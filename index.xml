@@ -66,15 +66,6 @@
     </item>
     
     <item>
-      <title></title>
-      <link>/about_me/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/about_me/</guid>
-      <description>Yang Liucode{white-space: pre;}pre:not([class]) {background-color: white;}if (window.hljs) {hljs.configure({languages: []});hljs.initHighlightingOnLoad();if (document.readyState &amp;&amp; document.readyState === &#34;complete&#34;) {window.setTimeout(function() { hljs.initHighlighting(); }, 0);}}h1 {font-size: 34px;}h1.title {font-size: 38px;}h2 {font-size: 30px;}h3 {font-size: 24px;}h4 {font-size: 18px;}h5 {font-size: 16px;}h6 {font-size: 12px;}.</description>
-    </item>
-    
-    <item>
       <title>About Blogdown and Hugo XMag Theme</title>
       <link>/about-hugo/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -90,9 +81,9 @@ XMag is the second Hugo theme I have designed. It is based on my first Hugo them
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/about-me/</guid>
-      <description>I started my old blog in the beginning of 2018 to keep a better record of my work and share some of my experience from programming to solve problems. It records the technical details behind many of my works. I hope it can help my colleague to track the history of some of our projects.
-This blog was created from the R package blogdown written by Yihui Xie.
-All the posts were written exclusively using R Markdown.</description>
+      <description>I am a statistician working in New York City who mainly use R and SAS. I started my old blog in the beginning of 2018 to keep a better record of my work and share some of my experience in R programming.
+This blog was created from the R package blogdown written by Yihui Xie. Lots of thanks. All the posts were written exclusively using R Markdown.
+The banner photo was taken at Zakynthos Island in Greece in 2014.</description>
     </item>
     
   </channel>
