@@ -13,6 +13,11 @@
   </url>
   
   <url>
+    <loc>/post/2018/07/20/test/</loc>
+    <lastmod>2018-07-20T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/post/2018/07/16/how-to-draw-heatmap-with-colorful-dendrogram/</loc>
     <lastmod>2018-07-16T00:00:00+00:00</lastmod>
   </url>
@@ -31,13 +36,13 @@
   </url>
   
   <url>
-    <loc>/categories/catalog/</loc>
+    <loc>/tags/catalog/</loc>
     <lastmod>2018-07-20T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/catalog/</loc>
+    <loc>/categories/catalog/</loc>
     <lastmod>2018-07-20T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
