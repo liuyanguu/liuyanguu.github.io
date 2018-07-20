@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <title>Spatial data in R: Dividing raster layers into equal-area rings | Welcome to my blog</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    <link href="//cdn.bootcss.com/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+
+  </head>
+
+  <body class="page">
+    <nav class="header">
+      <div class="banner">
+<a href="/">
+
+<img src="/ocean%202.jpg" alt="Text on Image" />
+</a>
+</div>
+
+      <div class="head-meta">
+      
+        <span><a href="/">&larr; Back to Home</a></span>
+        <span class="date">2018-07-20</span>
+        
+        
+        
+          
+        
+        
+        <span><a href="https://github.com/yihui/hugo-xmag/edit/master/exampleSite/content/post%5c2018-07-19-spatial-data-in-r-dividing-raster-layers-into-equal-area-rings.Rmd">Edit this page &rarr;</a></span>
+        
+        
+      
+      </div>
+    </nav>
+
+<div class="container">
+<article>
+<div class="article-meta">
+
+  <div class="categories">
+  
+    <a href="/categories/data-visualization">Data Visualization</a>
+  
+     &hercon; <a href="/categories/spatial-data">Spatial Data</a>
+  
+  </div>
+
+  <h1><span class="title">Spatial data in R: Dividing raster layers into equal-area rings</span></h1>
+
+  
+  <h3 class="author">Yang Liu
+</h3>
+  
+
+  
+  <p>Tags: <a href="/tags/r">R</a>; <a href="/tags/geographic">Geographic</a>; <a href="/tags/spatial">Spatial</a>
+  </p>
+  
+  
+
+</div>
+
+
+
+<main>
+<div id="TOC">
+<ul>
+<li><a href="#saturation-in-10-cities-with-equal-area-rings">Saturation in 10 cities with equal-area rings</a></li>
+<li><a href="#r-code-for-one-city">R Code for one city</a></li>
+<li><a href="#results-for-the-ring-saturations">Results for the ring saturations</a></li>
+<li><a href="#average-saturation-in-each-ring">Average saturation in each ring</a></li>
+<li><a href="#methodology">Methodology</a></li>
+</ul>
+</div>
+
+<p><strong>This data visualization example include:</strong><br />
+* Import <code>.img</code> file as a raster<br />
+* Turn raster into a dataframe of points (coordinates) and values<br />
+* Dividing the points into 100 equal-area rings<br />
+* Calculate <em>Built-up Area/Urban Extent</em> for each ring<br />
+* Turn dataframe into raster<br />
+* Plot multiple figures on the same color scale.</p>
+<div id="saturation-in-10-cities-with-equal-area-rings" class="section level2">
+<h2>Saturation in 10 cities with equal-area rings</h2>
+<ul>
+<li>The 1000 rings have a minimum saturation of 30.5% and a maximum of 99.9%.</li>
+<li>Same color scale for every map, with a boundary of [0.3, 1].<br />
+</li>
+<li>Dark green corresponds to a ring saturation of 0.3, and dark red corresponds to 1.</li>
+</ul>
+<div class="figure">
+<img src="/post/2018-07-19-spatial-data-in-r-dividing-raster-layers-into-equal-area-rings_files/ten%20cities%20100%20rings.jpeg" />
+
+</div>
+</div>
+<div id="r-code-for-one-city" class="section level2">
+<h2>R Code for one city</h2>
+<pre class="r"><code>library(&#39;raster&#39;)   # obtain raster from GIS image file, and plot
+library(&#39;rgdal&#39;)    # readOGR: read ArcGIS vector maps into Spatial objects
+library(&#39;Hmisc&#39;)    # cut2: cut vector into equal-length
+library(&#39;plyr&#39;)     # join
+library(&#39;RColorBrewer&#39;) # for `brewer.pal` in ggplot2
+library(&#39;knitr&#39;)    # kable
+options(digits = 4)
+
+parent_dir &lt;- c(&quot;C:/Users/lyhel/OneDrive - nyu.edu/NYU Marron/180716_Draw Circle/Data/&quot;)
+# Get all the folder names (names of the cities) in the directory
+# Used to scan all the cities
+city_list &lt;- list.files(parent_dir)
+
+# Hong Kong as an example
+  city1 &lt;- city_list[6]
+  newdir &lt;- paste(parent_dir, city1, sep = &quot;&quot;)
+  image &lt;- raster(paste(newdir, c(&quot;./city_urbFootprint_clp_t3.img&quot;), sep = &quot;&quot;))</code></pre>
+<ul>
+<li>Read raster as points: <code>rasterToPoints</code></li>
+</ul>
+<pre class="r"><code>  # mydata contains coordinate (x,y) and category (type)
+  mydata &lt;- as.data.frame(rasterToPoints(image))
+  names(mydata) &lt;- c(&quot;x&quot;, &quot;y&quot;, &quot;type&quot;)
+  pts &lt;- as.matrix(mydata[,1:2])
+  
+  # A point that shows the center of the city
+  cbd &lt;-  readOGR(dsn = newdir, layer = paste(city1, &quot;_CBD_Project&quot;, sep=&quot;&quot;))</code></pre>
+<pre><code>## OGR data source with driver: ESRI Shapefile 
+## Source: &quot;C:\Users\lyhel\OneDrive - nyu.edu\NYU Marron\180716_Draw Circle\Data\Hong_Kong&quot;, layer: &quot;Hong_Kong_CBD_Project&quot;
+## with 1 features
+## It has 6 fields
+## Integer64 fields read as strings:  Id</code></pre>
+<pre class="r"><code>  cbdpoint &lt;- SpatialPoints(cbd)</code></pre>
+<ul>
+<li>Divide points into ten equal-size rings<br />
+</li>
+<li>Calculate distances using <code>sp::spDistsN1</code></li>
+</ul>
+<pre class="r"><code>  # calculate distance to the cbd from every point
+  mydata$cbd_dist &lt;- spDistsN1(pts, cbdpoint, longlat = F)
+  # library(&#39;Hmisc&#39;) # cut2
+  mydata$ring &lt;- as.numeric(cut2(mydata$cbd_dist,g = 100)) # get 1:100
+  mydata$type &lt;- as.factor(mydata$type)
+  mydata$ring &lt;- as.factor(mydata$ring)
+
+  # Function to get saturation, as the raster have 7 layers, 1 to 3 belong to built-up area
+  get_sat &lt;- function(x){
+    x &lt;- as.factor(x)
+    # (1 + 2 + 3) / (1 + 2 + 3 + 4 + 5 + 6 + 7)
+    sum(x==1|x==2|x==3)/length(x)
+  }
+
+  # get saturation by rings
+  sat_output &lt;- aggregate(mydata$type, by = list(mydata$ring), FUN = get_sat)
+  names(sat_output) &lt;- c(&quot;ring&quot;, &quot;ring_saturation&quot;)
+  # join back to mydata2 so we can later plot by values of ring_saturation
+  mydata2 &lt;- join(mydata, sat_output, by = &quot;ring&quot;)
+  kable(head(mydata2))  </code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="right">x</th>
+<th align="right">y</th>
+<th align="left">type</th>
+<th align="right">cbd_dist</th>
+<th align="left">ring</th>
+<th align="right">ring_saturation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">203936</td>
+<td align="right">2478244</td>
+<td align="left">3</td>
+<td align="right">11970</td>
+<td align="left">94</td>
+<td align="right">0.5318</td>
+</tr>
+<tr class="even">
+<td align="right">203966</td>
+<td align="right">2478244</td>
+<td align="left">4</td>
+<td align="right">11961</td>
+<td align="left">94</td>
+<td align="right">0.5318</td>
+</tr>
+<tr class="odd">
+<td align="right">203996</td>
+<td align="right">2478244</td>
+<td align="left">4</td>
+<td align="right">11952</td>
+<td align="left">93</td>
+<td align="right">0.5721</td>
+</tr>
+<tr class="even">
+<td align="right">204026</td>
+<td align="right">2478244</td>
+<td align="left">3</td>
+<td align="right">11944</td>
+<td align="left">93</td>
+<td align="right">0.5721</td>
+</tr>
+<tr class="odd">
+<td align="right">204056</td>
+<td align="right">2478244</td>
+<td align="left">4</td>
+<td align="right">11935</td>
+<td align="left">93</td>
+<td align="right">0.5721</td>
+</tr>
+<tr class="even">
+<td align="right">204086</td>
+<td align="right">2478244</td>
+<td align="left">4</td>
+<td align="right">11926</td>
+<td align="left">93</td>
+<td align="right">0.5721</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Turn dataframe (<code>mydata2</code>) into raster using <code>rasterFromXYZ</code><br />
+</li>
+<li>Numeric columns are automatically assigned as values in the raster, and if we plot it directly:</li>
+</ul>
+<pre class="r"><code>  r1 &lt;- rasterFromXYZ(mydata2)
+  plot(r1)</code></pre>
+<p><img src="/post/2018-07-19-spatial-data-in-r-dividing-raster-layers-into-equal-area-rings_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<pre class="r"><code>  # choose a color scale from `RColorBrewer`
+  color_scale &lt;- brewer.pal(n = 10, name = &quot;RdYlGn&quot;)
+  myPalette &lt;- colorRampPalette(rev(color_scale)) # reverse the order so highly value ~ dark red
+  # set col and breaks to align color scale across figures
+  plot(r1$ring_saturation, col=myPalette(70), breaks = c(30:100)/100,
+       legend=FALSE,  main = city1)
+  plot(cbdpoint, add = TRUE, size = 3) # drawn on top of a map using `add = TRUE`</code></pre>
+<p><img src="/post/2018-07-19-spatial-data-in-r-dividing-raster-layers-into-equal-area-rings_files/figure-html/unnamed-chunk-3-2.png" width="672" /></p>
+<pre class="r"><code>  # if need to output the raster
+  # writeRaster(r1, paste(raster_dir, city1, sep = &quot;&quot;), format = &quot;HFA&quot;, overwrite=TRUE)
+
+  # To preview the color panel:
+  # display.brewer.pal(n = 12, name = &#39;RdYlGn&#39;)</code></pre>
+</div>
+<div id="results-for-the-ring-saturations" class="section level2">
+<h2>Results for the ring saturations</h2>
+<ul>
+<li>I run the code using a loop for ten cities<br />
+</li>
+<li>Ring saturation in the 10 cities has a minimum of 30.5% and a maximum of 99.9%.</li>
+</ul>
+<pre class="r"><code>summary(sat$ring_saturation)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##   0.305   0.545   0.646   0.656   0.771   0.999</code></pre>
+</div>
+<div id="average-saturation-in-each-ring" class="section level2">
+<h2>Average saturation in each ring</h2>
+<ul>
+<li>There is a clear declining trend in saturation as we move towards the boundary of the cities<br />
+<img src="/post/2018-07-19-spatial-data-in-r-dividing-raster-layers-into-equal-area-rings_files/figure-html/unnamed-chunk-6-1.png" width="672" /></li>
+</ul>
+</div>
+<div id="methodology" class="section level2">
+<h2>Methodology</h2>
+<p>(Summarized by Alejandro Blei, my colleague)<br />
+1. Take the file: <code>city_urbFootprint_clp_t3.img</code>. This file is made up of many pixels. Pixels with values 1-3 = built up, pixels with values 4-6 = open space, and pixels with value 7 = water. In other words, 1 - 3 = built up, and 4 - 7 = not built.<br />
+2. Convert the pixels to points. This operation preserves the value associated with the pixel.<br />
+3. Calculate the distance from each point to the CBD.<br />
+4. Create 10 groups from these pixels, where each group has the same area. These groups radiate outward from the CBD. Since each pixel has the same size, all we need are ten groups with the same number of pixels, where the pixels in one group are closer to the CBD than the pixels in the next group.<br />
+5. Once we have the groups, we can calculate the saturation value in each group. Saturation is Built Up / (Built Up - Open Space), in other words, saturation is Pixels (1 + 2 + 3) / (1 + 2 + 3 + 4 + 5 + 6 + 7). Each of the ten groups now has a saturation value associated with it.</p>
+</div>
+
+</main>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<nav class="post-nav">
+  <span class="nav-prev"><a href="/post/2018/07/20/catalogue-of-my-old-blogger/">&larr; Catalog of my old blogger</a></span>
+  <span class="nav-next"><a href="/post/2018/07/16/how-to-draw-heatmap-with-colorful-dendrogram/">How to Draw Heatmap with Colorful Dendrogram &rarr;</a></span>
+</nav>
+
+
+
+</article>
+</div>
+
+<script async src="//yihui.name/js/center-img.js"></script>
+
+<footer>
+
+<div class="footer">
+  <ul class="menu">
+    
+    <li><a href="/"><span data-hover="Home">Home</span></a></li>
+    
+    <li><a href="/tags/"><span data-hover="Tags">Tags</span></a></li>
+    
+    <li><a href="/categories/"><span data-hover="Categories">Categories</span></a></li>
+    
+    <li><a href="/about-hugo/"><span data-hover="About Blogdown">About Blogdown</span></a></li>
+    
+    <li><a href="/about-me/"><span data-hover="About Me">About Me</span></a></li>
+    
+  </ul>
+  
+  <div class="copyright">Acknowledgement to Yihui Xie for this hugo theme: yihui/hugo-xmag</div>
+  
+</div>
+</footer>
+
+
+<script src="//yihui.name/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.12.0/languages/r.min.js"></script>
+<script>
+hljs.configure({languages: []});
+hljs.initHighlightingOnLoad();
+</script>
+
+
+
+
+</body>
+</html>
+

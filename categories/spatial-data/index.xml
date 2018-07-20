@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Spatial Data on Welcome to my blog</title>
+    <link>/categories/spatial-data/</link>
+    <description>Recent content in Spatial Data on Welcome to my blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 20 Jul 2018 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/categories/spatial-data/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Spatial data in R: Dividing raster layers into equal-area rings</title>
+      <link>/post/2018/07/20/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/</link>
+      <pubDate>Fri, 20 Jul 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/post/2018/07/20/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/</guid>
+      <description>Saturation in 10 cities with equal-area ringsR Code for one cityResults for the ring saturationsAverage saturation in each ringMethodologyThis data visualization example include:
+* Import .img file as a raster
+* Turn raster into a dataframe of points (coordinates) and values
+* Dividing the points into 100 equal-area rings
+* Calculate Built-up Area/Urban Extent for each ring
+* Turn dataframe into raster</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <title>eXtreme Gradient Boosting (XGBoost): Better than random forest or gradient boosting | Welcome to my blog</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    <link href="//cdn.bootcss.com/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+
+  </head>
+
+  <body class="page">
+    <nav class="header">
+      <div class="banner">
+<a href="/">
+
+<img src="/ocean%202.jpg" alt="Text on Image" />
+</a>
+</div>
+
+      <div class="head-meta">
+      
+        <span><a href="/">&larr; Back to Home</a></span>
+        <span class="date">2018-07-09</span>
+        
+        
+        
+          
+        
+        
+        <span><a href="https://github.com/yihui/hugo-xmag/edit/master/exampleSite/content/post%5c2018-07-09-extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting.Rmd">Edit this page &rarr;</a></span>
+        
+        
+      
+      </div>
+    </nav>
+
+<div class="container">
+<article>
+<div class="article-meta">
+
+  <div class="categories">
+  
+    <a href="/categories/statistical-learning">Statistical Learning</a>
+  
+  </div>
+
+  <h1><span class="title">eXtreme Gradient Boosting (XGBoost): Better than random forest or gradient boosting</span></h1>
+
+  
+  <h3 class="author">Yang Liu
+</h3>
+  
+
+  
+  <p>Tags: <a href="/tags/r">R</a>; <a href="/tags/machine-learning">Machine Learning</a>
+  </p>
+  
+  
+
+</div>
+
+
+
+<main>
+<script src="/rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="/rmarkdown-libs/viz/viz.js"></script>
+<link href="/rmarkdown-libs/DiagrammeR-styles/styles.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/grViz-binding/grViz.js"></script>
+
+<div id="TOC">
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#about-the-data">About the Data</a></li>
+<li><a href="#extreme-gradient-boosting">1. Extreme Gradient Boosting</a></li>
+<li><a href="#gradient-boosting">2. Gradient boosting</a></li>
+<li><a href="#random-forest">3. Random Forest</a></li>
+<li><a href="#lasso">4. Lasso</a></li>
+<li><a href="#best-subset">5. Best Subset</a></li>
+<li><a href="#compare-mses">Compare MSEs</a></li>
+<li><a href="#code">Code</a></li>
+</ul>
+</div>
+
+<div id="overview" class="section level1">
+<h1>Overview</h1>
+<p>I recently had the great pleasure to meet with Professor Allan Just and he introduced me to eXtreme Gradient Boosting (XGBoost). I have extended the earlier work <a href="https://yangliuresearch.blogspot.com/2018/06/modeling-of-slums-model-selection-using.html">on my old blog</a> by comparing the results across XGBoost, Gradient Boosting (GBM), Random Forest, Lasso, and Best Subset. The ensemble method is powerful as it combines the predictions from multiple machine learning algorithms together to make more accurate predictions than an individual model. Random Forest is among the most famous ones and it is easy to use. Random Forest is based on bagging (bootstrap aggregation) which averages the results over many decision trees from sub-samples. It further limits its search to only 1/3 of the features (in regression) to fit each tree, weakening the correlations among decision trees. It is easy to get a lower testing error compared to linear models.</p>
+<p>Boosting takes slower steps, making predictors sequentially instead of independently. It repetitively leverages the patterns in residuals, strengthens the model with weak predictions, and make it better. By combining the advantages from both random forest and gradient boosting, XGBoost gives prediction error 10-times lower than random forest or gradient boosting alone in my case.</p>
+<p>Link to the earlier version: <em><a href="https://yangliuresearch.blogspot.com/2018/06/modeling-of-slums-model-selection-using.html">Model Selection using Lasso and Best Subset</a></em></p>
+</div>
+<div id="about-the-data" class="section level1">
+<h1>About the Data</h1>
+<p>In sub-Saharan Africa, the region where deprivations in terms of living conditions are the most severe, slum dwellers represent an estimated 56% of the regions’ urban population (UN Habitat, 2016). Measuring informal settlements in a reliable way is a critical challenge for the United Nations to monitor the Sustainable Development Goals (SDGs) towards its 2030 Agenda for Sustainable Development. This data was collected by Slum Dwellers International (SDI), which was nominated for the Nobel Peace Prize in 2014. By extracting valuable information from the data, We will help the UN to create better SDG indicators by making full use of available data.</p>
+<p>In this exercise, we only model <em>Share_Temporary</em>: Share of Temporary Structure in Slums as the dependent variable. The independent variables are monitoring indicators like water, sanitation, housing conditions and overcrowding in African slum settlements. Dataset dimension is 973 x 153.</p>
+</div>
+<div id="extreme-gradient-boosting" class="section level1">
+<h1>1. Extreme Gradient Boosting</h1>
+<ul>
+<li>Tuning by simulation: randomized parameters and update the record with best ones.</li>
+<li>It turns out to be a very interesting and good method to scan for hyperparameters.</li>
+<li>The package <code>xgboost</code> is really fast.</li>
+</ul>
+<pre class="r"><code>library(xgboost)
+# Matrix for xgb: dtrain
+dtrain &lt;- xgb.DMatrix(X_train, label = Y_train)
+dtest &lt;- xgb.DMatrix(X_test, label = Y_test)
+# Randomize and bound
+best_param &lt;- list()
+best_seednumber &lt;- 1234
+best_rmse &lt;- Inf
+best_rmse_index &lt;- 0
+
+time_now &lt;- Sys.time()
+set.seed(1234)
+for (iter in 1:100) {
+  param &lt;- list(objective = &quot;reg:linear&quot;,  # For regression
+                eval_metric = &quot;rmse&quot;,      # rmse is used for regression
+                max_depth = sample(6:10, 1),
+                eta = runif(1, .01, .3),   # Learning rate, default: 0.3
+                subsample = runif(1, .6, .9),
+                colsample_bytree = runif(1, .5, .8), 
+                min_child_weight = sample(1:40, 1),
+                max_delta_step = sample(1:10, 1)
+  )
+  cv.nround &lt;-  1000
+  cv.nfold &lt;-  5 # 5-fold cross-validation
+  seed.number  &lt;-  sample.int(10000, 1) # set seed for the cv
+  set.seed(seed.number)
+  mdcv &lt;- xgb.cv(data = dtrain, params = param,  
+                 nfold = cv.nfold, nrounds = cv.nround,
+                 verbose = F, early_stopping_rounds = 8, maximize = FALSE)
+  
+  min_rmse_index  &lt;-  mdcv$best_iteration
+  min_rmse &lt;-  mdcv$evaluation_log[min_rmse_index]$test_rmse_mean
+  
+  if (min_rmse &lt; best_rmse) {
+    best_rmse &lt;- min_rmse
+    best_rmse_index &lt;- min_rmse_index
+    best_seednumber &lt;- seed.number
+    best_param &lt;- param
+  }
+}
+Sys.time() - time_now</code></pre>
+<pre><code>## Time difference of 2.81 mins</code></pre>
+<ul>
+<li>The best tuning parameters</li>
+</ul>
+<pre><code>##    objective eval_metric max_depth     eta subsample colsample_bytree
+## 1 reg:linear        rmse        10 0.04441    0.7931           0.7619
+##   min_child_weight max_delta_step best_rmse_index best_rmse
+## 1                5              9              91    0.2105
+##   best_seednumber
+## 1            7476</code></pre>
+<ul>
+<li>MSE</li>
+</ul>
+<pre><code>## [1] 0.004265</code></pre>
+<ul>
+<li>Feature Importance</li>
+</ul>
+<pre class="r"><code>importance_matrix &lt;- xgb.importance(colnames(X_train), model = xg_mod)
+# Use `xgb.plot.importance`, which create a _barplot_ or use `xgb.ggplot.importance`
+library(Ckmeans.1d.dp) # for xgb.ggplot.importance
+xgb.ggplot.importance(importance_matrix, top_n = 15, measure = &quot;Gain&quot;)</code></pre>
+<p><img src="/post/2018-07-09-extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<ul>
+<li>Plot only 2 trees as an example (use <code>trees</code>= 1)<br />
+</li>
+<li>The plots are not shown in pdf, but can be viewed <em><a href="https://yangliuresearch.blogspot.com/2018/07/extreme-gradient-boosting-xgboost.html">on my blog</a></em></li>
+</ul>
+<pre class="r"><code>library(&quot;DiagrammeR&quot;)
+xgb.plot.tree(model = xg_mod, trees = 1, feature_names = colnames(X_train))</code></pre>
+<div id="htmlwidget-1" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"diagram":"digraph {\n\ngraph [layout = \"dot\",\n       rankdir = \"LR\"]\n\nnode [color = \"DimGray\",\n      style = \"filled\",\n      fontname = \"Helvetica\"]\n\nedge [color = \"DimGray\",\n     arrowsize = \"1.5\",\n     arrowhead = \"vee\",\n     fontname = \"Helvetica\"]\n\n  \"1\" [label = \"Tree 1\nFF11_Water_MonthlyCost\nCover: 189\nGain: 11.1727266\", shape = \"rectangle\", fontcolor = \"black\", fillcolor = \"Beige\"] \n  \"2\" [label = \"FF11_Water_MonthlyCost\nCover: 72\nGain: 3.72218966\", shape = \"rectangle\", fontcolor = \"black\", fillcolor = \"Beige\"] \n  \"3\" [label = \"B14__undeclared_illegal_unprotected\nCover: 117\nGain: 1.22412956\", shape = \"rectangle\", fontcolor = \"black\", fillcolor = \"Beige\"] \n  \"4\" [label = \"CC11_Population_Estimate\nCover: 25\nGain: 0.762765229\", shape = \"rectangle\", fontcolor = \"black\", fillcolor = \"Beige\"] \n  \"5\" [label = \"FF11_Water_MonthlyCost\nCover: 47\nGain: 0.201015204\", shape = \"rectangle\", fontcolor = \"black\", fillcolor = \"Beige\"] \n  \"6\" [label = \"DD1_Location_Problemsslope\nCover: 74\nGain: 0.177181169\", shape = \"rectangle\", fontcolor = \"black\", fillcolor = \"Beige\"] \n  \"7\" [label = \"DD2_Location_Dangerous\nCover: 43\nGain: 0.205651253\", shape = \"rectangle\", fontcolor = \"black\", fillcolor = \"Beige\"] \n  \"8\" [label = \"Leaf\nCover: 6\nValue: 0.00694882823\", shape = \"oval\", fontcolor = \"black\", fillcolor = \"Khaki\"] \n  \"9\" [label = \"EE2A_Current_Eviction_Threat\nCover: 19\nGain: 0.115949228\", shape = \"rectangle\", fontcolor = \"black\", fillcolor = \"Beige\"] \n  \"10\" [label = \"CC11_Population_Estimate\nCover: 40\nGain: 0.00280251051\", shape = \"rectangle\", fontcolor = \"black\", fillcolor = \"Beige\"] \n  \"11\" [label = \"Leaf\nCover: 7\nValue: 0.0065883249\", shape = \"oval\", fontcolor = \"black\", fillcolor = \"Khaki\"] \n  \"12\" [label = \"Leaf\nCover: 60\nValue: -0.0191787779\", shape = \"oval\", fontcolor = \"black\", fillcolor = \"Khaki\"] \n  \"13\" [label = \"CC11_Population_Estimate\nCover: 14\nGain: 0.262760013\", shape = \"rectangle\", fontcolor = \"black\", fillcolor = \"Beige\"] \n  \"14\" [label = \"DD1_Location_Problemsslope\nCover: 21\nGain: 0.364344686\", shape = \"rectangle\", fontcolor = \"black\", fillcolor = \"Beige\"] \n  \"15\" [label = \"GG1_Sewer_Line\nCover: 22\nGain: 0.0795401782\", shape = \"rectangle\", fontcolor = \"black\", fillcolor = \"Beige\"] \n  \"16\" [label = \"Leaf\nCover: 11\nValue: -0.013222645\", shape = \"oval\", fontcolor = \"black\", fillcolor = \"Khaki\"] \n  \"17\" [label = \"Leaf\nCover: 8\nValue: -0.00521966768\", shape = \"oval\", fontcolor = \"black\", fillcolor = \"Khaki\"] \n  \"18\" [label = \"Leaf\nCover: 35\nValue: 0.0167991333\", shape = \"oval\", fontcolor = \"black\", fillcolor = \"Khaki\"] \n  \"19\" [label = \"Leaf\nCover: 5\nValue: 0.00967964809\", shape = \"oval\", fontcolor = \"black\", fillcolor = \"Khaki\"] \n  \"20\" [label = \"Leaf\nCover: 9\nValue: -0.0159276929\", shape = \"oval\", fontcolor = \"black\", fillcolor = \"Khaki\"] \n  \"21\" [label = \"Leaf\nCover: 5\nValue: -0.00278903195\", shape = \"oval\", fontcolor = \"black\", fillcolor = \"Khaki\"] \n  \"22\" [label = \"EE2A_Current_Eviction_Threat\nCover: 13\nGain: 0.0205123611\", shape = \"rectangle\", fontcolor = \"black\", fillcolor = \"Beige\"] \n  \"23\" [label = \"Leaf\nCover: 8\nValue: 0.00255160639\", shape = \"oval\", fontcolor = \"black\", fillcolor = \"Khaki\"] \n  \"24\" [label = \"EE2A_Current_Eviction_Threat\nCover: 17\nGain: 0.026364157\", shape = \"rectangle\", fontcolor = \"black\", fillcolor = \"Beige\"] \n  \"25\" [label = \"Leaf\nCover: 5\nValue: -0.00485198712\", shape = \"oval\", fontcolor = \"black\", fillcolor = \"Khaki\"] \n  \"26\" [label = \"Leaf\nCover: 8\nValue: -0.0107489014\", shape = \"oval\", fontcolor = \"black\", fillcolor = \"Khaki\"] \n  \"27\" [label = \"Leaf\nCover: 5\nValue: -0.00504188333\", shape = \"oval\", fontcolor = \"black\", fillcolor = \"Khaki\"] \n  \"28\" [label = \"Leaf\nCover: 11\nValue: -0.0145399114\", shape = \"oval\", fontcolor = \"black\", fillcolor = \"Khaki\"] \n  \"29\" [label = \"Leaf\nCover: 6\nValue: -0.00773344934\", shape = \"oval\", fontcolor = \"black\", fillcolor = \"Khaki\"] \n\"1\"->\"2\" [label = \"< 1900\", style = \"bold\"] \n\"2\"->\"4\" [label = \"< 102.5\", style = \"bold\"] \n\"3\"->\"6\" [label = \"< 0.5\", style = \"bold\"] \n\"4\"->\"8\" [label = \"< 4825\", style = \"bold\"] \n\"5\"->\"10\" [label = \"< 1100\", style = \"bold\"] \n\"6\"->\"12\" [label = \"< 0.5\", style = \"bold\"] \n\"7\"->\"14\" [label = \"< 0.5\", style = \"bold\"] \n\"9\"->\"16\" [label = \"< 0.5\", style = \"bold\"] \n\"10\"->\"18\" [label = \"< 18966\", style = \"bold\"] \n\"13\"->\"20\" [label = \"< 17535\", style = \"bold\"] \n\"14\"->\"22\" [label = \"< 0.5\", style = \"bold\"] \n\"15\"->\"24\" [label = \"< 0.5\", style = \"bold\"] \n\"22\"->\"26\" [label = \"< 0.5\", style = \"bold\"] \n\"24\"->\"28\" [label = \"< 0.5\", style = \"bold\"] \n\"1\"->\"3\" [style = \"bold\", style = \"solid\"] \n\"2\"->\"5\" [style = \"solid\", style = \"solid\"] \n\"3\"->\"7\" [style = \"solid\", style = \"solid\"] \n\"4\"->\"9\" [style = \"solid\", style = \"solid\"] \n\"5\"->\"11\" [style = \"solid\", style = \"solid\"] \n\"6\"->\"13\" [style = \"solid\", style = \"solid\"] \n\"7\"->\"15\" [style = \"solid\", style = \"solid\"] \n\"9\"->\"17\" [style = \"solid\", style = \"solid\"] \n\"10\"->\"19\" [style = \"solid\", style = \"solid\"] \n\"13\"->\"21\" [style = \"solid\", style = \"solid\"] \n\"14\"->\"23\" [style = \"solid\", style = \"solid\"] \n\"15\"->\"25\" [style = \"solid\", style = \"solid\"] \n\"22\"->\"27\" [style = \"solid\", style = \"solid\"] \n\"24\"->\"29\" [style = \"solid\", style = \"solid\"] \n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<pre class="r"><code># xgb.plot.tree needs to be revised a little bit by adding `fontcolor =&quot;black&quot;` in the `nodes &lt;- DiagrammeR::create_node_df` line
+source(&quot;C:/Users/lyhel/OneDrive - nyu.edu/NYU Marron/R/xgb.plot.tree2.R&quot;)
+xgb.plot.tree2(model = xg_mod, n_first_tree = 1, feature_names = colnames(X_train))</code></pre>
+<div id="htmlwidget-2" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-2">{"x":{"diagram":"digraph {\n\ngraph [layout = \"neato\",\n       outputorder = \"edgesfirst\",\n       bgcolor = \"white\"]\n\nnode [fontname = \"Helvetica\",\n      fontsize = \"10\",\n      shape = \"circle\",\n      fixedsize = \"true\",\n      width = \"0.5\",\n      style = \"filled\",\n      fillcolor = \"aliceblue\",\n      color = \"gray70\",\n      fontcolor = \"gray50\"]\n\nedge [fontname = \"Helvetica\",\n     fontsize = \"8\",\n     len = \"1.5\",\n     color = \"gray80\",\n     arrowsize = \"0.5\"]\n\n  \"1\" [label = \"Leaf\nCover: 6\nGain: -0.00773344934\", style = \"filled\", color = \"DimGray\", shape = \"oval\", fontname = \"Helvetica\", fontcolor = \"black\", fillcolor = \"Khaki\"] \n  \"2\" [label = \"Leaf\nCover: 11\nGain: -0.0145399114\", style = \"filled\", color = \"DimGray\", shape = \"oval\", fontname = \"Helvetica\", fontcolor = \"black\", fillcolor = \"Khaki\"] \n  \"3\" [label = \"Leaf\nCover: 5\nGain: -0.00504188333\", style = \"filled\", color = \"DimGray\", shape = \"oval\", fontname = \"Helvetica\", fontcolor = \"black\", fillcolor = \"Khaki\"] \n  \"4\" [label = \"Leaf\nCover: 8\nGain: -0.0107489014\", style = \"filled\", color = \"DimGray\", shape = \"oval\", fontname = \"Helvetica\", fontcolor = \"black\", fillcolor = \"Khaki\"] \n  \"5\" [label = \"Leaf\nCover: 5\nGain: -0.00485198712\", style = \"filled\", color = \"DimGray\", shape = \"oval\", fontname = \"Helvetica\", fontcolor = \"black\", fillcolor = \"Khaki\"] \n  \"6\" [label = \"EE2A_Current_Eviction_Threat\nCover: 17\nGain: 0.026364157\", style = \"filled\", color = \"DimGray\", shape = \"rectangle\", fontname = \"Helvetica\", fontcolor = \"black\", fillcolor = \"Beige\"] \n  \"7\" [label = \"Leaf\nCover: 8\nGain: 0.00255160639\", style = \"filled\", color = \"DimGray\", shape = \"oval\", fontname = \"Helvetica\", fontcolor = \"black\", fillcolor = \"Khaki\"] \n  \"8\" [label = \"EE2A_Current_Eviction_Threat\nCover: 13\nGain: 0.0205123611\", style = \"filled\", color = \"DimGray\", shape = \"rectangle\", fontname = \"Helvetica\", fontcolor = \"black\", fillcolor = \"Beige\"] \n  \"9\" [label = \"Leaf\nCover: 5\nGain: -0.00278903195\", style = \"filled\", color = \"DimGray\", shape = \"oval\", fontname = \"Helvetica\", fontcolor = \"black\", fillcolor = \"Khaki\"] \n  \"10\" [label = \"Leaf\nCover: 9\nGain: -0.0159276929\", style = \"filled\", color = \"DimGray\", shape = \"oval\", fontname = \"Helvetica\", fontcolor = \"black\", fillcolor = \"Khaki\"] \n  \"11\" [label = \"Leaf\nCover: 5\nGain: 0.00967964809\", style = \"filled\", color = \"DimGray\", shape = \"oval\", fontname = \"Helvetica\", fontcolor = \"black\", fillcolor = \"Khaki\"] \n  \"12\" [label = \"Leaf\nCover: 35\nGain: 0.0167991333\", style = \"filled\", color = \"DimGray\", shape = \"oval\", fontname = \"Helvetica\", fontcolor = \"black\", fillcolor = \"Khaki\"] \n  \"13\" [label = \"Leaf\nCover: 8\nGain: -0.00521966768\", style = \"filled\", color = \"DimGray\", shape = \"oval\", fontname = \"Helvetica\", fontcolor = \"black\", fillcolor = \"Khaki\"] \n  \"14\" [label = \"Leaf\nCover: 11\nGain: -0.013222645\", style = \"filled\", color = \"DimGray\", shape = \"oval\", fontname = \"Helvetica\", fontcolor = \"black\", fillcolor = \"Khaki\"] \n  \"15\" [label = \"GG1_Sewer_Line\nCover: 22\nGain: 0.0795401782\", style = \"filled\", color = \"DimGray\", shape = \"rectangle\", fontname = \"Helvetica\", fontcolor = \"black\", fillcolor = \"Beige\"] \n  \"16\" [label = \"DD1_Location_Problemsslope\nCover: 21\nGain: 0.364344686\", style = \"filled\", color = \"DimGray\", shape = \"rectangle\", fontname = \"Helvetica\", fontcolor = \"black\", fillcolor = \"Beige\"] \n  \"17\" [label = \"CC11_Population_Estimate\nCover: 14\nGain: 0.262760013\", style = \"filled\", color = \"DimGray\", shape = \"rectangle\", fontname = \"Helvetica\", fontcolor = \"black\", fillcolor = \"Beige\"] \n  \"18\" [label = \"Leaf\nCover: 60\nGain: -0.0191787779\", style = \"filled\", color = \"DimGray\", shape = \"oval\", fontname = \"Helvetica\", fontcolor = \"black\", fillcolor = \"Khaki\"] \n  \"19\" [label = \"Leaf\nCover: 7\nGain: 0.0065883249\", style = \"filled\", color = \"DimGray\", shape = \"oval\", fontname = \"Helvetica\", fontcolor = \"black\", fillcolor = \"Khaki\"] \n  \"20\" [label = \"CC11_Population_Estimate\nCover: 40\nGain: 0.00280251051\", style = \"filled\", color = \"DimGray\", shape = \"rectangle\", fontname = \"Helvetica\", fontcolor = \"black\", fillcolor = \"Beige\"] \n  \"21\" [label = \"EE2A_Current_Eviction_Threat\nCover: 19\nGain: 0.115949228\", style = \"filled\", color = \"DimGray\", shape = \"rectangle\", fontname = \"Helvetica\", fontcolor = \"black\", fillcolor = \"Beige\"] \n  \"22\" [label = \"Leaf\nCover: 6\nGain: 0.00694882823\", style = \"filled\", color = \"DimGray\", shape = \"oval\", fontname = \"Helvetica\", fontcolor = \"black\", fillcolor = \"Khaki\"] \n  \"23\" [label = \"DD2_Location_Dangerous\nCover: 43\nGain: 0.205651253\", style = \"filled\", color = \"DimGray\", shape = \"rectangle\", fontname = \"Helvetica\", fontcolor = \"black\", fillcolor = \"Beige\"] \n  \"24\" [label = \"DD1_Location_Problemsslope\nCover: 74\nGain: 0.177181169\", style = \"filled\", color = \"DimGray\", shape = \"rectangle\", fontname = \"Helvetica\", fontcolor = \"black\", fillcolor = \"Beige\"] \n  \"25\" [label = \"FF11_Water_MonthlyCost\nCover: 47\nGain: 0.201015204\", style = \"filled\", color = \"DimGray\", shape = \"rectangle\", fontname = \"Helvetica\", fontcolor = \"black\", fillcolor = \"Beige\"] \n  \"26\" [label = \"CC11_Population_Estimate\nCover: 25\nGain: 0.762765229\", style = \"filled\", color = \"DimGray\", shape = \"rectangle\", fontname = \"Helvetica\", fontcolor = \"black\", fillcolor = \"Beige\"] \n  \"27\" [label = \"B14__undeclared_illegal_unprotected\nCover: 117\nGain: 1.22412956\", style = \"filled\", color = \"DimGray\", shape = \"rectangle\", fontname = \"Helvetica\", fontcolor = \"black\", fillcolor = \"Beige\"] \n  \"28\" [label = \"FF11_Water_MonthlyCost\nCover: 72\nGain: 3.72218966\", style = \"filled\", color = \"DimGray\", shape = \"rectangle\", fontname = \"Helvetica\", fontcolor = \"black\", fillcolor = \"Beige\"] \n  \"29\" [label = \"FF11_Water_MonthlyCost\nCover: 189\nGain: 11.1727266\", style = \"filled\", color = \"DimGray\", shape = \"rectangle\", fontname = \"Helvetica\", fontcolor = \"black\", fillcolor = \"Beige\"] \n\"29\"->\"28\" [label = \"< 1900\", color = \"DimGray\", arrowsize = \"1.5\", arrowhead = \"vee\", fontname = \"Helvetica\"] \n\"28\"->\"26\" [label = \"< 102.5\", color = \"DimGray\", arrowsize = \"1.5\", arrowhead = \"vee\", fontname = \"Helvetica\"] \n\"27\"->\"24\" [label = \"< 0.5\", color = \"DimGray\", arrowsize = \"1.5\", arrowhead = \"vee\", fontname = \"Helvetica\"] \n\"26\"->\"22\" [label = \"< 4825\", color = \"DimGray\", arrowsize = \"1.5\", arrowhead = \"vee\", fontname = \"Helvetica\"] \n\"25\"->\"20\" [label = \"< 1100\", color = \"DimGray\", arrowsize = \"1.5\", arrowhead = \"vee\", fontname = \"Helvetica\"] \n\"24\"->\"18\" [label = \"< 0.5\", color = \"DimGray\", arrowsize = \"1.5\", arrowhead = \"vee\", fontname = \"Helvetica\"] \n\"23\"->\"16\" [label = \"< 0.5\", color = \"DimGray\", arrowsize = \"1.5\", arrowhead = \"vee\", fontname = \"Helvetica\"] \n\"21\"->\"14\" [label = \"< 0.5\", color = \"DimGray\", arrowsize = \"1.5\", arrowhead = \"vee\", fontname = \"Helvetica\"] \n\"20\"->\"12\" [label = \"< 18966\", color = \"DimGray\", arrowsize = \"1.5\", arrowhead = \"vee\", fontname = \"Helvetica\"] \n\"17\"->\"10\" [label = \"< 17535\", color = \"DimGray\", arrowsize = \"1.5\", arrowhead = \"vee\", fontname = \"Helvetica\"] \n\"16\"->\"8\" [label = \"< 0.5\", color = \"DimGray\", arrowsize = \"1.5\", arrowhead = \"vee\", fontname = \"Helvetica\"] \n\"15\"->\"6\" [label = \"< 0.5\", color = \"DimGray\", arrowsize = \"1.5\", arrowhead = \"vee\", fontname = \"Helvetica\"] \n\"8\"->\"4\" [label = \"< 0.5\", color = \"DimGray\", arrowsize = \"1.5\", arrowhead = \"vee\", fontname = \"Helvetica\"] \n\"6\"->\"2\" [label = \"< 0.5\", color = \"DimGray\", arrowsize = \"1.5\", arrowhead = \"vee\", fontname = \"Helvetica\"] \n\"29\"->\"27\" [fontname = \"Helvetica\", color = \"DimGray\", arrowsize = \"1.5\", arrowhead = \"vee\", fontname = \"Helvetica\"] \n\"28\"->\"25\" [fontname = \"Helvetica\", color = \"DimGray\", arrowsize = \"1.5\", arrowhead = \"vee\", fontname = \"Helvetica\"] \n\"27\"->\"23\" [fontname = \"Helvetica\", color = \"DimGray\", arrowsize = \"1.5\", arrowhead = \"vee\", fontname = \"Helvetica\"] \n\"26\"->\"21\" [fontname = \"Helvetica\", color = \"DimGray\", arrowsize = \"1.5\", arrowhead = \"vee\", fontname = \"Helvetica\"] \n\"25\"->\"19\" [fontname = \"Helvetica\", color = \"DimGray\", arrowsize = \"1.5\", arrowhead = \"vee\", fontname = \"Helvetica\"] \n\"24\"->\"17\" [fontname = \"Helvetica\", color = \"DimGray\", arrowsize = \"1.5\", arrowhead = \"vee\", fontname = \"Helvetica\"] \n\"23\"->\"15\" [fontname = \"Helvetica\", color = \"DimGray\", arrowsize = \"1.5\", arrowhead = \"vee\", fontname = \"Helvetica\"] \n\"21\"->\"13\" [fontname = \"Helvetica\", color = \"DimGray\", arrowsize = \"1.5\", arrowhead = \"vee\", fontname = \"Helvetica\"] \n\"20\"->\"11\" [fontname = \"Helvetica\", color = \"DimGray\", arrowsize = \"1.5\", arrowhead = \"vee\", fontname = \"Helvetica\"] \n\"17\"->\"9\" [fontname = \"Helvetica\", color = \"DimGray\", arrowsize = \"1.5\", arrowhead = \"vee\", fontname = \"Helvetica\"] \n\"16\"->\"7\" [fontname = \"Helvetica\", color = \"DimGray\", arrowsize = \"1.5\", arrowhead = \"vee\", fontname = \"Helvetica\"] \n\"15\"->\"5\" [fontname = \"Helvetica\", color = \"DimGray\", arrowsize = \"1.5\", arrowhead = \"vee\", fontname = \"Helvetica\"] \n\"8\"->\"3\" [fontname = \"Helvetica\", color = \"DimGray\", arrowsize = \"1.5\", arrowhead = \"vee\", fontname = \"Helvetica\"] \n\"6\"->\"1\" [fontname = \"Helvetica\", color = \"DimGray\", arrowsize = \"1.5\", arrowhead = \"vee\", fontname = \"Helvetica\"] \n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<ul>
+<li>Plot all trees on one tree and plot it: A huge plot</li>
+</ul>
+<pre class="r"><code>xgb.plot.multi.trees(model = xg_mod, n_first_tree = 1, feature_names = colnames(X_train))</code></pre>
+<div id="htmlwidget-3" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-3">{"x":{"diagram":"digraph {\n\ngraph [layout = \"dot\",\n       rankdir = \"LR\"]\n\nnode [color = \"DimGray\",\n      fillcolor = \"beige\",\n      style = \"filled\",\n      shape = \"rectangle\",\n      fontname = \"Helvetica\"]\n\nedge [color = \"DimGray\",\n     arrowsize = \"1.5\",\n     arrowhead = \"vee\",\n     fontname = \"Helvetica\"]\n\n  \"1\" [label = \"FF11_Water_MonthlyCost (114.35750)\nB14__resettled (  9.45033)\nDD1_Location_Problemscanal (  8.25565)\nDD1_Location_Problemsslope (  1.49802)\nCC9_Households (  0.74665)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"2\" [label = \"FF11_Water_MonthlyCost (41.361450)\nCC11_Population_Estimate ( 4.194854)\nEviction_Threats ( 2.083526)\nCC9_Households ( 3.001986)\nLeaf ( 0.036548)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"3\" [label = \"B14__resettled (4.24089)\nB14__undeclared_illegal_unprotected (1.81077)\nCC9_Households (0.53977)\nFF1_8_Water_Sourcescommunity_taps (7.83657)\nDD1_Location_Problemsgarbage_dump (0.57248)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"4\" [label = \"DD1_Location_Problemsslope (3.887125)\nCC11_Population_Estimate (4.668193)\nDD1_Location_Problemsindustrial_hazards (0.448956)\nFF1_8_Water_Sourcescommunity_taps (0.802843)\nLeaf (0.036896)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"5\" [label = \"CC11_Population_Estimate (0.90405)\nFF11_Water_MonthlyCost (1.30831)\nCC10_Household_Size (1.45775)\nB14__declared_legal_protected (1.30723)\nEviction_Threats (1.21911)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"6\" [label = \"FF1_8_Water_Sourcesrivers ( 1.084836)\nDD1_Location_Problemsslope ( 0.282184)\nLeaf (-0.032145)\nFF12_Water_CollectionTime30_minutes ( 0.153371)\nFF1_8_Water_Sourceswells ( 1.403516)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"7\" [label = \"DD1_Location_Problemsslope ( 1.845723)\nDD2_Location_Dangerous ( 0.765091)\nLeaf (-0.056386)\nFF11_Water_MonthlyCost ( 0.534120)\nFF1_8_Water_Sourceswells ( 0.044978)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"8\" [label = \"CC11_Population_Estimate (0.027889)\nLeaf (0.121691)\nCC9_Households (0.609712)\nCC12_Total_Population (0.118965)\nDD1_Location_Problemsflood_prone_area (0.243668)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"9\" [label = \"Leaf (0.014106)\nEE2A_Current_Eviction_Threat (0.172932)\nCC11_Population_Estimate (0.265214)\nDD2_Location_Dangerous (0.269739)\nFF1_8_Water_Sourceswater_kiosk (0.081510)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"10\" [label = \"Leaf (0.108652)\nCC11_Population_Estimate (1.114929)\nDD1_Location_Problemsunder_power_lines (0.076576)\nDD1_Location_Problemsflood_prone_area (0.082644)\nCC10_Household_Size (0.309180)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"11\" [label = \"CC12_Total_Population (0.610406)\nLeaf (0.082797)\nGG7_10_Toilet_Typescommunal_toilets (0.593474)\nCC9_Households (0.359598)\nFF1_8_Water_Sourceswells (0.730404)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"12\" [label = \"CC11_Population_Estimate ( 0.50358)\nLeaf (-0.02393)\nDD1_Location_Problemsroad_side ( 0.24503)\nDD1_Location_Problemscanal ( 0.29192)\nDD1_Location_Problemsgarbage_dump ( 0.25259)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"13\" [label = \"Leaf (-0.011556)\nCC11_Population_Estimate ( 0.476290)\nEviction_Threats ( 0.043791)\nCC9_Households ( 0.183135)\nB14__resettled ( 0.067437)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"14\" [label = \"Leaf (-0.020002)\nDD1_Location_Problemsslope ( 0.689888)\nDD2_Location_Dangerous ( 0.332336)\nCC11_Population_Estimate ( 0.022366)\nGG1_Sewer_Line ( 0.476509)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"15\" [label = \"CC10_Household_Size (0.174475)\nGG1_Sewer_Line (0.079540)\nLeaf (0.013266)\nDD1_Location_Problemsslope (0.134291)\nCC9_Households (0.207690)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"16\" [label = \"Leaf (-0.0376870)\nDD1_Location_Problemsflood_prone_area ( 0.2417282)\nDD1_Location_Problemsgarbage_dump ( 0.0668142)\nDD1_Location_Problemsindustrial_hazards ( 0.0721198)\nGG7_10_Toilet_Typesshared_toilets ( 0.0088046)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"17\" [label = \"Leaf (-0.051982)\nB14__undeclared_illegal_unprotected ( 0.062019)\nB14__resettled ( 0.013344)\nGG1_Sewer_Line ( 0.029981)\nDD1_Location_Problemsopen_drains ( 0.024220)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"18\" [label = \"Leaf (0.087353)\nCC9_Households (0.990809)\nFF1_8_Water_Sourcessprings (0.642672)\nEviction_Threats (0.220458)\nCC12_Total_Population (0.122466)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"19\" [label = \"Leaf (0.042573)\nCC9_Households (0.487096)\nGG1_Sewer_Line (0.437036)\nGG7_10_Toilet_Typespublic_toilets (0.591169)\nDD2_Location_Dangerous (0.211403)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"20\" [label = \"DD2_Location_Dangerous ( 0.662329)\nFF1_8_Water_Sourcessprings ( 0.078612)\nFF11_Water_MonthlyCost ( 0.387757)\nB14__undeclared_illegal_unprotected ( 0.157804)\nLeaf (-0.033585)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"21\" [label = \"Leaf (-0.042044)\nEviction_Threats ( 0.024916)\nDD1_Location_Problemsgarbage_dump ( 0.156832)\nFF12_Water_CollectionTime5_minutes ( 0.106343)\nFF1_8_Water_Sourcessprings ( 0.153286)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"22\" [label = \"Leaf (-0.0390154)\nEE2A_Current_Eviction_Threat ( 0.0263642)\nGG1_Sewer_Line ( 0.0089725)\nGG7_10_Toilet_Typescommunal_toilets ( 0.0301559)\nFF1_8_Water_Sourceswells ( 0.0065289)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"23\" [label = \"Leaf (-0.017594)\nCC9_Households ( 0.047037)\nCC10_Household_Size ( 0.022525)\nFF1_8_Water_Sourceswells ( 0.039355)\nDD2_Location_Dangerous ( 0.092398)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"24\" [label = \"CC12_Total_Population ( 0.556729)\nLeaf (-0.072138)\nDD1_Location_Problemsindustrial_hazards ( 0.039364)\nCC11_Population_Estimate ( 0.067445)\nDD1_Location_Problemsgarbage_dump ( 0.096940)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"25\" [label = \"Leaf (-0.070300)\nCC9_Households ( 0.157843)\nEviction_Threats ( 0.086753)\nFF11_Water_MonthlyCost ( 0.134503)\nCC11_Population_Estimate ( 0.101325)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"26\" [label = \"Leaf (-0.0639844)\nEE2A_Current_Eviction_Threat ( 0.0015217)\nFF1_8_Water_Sourceswells ( 0.1709144)\nCC12_Total_Population ( 0.0269154)\nFF11_Water_MonthlyCost ( 0.0366125)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"27\" [label = \"Leaf (-0.031269)\nCC12_Total_Population ( 0.055503)\nCC9_Households ( 0.015761)\nDD1_Location_Problemsgarbage_dump ( 0.020955)\nFF1_8_Water_Sourceswells ( 0.012567)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"28\" [label = \"Leaf (-0.054022)\nDD1_Location_Problemsgarbage_dump ( 0.081445)\nEE2A_Current_Eviction_Threat ( 0.053634)\nGG7_10_Toilet_Typespublic_toilets ( 0.085684)\nGG7_10_Toilet_Typesshared_toilets ( 0.109760)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"29\" [label = \"Leaf (-0.1090152)\nEE2A_Current_Eviction_Threat ( 0.0774469)\nDD1_Location_Problemscanal ( 0.0835603)\nFF12_Water_CollectionTime5_minutes ( 0.0092596)\nDD1_Location_Problemsroad_side ( 0.0475504)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"30\" [label = \"Leaf (0.0763129)\nGG7_10_Toilet_Typesshared_toilets (0.4241283)\nCC12_Total_Population (0.0771558)\nDD1_Location_Problemsflood_prone_area (0.0935814)\nC13__most_rent (0.0079529)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"31\" [label = \"Leaf (0.060507)\nCC12_Total_Population (0.146839)\nB14__undeclared_illegal_unprotected (0.529292)\nFF1_8_Water_Sourcessprings (0.188251)\nCC11_Population_Estimate (0.050249)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"32\" [label = \"Leaf (-0.055637)\nEviction_Threats ( 0.059155)\nDD1_Location_Problemsslope ( 0.035503)\nEE2A_Current_Eviction_Threat ( 0.030769)\nFF12_Water_CollectionTime5_minutes ( 0.091717)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"33\" [label = \"Leaf (-0.033062)\nCC11_Population_Estimate ( 0.023760)\nCC12_Total_Population ( 0.093972)\nFF12_Water_CollectionTime5_minutes ( 0.013410)\nDD2_Location_Dangerous ( 0.042268)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"34\" [label = \"EE2A_Current_Eviction_Threat ( 0.020512)\nGG7_10_Toilet_Typescommunal_toilets ( 0.172949)\nLeaf (-0.061034)\nCC11_Population_Estimate ( 0.119249)\nCC9_Households ( 0.202608)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"35\" [label = \"Leaf (0.0198874)\nCC12_Total_Population (0.0202966)\nGG7_10_Toilet_Typescommunal_toilets (0.1939222)\nEE2A_Current_Eviction_Threat (0.0071896)\nDD1_Location_Problemsflood_prone_area (0.0126613)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"36\" [label = \"Leaf (-0.0442249)\nB14__undeclared_illegal_unprotected ( 0.1002874)\nFF1_8_Water_Sourcessprings ( 0.0098451)\nGG2_Sewer_Connected ( 0.0119622)\nCC11_Population_Estimate ( 0.0393950)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"37\" [label = \"Leaf (-0.0491231)\nCC9_Households ( 0.0064243)\nEE2A_Current_Eviction_Threat ( 0.0157630)\nCC12_Total_Population ( 0.0093897)\nCC11_Population_Estimate ( 0.0280952)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"38\" [label = \"Leaf (-0.01559854)\nCC9_Households ( 0.03286809)\nCC12_Total_Population ( 0.00034646)\nEviction_Threats ( 0.00781419)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"39\" [label = \"Leaf (-0.013982)\nCC9_Households ( 0.023391)\nEE2A_Current_Eviction_Threat ( 0.020268)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"40\" [label = \"GG7_10_Toilet_Typespublic_toilets (0.448473)\nCC11_Population_Estimate (0.316091)\nLeaf (0.026304)\nCC10_Household_Size (0.028213)\nDD1_Location_Problemsroad_side (0.046809)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"41\" [label = \"GG1_Sewer_Line (0.41916305)\nLeaf (0.01851001)\nDD2_Location_Dangerous (0.11840854)\nCC12_Total_Population (0.00046915)\nDD1_Location_Problemsopen_drains (0.00207023)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"42\" [label = \"`FF6_Supply_(private=1,municipality=0)_springs` (0.055254)\nDD1_Location_Problemsopen_drains (0.120843)\n`FF15_Main_Water_Line_(yes=1, no=0)` (0.130714)\nGG1_Sewer_Line (0.144237)\nLeaf (0.042977)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"43\" [label = \"Leaf (0.024148)\nCC12_Total_Population (0.019003)\nCC9_Households (0.328987)\nCC10_Household_Size (0.013305)\nB14__undeclared_illegal_unprotected (0.059160)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"44\" [label = \"FF12_Water_CollectionTime5_minutes (0.38314244)\nEE2A_Current_Eviction_Threat (0.21506655)\nLeaf (0.00664615)\nDD1_Location_Problemsopen_drains (0.02171353)\nCC9_Households (0.00095728)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"45\" [label = \"EE2A_Current_Eviction_Threat ( 0.4158753)\nLeaf (-0.0030938)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"46\" [label = \"Leaf (-0.0024638)\nB14__declared_legal_protected ( 0.0067987)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"47\" [label = \"CC9_Households (0.35543)\nLeaf (0.01972)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"48\" [label = \"Leaf (-0.0152903)\nFF1_8_Water_Sourceswells ( 0.0335156)\nFF11_Water_MonthlyCost ( 0.0019774)\nCC10_Household_Size ( 0.0113122)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"49\" [label = \"Leaf (-0.021289)\nDD1_Location_Problemsslope ( 0.023029)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"50\" [label = \"EE2A_Current_Eviction_Threat (0.1695103)\nLeaf (0.0086685)\nGG2_Sewer_Connected (0.0058383)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"51\" [label = \"Leaf (0.038429)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"52\" [label = \"Leaf (-0.012556)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"53\" [label = \"Leaf (0.0023345)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"54\" [label = \"Leaf (-0.0099676)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"55\" [label = \"Leaf (0.0043663)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"56\" [label = \"CC9_Households ( 0.09012441)\nLeaf (-0.00097497)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"57\" [label = \"Leaf (0.0085875)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"58\" [label = \"Leaf (0.0024749)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"59\" [label = \"Leaf (-0.0052686)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"60\" [label = \"Leaf (-0.043638)\nDD1_Location_Problemsroad_side ( 0.027540)\nFF1_8_Water_Sourceswells ( 0.008592)\nB14__resettled ( 0.052770)\nCC12_Total_Population ( 0.020165)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"61\" [label = \"Leaf (-0.0364347)\nFF11_Water_MonthlyCost ( 0.0028072)\nGG7_10_Toilet_Typesshared_toilets ( 0.0475918)\nDD2_Location_Dangerous ( 0.0725640)\nEviction_Threats ( 0.0303104)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"62\" [label = \"Leaf (-0.0472675)\nB14__undeclared_illegal_unprotected ( 0.0015017)\nFF1_8_Water_Sourcessprings ( 0.0010540)\nCC11_Population_Estimate ( 0.0224500)\nCC9_Households ( 0.0012940)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"63\" [label = \"Leaf (-0.0592868)\nCC10_Household_Size ( 0.0496274)\nFF11_Water_MonthlyCost ( 0.0161469)\nFF1_8_Water_Sourceswells ( 0.0011879)\nDD1_Location_Problemsflood_prone_area ( 0.0124376)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"64\" [label = \"Leaf (-0.0319802)\nCC12_Total_Population ( 0.0024451)\nC13__few_rent ( 0.0194205)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"65\" [label = \"Leaf (-0.013331)\nFF11_Water_MonthlyCost ( 0.037144)\n`FF15_Main_Water_Line_(yes=1, no=0)` ( 0.024695)\nCC9_Households ( 0.019217)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"66\" [label = \"C13__most_rent (0.0311999)\nLeaf (0.0071088)\nFF11_Water_MonthlyCost (0.0219578)\nGG7_10_Toilet_Typesshared_toilets (0.0179256)\nEviction_Threats (0.0023969)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"67\" [label = \"Leaf (0.0078823)\nCC12_Total_Population (0.1023246)\nGG7_10_Toilet_Typesshared_toilets (0.0335006)\nCC11_Population_Estimate (0.0808118)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"68\" [label = \"Leaf (-0.020273)\nDD1_Location_Problemswater_body ( 0.023711)\nCC12_Total_Population ( 0.013002)\n`FF15_Main_Water_Line_(yes=1, no=0)` ( 0.017217)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"69\" [label = \"CC12_Total_Population (0.0530845)\nLeaf (0.0072468)\nCC9_Households (0.0154547)\nCC11_Population_Estimate (0.0099911)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"70\" [label = \"Leaf (0.020937)\nFF1_8_Water_Sourceswells (0.233390)\n`FF15_Main_Water_Line_(yes=1, no=0)` (0.036226)\nEviction_Threats (0.038176)\nCC9_Households (0.110306)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"71\" [label = \"FF12_Water_CollectionTime5_minutes (0.0687643)\nGG1_Sewer_Line (0.2103442)\nCC12_Total_Population (0.0430713)\nLeaf (0.0190652)\nGG7_10_Toilet_Typesshared_toilets (0.0061963)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"72\" [label = \"Leaf (-0.0026454)\nB14__resettled ( 0.0088735)\nCC11_Population_Estimate ( 0.0142714)\nCC10_Household_Size ( 0.0538714)\nEviction_Threats ( 0.0056012)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"73\" [label = \"Leaf (-0.0021829)\nB14__declared_legal_protected ( 0.0187587)\nCC12_Total_Population ( 0.0192901)\nB14__resettled ( 0.0046288)\nFF11_Water_MonthlyCost ( 0.0118186)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"74\" [label = \"Leaf (-0.00667468)\nCC12_Total_Population ( 0.00059918)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"75\" [label = \"Leaf (-0.0134880)\nCC11_Population_Estimate ( 0.0032856)\nCC10_Household_Size ( 0.0103209)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"76\" [label = \"`FF15_Main_Water_Line_(yes=1, no=0)` ( 0.04857052)\nLeaf (-0.01435066)\nCC12_Total_Population ( 0.00080988)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"77\" [label = \"Leaf (-0.01624)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"78\" [label = \"Leaf (0.018959)\nCC12_Total_Population (0.116137)\nDD1_Location_Problemsopen_drains (0.031646)\nCC10_Household_Size (0.029442)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"79\" [label = \"Leaf (0.018048)\nFF1_8_Water_Sourcescommunity_taps (0.030802)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"80\" [label = \"Leaf (-0.010945)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"81\" [label = \"Leaf (-0.0032143)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"82\" [label = \"Leaf (0.0542284)\nCC12_Total_Population (0.0540691)\nCC10_Household_Size (0.0047008)\nDD1_Location_Problemscanal (0.0042914)\nDD1_Location_Problemsrailway_track (0.0172344)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"83\" [label = \"`FF15_Main_Water_Line_(yes=1, no=0)` (0.179028)\nLeaf (0.031665)\nDD1_Location_Problemsgarbage_dump (0.032509)\nFF11_Water_MonthlyCost (0.120695)\nCC9_Households (0.152867)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"84\" [label = \"Leaf (-0.0072499)\nCC12_Total_Population ( 0.0321442)\nFF11_Water_MonthlyCost ( 0.0206695)\nDD1_Location_Problemsindustrial_hazards ( 0.0193187)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"85\" [label = \"Leaf (0.00596187)\nCC9_Households (0.02853607)\nCC10_Household_Size (0.08746289)\nCC11_Population_Estimate (0.02282059)\nCC12_Total_Population (0.00089579)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"86\" [label = \"Leaf (-0.00080634)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"87\" [label = \"Leaf (-0.0019692)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"88\" [label = \"Leaf (-0.035285)\nCC9_Households ( 0.046078)\nCC11_Population_Estimate ( 0.012303)\nDD1_Location_Problemsslope ( 0.033255)\nC13__half_rent ( 0.014655)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"89\" [label = \"Leaf (-3.3017e-05)\nDD1_Location_Problemsflood_prone_area ( 3.1421e-02)\nDD1_Location_Problemsgarbage_dump ( 7.0869e-03)\nCC12_Total_Population ( 2.2190e-02)\nCC10_Household_Size ( 1.8982e-03)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"90\" [label = \"Leaf (-0.048325)\nCC12_Total_Population ( 0.012672)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"91\" [label = \"Leaf (-0.056361)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"92\" [label = \"Leaf (0.0129061)\nFF1_8_Water_Sourcesindividual_taps (0.0025796)\nB14__resettled (0.0106722)\nCC11_Population_Estimate (0.0086069)\nCC9_Households (0.0077752)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"93\" [label = \"Leaf (0.0033938)\nCC10_Household_Size (0.0129562)\nDD2_Location_Dangerous (0.0391494)\nCC11_Population_Estimate (0.0468385)\nCC9_Households (0.0016560)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"94\" [label = \"Leaf (-0.0216279)\nB14__resettled ( 0.0036488)\nEviction_Threats ( 0.0147314)\nFF11_Water_MonthlyCost ( 0.0226193)\n`FF15_Main_Water_Line_(yes=1, no=0)` ( 0.0363235)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"95\" [label = \"Leaf (-0.0355852)\n`FF15_Main_Water_Line_(yes=1, no=0)` ( 0.0075081)\nCC11_Population_Estimate ( 0.0107527)\nB14__resettled ( 0.0173263)\nFF11_Water_MonthlyCost ( 0.0168914)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"96\" [label = \"Leaf (-0.0020498)\nDD2_Location_Dangerous ( 0.0021203)\nB14__undeclared_illegal_unprotected ( 0.0085515)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"97\" [label = \"Leaf (-0.0066426)\nCC12_Total_Population ( 0.0186258)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"98\" [label = \"Leaf (0.017955)\nGG7_10_Toilet_Typesshared_toilets (0.011683)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"99\" [label = \"DD1_Location_Problemsflood_prone_area ( 0.08624236)\nLeaf (-0.00348205)\nCC10_Household_Size ( 0.00045508)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"100\" [label = \"Leaf (-0.0025729)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"101\" [label = \"Leaf (0.0027118)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"102\" [label = \"Leaf (0.00027527)\nFF1_8_Water_Sourcesshared_taps (0.01635756)\nC13__half_rent (0.02758219)\nFF11_Water_MonthlyCost (0.01720353)\nEviction_Threats (0.01507494)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"103\" [label = \"Leaf (0.0013052)\nC13__most_rent (0.0359184)\nFF11_Water_MonthlyCost (0.0668383)\nEviction_Threats (0.0482494)\nCC12_Total_Population (0.0270228)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"104\" [label = \"Leaf (-0.0181841)\nCC11_Population_Estimate ( 0.0233430)\nDD1_Location_Problemsgarbage_dump ( 0.0124739)\nFF12_Water_CollectionTime5_minutes ( 0.0193929)\nFF11_Water_MonthlyCost ( 0.0041887)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"105\" [label = \"Leaf (-0.0108955)\nCC10_Household_Size ( 0.0380584)\nCC12_Total_Population ( 0.0086165)\nDD1_Location_Problemsgarbage_dump ( 0.0176463)\nCC11_Population_Estimate ( 0.0918019)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"106\" [label = \"Leaf (-0.0161145)\nDD1_Location_Problemsmine_dump ( 0.0172716)\nFF11_Water_MonthlyCost ( 0.0081881)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"107\" [label = \"Leaf (-0.022474)\nCC12_Total_Population ( 0.037754)\nCC11_Population_Estimate ( 0.044102)\nB14__resettled ( 0.039720)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"108\" [label = \"Leaf (-0.0114234)\nCC9_Households ( 0.0043374)\nCC10_Household_Size ( 0.0092598)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"109\" [label = \"Leaf (-0.0211987)\nDD1_Location_Problemsgarbage_dump ( 0.0058401)\nFF1_8_Water_Sourceswells ( 0.0020041)\nEviction_Threats ( 0.0034899)\nCC10_Household_Size ( 0.0060821)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"110\" [label = \"Leaf (-0.0027814)\nCC12_Total_Population ( 0.0196737)\nDD1_Location_Problemsindustrial_hazards ( 0.0041517)\nDD1_Location_Problemsgarbage_dump ( 0.0068484)\nGG7_10_Toilet_Typespublic_toilets ( 0.0040656)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"111\" [label = \"Leaf (-0.0047192)\nGG7_10_Toilet_Typespublic_toilets ( 0.0092167)\nCC9_Households ( 0.1015985)\nFF1_8_Water_Sourcesshared_taps ( 0.0111529)\nGG2_Sewer_Connected ( 0.0063790)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"112\" [label = \"Leaf (-0.0038839)\nB14__undeclared_illegal_unprotected ( 0.0269156)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"113\" [label = \"Leaf (-0.0066503)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"114\" [label = \"Leaf (-0.0041741)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"115\" [label = \"Leaf (-0.00053874)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"116\" [label = \"Leaf (-0.0044654)\nDD1_Location_Problemsgarbage_dump ( 0.0211901)\nFF12_Water_CollectionTime15_minutes ( 0.0039899)\nCC9_Households ( 0.0089216)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"117\" [label = \"Leaf (-0.0094308)\nFF11_Water_MonthlyCost ( 0.0061734)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"118\" [label = \"Leaf (-0.0090954)\nCC10_Household_Size ( 0.0027111)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"119\" [label = \"Leaf (-0.0069222)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"120\" [label = \"Leaf (-0.0055023)\nCC12_Total_Population ( 0.0253197)\nFF11_Water_MonthlyCost ( 0.0024662)\nDD1_Location_Problemsflood_prone_area ( 0.0136989)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"121\" [label = \"DD1_Location_Problemsopen_drains (0.0035803)\nLeaf (0.0045109)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"122\" [label = \"Leaf (-0.0061148)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"123\" [label = \"Leaf (-0.0029742)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"124\" [label = \"Leaf (-0.0201986)\nCC11_Population_Estimate ( 0.0086815)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"125\" [label = \"Leaf (-0.0095558)\nCC10_Household_Size ( 0.0087549)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"126\" [label = \"Leaf (-0.0061899)\nFF11_Water_MonthlyCost ( 0.0047751)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"127\" [label = \"Leaf (-0.0090411)\nDD1_Location_Problemsflood_prone_area ( 0.0027761)\nB14__resettled ( 0.0047014)\nFF11_Water_MonthlyCost ( 0.0065125)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"128\" [label = \"B14__undeclared_illegal_unprotected ( 0.0368463)\nLeaf (-0.0025735)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"129\" [label = \"CC10_Household_Size ( 0.0073770)\nLeaf (-0.0020579)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"130\" [label = \"Leaf (-0.0041404)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"131\" [label = \"Leaf (0.00044715)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"132\" [label = \"Leaf (-0.0060284)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"133\" [label = \"Leaf (-0.0029504)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"134\" [label = \"Leaf (0.003658)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"135\" [label = \"Leaf (-0.00064557)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"136\" [label = \"Leaf (-0.0072703)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"137\" [label = \"Eviction_Threats ( 0.0034332)\nLeaf (-0.0088741)\n`FF15_Main_Water_Line_(yes=1, no=0)` ( 0.0112707)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"138\" [label = \"Leaf (-0.0050614)\nB14__resettled ( 0.0048872)\nFF11_Water_MonthlyCost ( 0.0067913)\nCC9_Households ( 0.0084683)\nDD1_Location_Problemsopen_drains ( 0.0267953)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"139\" [label = \"Leaf (-0.0029622)\nCC9_Households ( 0.0298381)\nC13__most_rent ( 0.0062177)\nCC10_Household_Size ( 0.0382001)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"140\" [label = \"Leaf (-0.0078176)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"141\" [label = \"Leaf (-0.0025581)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"142\" [label = \"Leaf (0.0051906)\nCC11_Population_Estimate (0.0332575)\nCC12_Total_Population (0.0539783)\nCC9_Households (0.0225585)\nFF11_Water_MonthlyCost (0.0124167)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"143\" [label = \"Leaf (0.003080)\nGG1_Sewer_Line (0.033826)\nCC12_Total_Population (0.040032)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"144\" [label = \"Eviction_Threats ( 0.0258678)\nGG7_10_Toilet_Typespublic_toilets ( 0.0443359)\nLeaf (-0.0038380)\nCC10_Household_Size ( 0.0080062)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"145\" [label = \"Leaf (0.0036670)\nC13__most_rent (0.0054602)\nB14__declared_legal_protected (0.0207290)\nDD1_Location_Problemswater_body (0.0044365)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"146\" [label = \"Leaf (0.0032537)\nCC12_Total_Population (0.0012684)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"147\" [label = \"Leaf (-0.0031449)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"148\" [label = \"Leaf (-0.0052146)\nDD1_Location_Problemsrailway_track ( 0.0196850)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"149\" [label = \"Leaf (-0.0013018)\nCC9_Households ( 0.0089530)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"150\" [label = \"Leaf (-0.0133735)\nCC10_Household_Size ( 0.0053179)\nFF11_Water_MonthlyCost ( 0.0054986)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"151\" [label = \"Leaf (-0.0058961)\nCC10_Household_Size ( 0.0046385)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"152\" [label = \"Leaf (-0.0100699)\nGG2_Sewer_Connected ( 0.0139675)\nFF11_Water_MonthlyCost ( 0.0048910)\nDD1_Location_Problemsgarbage_dump ( 0.0061825)\nCC9_Households ( 0.0081785)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"153\" [label = \"Leaf (-0.0076882)\nCC9_Households ( 0.0034764)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"154\" [label = \"Leaf (-0.0073324)\nCC9_Households ( 0.0240011)\nCC11_Population_Estimate ( 0.0055690)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"155\" [label = \"CC9_Households (0.0004017)\nLeaf (0.0049437)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"156\" [label = \"Leaf (0.0054741)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"157\" [label = \"Leaf (0.002898)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"158\" [label = \"Leaf (-0.0041863)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"159\" [label = \"Leaf (-0.0021829)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"160\" [label = \"FF11_Water_MonthlyCost ( 0.01370757)\nLeaf (-0.00183069)\nCC12_Total_Population ( 0.00028014)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"161\" [label = \"Leaf (-0.0040887)\nC13__most_rent ( 0.0136107)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"162\" [label = \"Leaf (-0.001643)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"163\" [label = \"Leaf (-0.0063646)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"164\" [label = \"Leaf (-0.003864)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"165\" [label = \"Leaf (-0.0018556)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"166\" [label = \"FF1_8_Water_Sourcesindividual_taps ( 0.00087644)\nB14__declared_legal_protected ( 0.00486471)\nLeaf (-0.00265645)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"167\" [label = \"Leaf (-0.0026783)\nB14__undeclared_illegal_unprotected ( 0.0145979)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"168\" [label = \"Leaf (0.0052904)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"169\" [label = \"Leaf (0.0017886)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"170\" [label = \"Leaf (0.0060875)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"171\" [label = \"Leaf (0.0016349)\nCC12_Total_Population (0.0197906)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"172\" [label = \"Leaf (-0.010803)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"173\" [label = \"Leaf (-0.0051222)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"174\" [label = \"CC11_Population_Estimate (0.0021037)\nCC12_Total_Population (0.0043930)\nGG1_Sewer_Line (0.0034241)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"175\" [label = \"B14__resettled ( 0.0026573)\nLeaf (-0.0021416)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"176\" [label = \"Leaf (-0.0037738)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"177\" [label = \"Leaf (-0.0019369)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"178\" [label = \"Leaf (-0.0014684)\nCC12_Total_Population ( 0.0064064)\nEE2A_Current_Eviction_Threat ( 0.0038382)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"179\" [label = \"Leaf (-0.00333372)\nCC12_Total_Population ( 0.00061604)\nEE2A_Current_Eviction_Threat ( 0.00558090)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"180\" [label = \"Leaf (-0.0054487)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"181\" [label = \"Leaf (-0.0029126)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"182\" [label = \"Leaf (-0.00026973)\nCC10_Household_Size ( 0.00015487)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"183\" [label = \"Leaf (-0.0057772)\nCC11_Population_Estimate ( 0.0065526)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"184\" [label = \"CC12_Total_Population ( 0.00014513)\nLeaf (-0.00956027)\nGG7_10_Toilet_Typesshared_toilets ( 0.00935388)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"185\" [label = \"Leaf (-0.0086851)\n`FF15_Main_Water_Line_(yes=1, no=0)` ( 0.0056158)\nDD1_Location_Problemsgarbage_dump ( 0.0089845)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"186\" [label = \"Leaf (-0.0018565)\nFF1_8_Water_Sourcesindividual_taps ( 0.0091523)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"187\" [label = \"Leaf (-0.0032204)\nFF1_8_Water_Sourceswells ( 0.0041962)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"188\" [label = \"CC12_Total_Population (0.00075365)\nLeaf (0.00011618)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"189\" [label = \"Leaf (8.4831e-05)\nDD1_Location_Problemsgarbage_dump (4.6986e-03)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"190\" [label = \"Leaf (-0.0030438)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"191\" [label = \"Leaf (-3.3797e-03)\nFF11_Water_MonthlyCost ( 6.4842e-05)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"192\" [label = \"Leaf (-0.00088973)\nEviction_Threats ( 0.00880413)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"193\" [label = \"Leaf (-0.0029345)\nEviction_Threats ( 0.0007378)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"194\" [label = \"Leaf (-0.0011366)\nB14__declared_legal_protected ( 0.0018351)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"195\" [label = \"Leaf (-0.0026843)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"196\" [label = \"Leaf (-0.0015528)\n`FF15_Main_Water_Line_(yes=1, no=0)` ( 0.0109757)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"197\" [label = \"Leaf (0.00098018)\nGG7_10_Toilet_Typespublic_toilets (0.04089160)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"198\" [label = \"Leaf (-0.0054710)\n`FF15_Main_Water_Line_(yes=1, no=0)` ( 0.0026969)\nDD1_Location_Problemswater_body ( 0.0305656)\nFF1_8_Water_Sourcesindividual_taps ( 0.0016853)\nCC9_Households ( 0.0131570)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"199\" [label = \"GG7_10_Toilet_Typesshared_toilets ( 0.0021563)\nGG1_Sewer_Line ( 0.0035988)\nLeaf (-0.0010703)\nCC9_Households ( 0.0139001)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"200\" [label = \"Leaf (-0.00082888)\nB14__resettled ( 0.00609295)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"201\" [label = \"Leaf (-0.0044956)\n`FF15_Main_Water_Line_(yes=1, no=0)` ( 0.0068033)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"202\" [label = \"Leaf (0.0019992)\nFF12_Water_CollectionTime15_minutes (0.0161790)\nCC12_Total_Population (0.0085725)\nCC9_Households (0.0102978)\nGG7_10_Toilet_Typespublic_toilets (0.0451260)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"203\" [label = \"Leaf (0.0011992)\nFF11_Water_MonthlyCost (0.0291523)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"204\" [label = \"Leaf (-0.003142)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"205\" [label = \"DD1_Location_Problemsopen_drains (0.011915)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"206\" [label = \"Leaf (0.0030124)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"207\" [label = \"Leaf (-0.0016256)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"208\" [label = \"Leaf (0.00058109)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"209\" [label = \"Leaf (-0.0021656)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"210\" [label = \"Leaf (0.0047118)\nFF11_Water_MonthlyCost (0.0216158)\nCC10_Household_Size (0.0018377)\nCC9_Households (0.0052187)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"211\" [label = \"Leaf (-0.0021124)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"212\" [label = \"DD1_Location_Problemsflood_prone_area (0.012929)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"213\" [label = \"CC11_Population_Estimate (0.0014108)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"214\" [label = \"Leaf (0.0050686)\nGG2_Sewer_Connected (0.0054266)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"215\" [label = \"Leaf (0.0026278)\nDD1_Location_Problemsslope (0.0042677)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"216\" [label = \"FF1_8_Water_Sourcesshared_taps (0.0012780)\nCC10_Household_Size (0.0098953)\nC13__most_rent (0.0146613)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"217\" [label = \"Leaf (-0.0028905)\nCC10_Household_Size ( 0.0056421)\nGG2_Sewer_Connected ( 0.0063501)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"218\" [label = \"Leaf (-1.1122e-05)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"219\" [label = \"Leaf (-0.0024079)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"220\" [label = \"CC9_Households (0.00023731)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"221\" [label = \"Leaf (-0.003536)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"222\" [label = \"Leaf (-0.0061725)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"223\" [label = \"Leaf (0.00058449)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"224\" [label = \"Leaf (-0.0026736)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"225\" [label = \"Leaf (-0.0014472)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"226\" [label = \"Leaf (-0.00061778)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"227\" [label = \"CC10_Household_Size (0.0016272)\nLeaf (0.0024038)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"228\" [label = \"Leaf (0.0031312)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"229\" [label = \"CC12_Total_Population (0.0028171)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"230\" [label = \"Leaf (0.00070866)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"231\" [label = \"Leaf (0.0022652)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"232\" [label = \"Leaf (0.0020003)\n`FF15_Main_Water_Line_(yes=1, no=0)` (0.0124006)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"233\" [label = \"Leaf (0.00017961)\nGG7_10_Toilet_Typesshared_toilets (0.00332425)\nCC9_Households (0.00712433)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"234\" [label = \"Leaf (-0.0047308)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"235\" [label = \"Leaf (-0.0021845)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"236\" [label = \"Leaf (-0.0078451)\nCC11_Population_Estimate ( 0.0091682)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"237\" [label = \"CC10_Household_Size (0.0050363)\nDD2_Location_Dangerous (0.0157621)\nLeaf (0.0027915)\nCC12_Total_Population (0.0115873)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"238\" [label = \"CC12_Total_Population (0.0282588)\nLeaf (0.0031026)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"239\" [label = \"CC9_Households ( 0.0434946)\nLeaf (-0.0013855)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"240\" [label = \"Leaf (-0.0057221)\nDD2_Location_Dangerous ( 0.0057886)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"241\" [label = \"Leaf (-0.0061448)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"242\" [label = \"CC11_Population_Estimate (0.004013)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"243\" [label = \"Leaf (0.00085399)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"244\" [label = \"Leaf (-0.0014358)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"245\" [label = \"Leaf (0.0037469)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"246\" [label = \"Leaf (-0.0013376)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"247\" [label = \"DD1_Location_Problemsopen_drains (0.0019268)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"248\" [label = \"Leaf (-0.0020594)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"249\" [label = \"Leaf (-0.0036992)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"250\" [label = \"Leaf (0.0011689)\nGG1_Sewer_Line (0.0063963)\nFF11_Water_MonthlyCost (0.0196933)\nB14__undeclared_illegal_unprotected (0.0286320)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"251\" [label = \"CC12_Total_Population (0.0245334)\nCC9_Households (0.0364951)\nFF11_Water_MonthlyCost (0.0348843)\nDD1_Location_Problemsroad_side (0.0097326)\nCC11_Population_Estimate (0.0025740)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"252\" [label = \"Leaf (-0.00054152)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"253\" [label = \"Leaf (-0.0024939)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"254\" [label = \"CC11_Population_Estimate ( 0.0157840)\nLeaf (-0.0024661)\nCC9_Households ( 0.0159696)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"255\" [label = \"Leaf (-0.0032345)\nCC11_Population_Estimate ( 0.0424008)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"256\" [label = \"CC11_Population_Estimate ( 2.8087e-03)\nLeaf (-7.4162e-05)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"257\" [label = \"CC9_Households (0.0137249)\nLeaf (0.0030379)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"258\" [label = \"FF12_Water_CollectionTime5_minutes (0.0025572)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"259\" [label = \"Leaf (-0.0032325)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"260\" [label = \"Leaf (0.00099668)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"261\" [label = \"CC10_Household_Size (0.0010031)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"262\" [label = \"Leaf (-0.0010606)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"263\" [label = \"Leaf (-0.0026118)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"264\" [label = \"Leaf (-0.0009291)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"265\" [label = \"Leaf (-0.0020453)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"266\" [label = \"CC9_Households (0.0295)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"267\" [label = \"CC12_Total_Population (0.033245)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"268\" [label = \"Leaf (0.00071855)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"269\" [label = \"CC9_Households (0.0091887)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"270\" [label = \"CC10_Household_Size (0.017686)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"271\" [label = \"FF1_8_Water_Sourcessprings (0.01698)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"272\" [label = \"CC11_Population_Estimate (0.0014403)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"273\" [label = \"CC9_Households (0.025379)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"274\" [label = \"Leaf (-0.0028519)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"275\" [label = \"Leaf (0.00043861)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"276\" [label = \"Leaf (0.0028952)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"277\" [label = \"Leaf (-0.00034243)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"278\" [label = \"Leaf (-0.0018999)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"279\" [label = \"Leaf (-0.00313)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"280\" [label = \"Leaf (0.0011957)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"281\" [label = \"Leaf (-0.0019609)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"282\" [label = \"CC9_Households (0.0018677)\nEE2A_Current_Eviction_Threat (0.0045064)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"283\" [label = \"Leaf (-0.0035944)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"284\" [label = \"Leaf (-0.0012086)\nCC9_Households ( 0.0016717)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"285\" [label = \"Leaf (-0.0045879)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"286\" [label = \"`FF15_Main_Water_Line_(yes=1, no=0)` (0.0013621)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"287\" [label = \"Leaf (0.00083852)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"288\" [label = \"Leaf (-0.0017316)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"289\" [label = \"FF11_Water_MonthlyCost (0.0034559)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"290\" [label = \"Leaf (-0.0015183)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"291\" [label = \"Leaf (8.6942e-06)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"292\" [label = \"Leaf (0.0023560)\nCC11_Population_Estimate (0.0026101)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"293\" [label = \"B14__undeclared_illegal_unprotected ( 0.0110535)\nLeaf (-0.0057806)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"294\" [label = \"Leaf (-0.0031670)\nFF11_Water_MonthlyCost ( 0.0037868)\nCC12_Total_Population ( 0.0012913)\nCC11_Population_Estimate ( 0.0049390)\nGG7_10_Toilet_Typescommunal_toilets ( 0.0100841)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"295\" [label = \"Leaf (-0.0014711)\nCC12_Total_Population ( 0.0053728)\nDD1_Location_Problemsroad_side ( 0.0041172)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"296\" [label = \"FF11_Water_MonthlyCost ( 0.0028087)\nLeaf (-0.0035912)\nCC9_Households ( 0.0151360)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"297\" [label = \"GG7_10_Toilet_Typesshared_toilets (0.010443)\nFF12_Water_CollectionTime30_minutes (0.018527)\nLeaf (0.002878)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"298\" [label = \"GG2_Sewer_Connected (0.0080836)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"299\" [label = \"Leaf (-0.00079681)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"300\" [label = \"FF11_Water_MonthlyCost (0.0011963)\nLeaf (0.0015811)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"301\" [label = \"CC12_Total_Population (0.00034755)\nB14__declared_legal_protected (0.00799229)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"302\" [label = \"Leaf (-0.0017727)\nCC11_Population_Estimate ( 0.0079028)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"303\" [label = \"Leaf (0.00086187)\nDD2_Location_Dangerous (0.01067296)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"304\" [label = \"Leaf (0.0025915)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"305\" [label = \"Leaf (0.00038991)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"306\" [label = \"Leaf (-0.001604)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"307\" [label = \"Leaf (-0.00067221)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"308\" [label = \"Leaf (-0.0034322)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"309\" [label = \"Leaf (-0.0026241)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"310\" [label = \"DD1_Location_Problemsflood_prone_area ( 0.0016078)\nLeaf (-0.0030993)\nC13__few_rent ( 0.0020492)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"311\" [label = \"Leaf (-0.00716249)\nFF1_8_Water_Sourcesindividual_taps ( 0.00093185)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"312\" [label = \"Leaf (-0.0030501)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"313\" [label = \"Leaf (-0.0027382)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"314\" [label = \"Leaf (0.0023606)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"315\" [label = \"DD2_Location_Dangerous (0.012834)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"316\" [label = \"CC12_Total_Population (0.005933)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"317\" [label = \"Leaf (-0.0006034)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"318\" [label = \"Leaf (-0.00096005)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"319\" [label = \"Leaf (0.0015957)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"320\" [label = \"DD1_Location_Problemsroad_side (0.01744)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"321\" [label = \"CC12_Total_Population (0.0029473)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"322\" [label = \"Leaf (-0.0028434)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"323\" [label = \"Leaf (-0.0013084)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"324\" [label = \"Leaf (-0.0019682)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"325\" [label = \"Leaf (0.00089846)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"326\" [label = \"Leaf (-0.0012547)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"327\" [label = \"Leaf (-0.0027998)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"328\" [label = \"EE2A_Current_Eviction_Threat ( 0.01687382)\nLeaf (-0.00055845)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"329\" [label = \"Leaf (-0.0027380)\nB14__resettled ( 0.0093186)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"330\" [label = \"DD1_Location_Problemsslope (0.010145)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"331\" [label = \"FF1_8_Water_Sourceswells (0.018622)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"332\" [label = \"Leaf (-0.00097484)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"333\" [label = \"Leaf (0.0021808)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"334\" [label = \"FF11_Water_MonthlyCost (0.020118)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"335\" [label = \"Leaf (-0.002157)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"336\" [label = \"Leaf (0.0027009)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"337\" [label = \"Leaf (-0.00048146)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"338\" [label = \"Leaf (0.0014839)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"339\" [label = \"Leaf (-0.0014449)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"340\" [label = \"Leaf (-0.00341)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"341\" [label = \"C13__few_rent (0.00024191)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"342\" [label = \"Leaf (-0.0011373)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"343\" [label = \"Leaf (-0.001961)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"344\" [label = \"CC12_Total_Population ( 0.0111917)\nLeaf (-0.0027501)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"345\" [label = \"CC12_Total_Population ( 0.0048835)\nLeaf (-0.0016287)\nCC11_Population_Estimate ( 0.0056400)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"346\" [label = \"Leaf (0.00026701)\nCC12_Total_Population (0.00105669)\nCC11_Population_Estimate (0.00621330)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"347\" [label = \"GG1_Sewer_Line ( 0.0015218)\nLeaf (-0.0018257)\nCC12_Total_Population ( 0.0056506)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"348\" [label = \"CC9_Households (0.012464)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"349\" [label = \"CC12_Total_Population (0.027446)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"350\" [label = \"Leaf (-0.00022887)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"351\" [label = \"Leaf (-0.0038258)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"352\" [label = \"Leaf (-0.0012734)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"353\" [label = \"Leaf (-0.0043045)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"354\" [label = \"Leaf (-0.001579)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"355\" [label = \"Leaf (0.0011094)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"356\" [label = \"FF11_Water_MonthlyCost (0.018716)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"357\" [label = \"Leaf (-0.00081111)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"358\" [label = \"Leaf (0.004335)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"359\" [label = \"Leaf (0.00053251)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"360\" [label = \"`FF15_Main_Water_Line_(yes=1, no=0)` (0.010463)\nFF1_8_Water_Sourceswells (0.006438)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"361\" [label = \"`FF15_Main_Water_Line_(yes=1, no=0)` ( 0.00034698)\nLeaf (-0.00013869)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"362\" [label = \"Leaf (-0.0034012)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"363\" [label = \"Leaf (5.5001e-06)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"364\" [label = \"Leaf (-0.0011299)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"365\" [label = \"Leaf (-0.0018892)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"366\" [label = \"Leaf (-0.0017105)\nB14__declared_legal_protected ( 0.0077435)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"367\" [label = \"Leaf (-0.0050045)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"368\" [label = \"Leaf (-0.0015803)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"369\" [label = \"Leaf (0.00052077)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"370\" [label = \"Leaf (-0.0026395)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"371\" [label = \"JJ1_Electricity_Availableyes (0.00054079)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"372\" [label = \"Leaf (-0.00066686)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"373\" [label = \"Leaf (-0.0014535)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"374\" [label = \"FF11_Water_MonthlyCost (0.0077350)\nLeaf (0.0030201)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"375\" [label = \"Leaf (-0.0013501)\nCC12_Total_Population ( 0.0100053)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"376\" [label = \"DD2_Location_Dangerous (0.0057653)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"377\" [label = \"GG7_10_Toilet_Typesshared_toilets (0.0054085)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"378\" [label = \"Leaf (0.0037086)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"379\" [label = \"CC11_Population_Estimate (0.0056846)\nCC12_Total_Population (0.0131046)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"380\" [label = \"Leaf (-0.0014027)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"381\" [label = \"DD1_Location_Problemsflood_prone_area (0.00045624)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"382\" [label = \"Leaf (-0.00017169)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"383\" [label = \"DD2_Location_Dangerous (0.0020743)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"384\" [label = \"Leaf (-0.0021567)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"385\" [label = \"Leaf (0.0026398)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"386\" [label = \"Leaf (-0.0039902)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"387\" [label = \"Leaf (-0.0022)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"388\" [label = \"Leaf (-0.0010056)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"389\" [label = \"Leaf (-0.0024988)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"390\" [label = \"Leaf (0.0018299)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"391\" [label = \"Leaf (-0.00065084)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"392\" [label = \"Leaf (-0.0010117)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"393\" [label = \"Leaf (0.00081761)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"394\" [label = \"Leaf (-0.0019007)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"395\" [label = \"Leaf (-0.0046861)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"396\" [label = \"Leaf (-0.0016703)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"397\" [label = \"Leaf (-0.00061496)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"398\" [label = \"CC11_Population_Estimate ( 0.00359348)\nLeaf (-0.00073993)\nCC12_Total_Population ( 0.00364739)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"399\" [label = \"CC11_Population_Estimate (0.0285343)\nLeaf (0.0015605)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"400\" [label = \"Leaf (-0.0004763)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"401\" [label = \"Leaf (-0.0040454)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"402\" [label = \"CC11_Population_Estimate (0.024232)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"403\" [label = \"CC11_Population_Estimate (0.015065)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"404\" [label = \"Leaf (-0.0021296)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"405\" [label = \"Leaf (-0.0013642)\nCC9_Households ( 0.0099660)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"406\" [label = \"Leaf (-0.00016072)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"407\" [label = \"Leaf (0.0038052)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"408\" [label = \"CC11_Population_Estimate (0.020956)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"409\" [label = \"CC11_Population_Estimate (0.0041543)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"410\" [label = \"Leaf (-0.00072103)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"411\" [label = \"Leaf (0.0014026)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"412\" [label = \"Leaf (-0.0028818)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"413\" [label = \"Leaf (-0.00087776)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"414\" [label = \"Leaf (-0.001342)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"415\" [label = \"Leaf (-0.0023526)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"416\" [label = \"Leaf (-0.0024237)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"417\" [label = \"Leaf (-0.0012829)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"418\" [label = \"Leaf (0.00088957)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"419\" [label = \"Leaf (-0.0010522)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"420\" [label = \"Leaf (-0.0002929)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"421\" [label = \"Leaf (-0.0011457)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"422\" [label = \"Leaf (0.002768)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"423\" [label = \"Leaf (0.00039702)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"424\" [label = \"Leaf (-0.0014247)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"425\" [label = \"CC11_Population_Estimate (0.0015472)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"426\" [label = \"Leaf (0.0010433)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"427\" [label = \"Leaf (2.9629e-05)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"428\" [label = \"Leaf (-4.1684e-05)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"429\" [label = \"Leaf (-0.00095683)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"430\" [label = \"Leaf (0.00018595)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"431\" [label = \"Leaf (-0.00093127)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"432\" [label = \"`FF15_Main_Water_Line_(yes=1, no=0)` (0.003412)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"433\" [label = \"DD1_Location_Problemsopen_drains (0.0032556)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"434\" [label = \"CC9_Households (0.0016672)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"435\" [label = \"GG7_10_Toilet_Typesshared_toilets (0.011725)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"436\" [label = \"Leaf (-0.0030763)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"437\" [label = \"GG7_10_Toilet_Typesshared_toilets (0.0018986)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"438\" [label = \"Leaf (-0.0011267)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"439\" [label = \"Leaf (-0.0022249)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"440\" [label = \"Leaf (0.00072286)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"441\" [label = \"Leaf (-0.0014034)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"442\" [label = \"Leaf (-0.0020089)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"443\" [label = \"Leaf (-0.00072622)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"444\" [label = \"FF1_8_Water_Sourcesindividual_taps (0.010384)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"445\" [label = \"Leaf (0.0014948)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"446\" [label = \"CC10_Household_Size (0.0134232)\nDD1_Location_Problemsslope (0.0058105)\nB14__undeclared_illegal_unprotected (0.0114296)\nFF12_Water_CollectionTime5_minutes (0.0209825)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"447\" [label = \"Leaf (-0.0024404)\nDD1_Location_Problemsslope ( 0.0164225)\nCC9_Households ( 0.0117335)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"448\" [label = \"Leaf (0.00094513)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"449\" [label = \"CC11_Population_Estimate (0.011297)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"450\" [label = \"FF1_8_Water_Sourceswells (0.00721144)\nCC11_Population_Estimate (0.00287049)\nLeaf (0.00029642)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"451\" [label = \"Leaf (0.0081534)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"452\" [label = \"Leaf (0.0031145)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"453\" [label = \"Leaf (-0.00011473)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"454\" [label = \"FF12_Water_CollectionTime5_minutes (0.0020775)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"455\" [label = \"CC11_Population_Estimate (0.013985)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"456\" [label = \"Leaf (0.0016703)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"457\" [label = \"Leaf (-0.0016632)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"458\" [label = \"Leaf (-0.0026493)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"459\" [label = \"Leaf (-0.0012734)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"460\" [label = \"Leaf (1.3222e-05)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"461\" [label = \"Leaf (-0.0016551)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"462\" [label = \"Leaf (-0.0039508)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"463\" [label = \"Leaf (-0.0045997)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"464\" [label = \"DD1_Location_Problemsunder_power_lines (0.0023487)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"465\" [label = \"Leaf (0.0019455)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"466\" [label = \"CC12_Total_Population ( 9.8224e-03)\nLeaf (-5.2946e-05)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"467\" [label = \"FF12_Water_CollectionTime5_minutes (0.00033019)\nLeaf (0.00158382)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"468\" [label = \"Leaf (-0.0014436)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"469\" [label = \"Leaf (-0.00019756)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"470\" [label = \"GG7_10_Toilet_Typespublic_toilets (0.0062334)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"471\" [label = \"Leaf (0.0011495)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"472\" [label = \"Leaf (-0.00086934)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"473\" [label = \"Leaf (-0.0017741)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"474\" [label = \"Leaf (0.0013525)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"475\" [label = \"Leaf (-0.0013202)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"476\" [label = \"Leaf (-0.0006983)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"477\" [label = \"Leaf (-0.0025583)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"478\" [label = \"B14__resettled (0.0062483)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"479\" [label = \"Leaf (-0.0016851)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"480\" [label = \"Leaf (0.00032951)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"481\" [label = \"Leaf (-0.0011746)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"482\" [label = \"Leaf (0.0014148)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"483\" [label = \"Leaf (0.0025924)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"484\" [label = \"GG7_10_Toilet_Typescommunal_toilets ( 0.0072323)\nLeaf (-0.0012704)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"485\" [label = \"`FF15_Main_Water_Line_(yes=1, no=0)` (0.0159822)\nLeaf (0.0012689)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"486\" [label = \"CC10_Household_Size (0.0048016)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"487\" [label = \"Leaf (-0.0021703)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"488\" [label = \"Leaf (-0.0010989)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"489\" [label = \"Leaf (0.0018841)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"490\" [label = \"Leaf (-0.0012319)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"491\" [label = \"Leaf (-4.313e-05)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"492\" [label = \"Leaf (-0.0026788)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"493\" [label = \"C13__most_rent (0.00026026)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"494\" [label = \"Leaf (-0.0011604)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"495\" [label = \"Leaf (0.00099629)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"496\" [label = \"Leaf (-0.0010168)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"497\" [label = \"Leaf (-0.0022144)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"498\" [label = \"Leaf (0.00024987)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"499\" [label = \"Leaf (-0.002329)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"500\" [label = \"Leaf (-0.0014273)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"501\" [label = \"Leaf (-0.00067135)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"502\" [label = \"Leaf (-0.00062749)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"503\" [label = \"Leaf (-0.0017588)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"504\" [label = \"Leaf (-7.6879e-05)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"505\" [label = \"Leaf (-0.0014217)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"506\" [label = \"Leaf (0.0015416)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"507\" [label = \"FF1_8_Water_Sourceswells (0.0061471)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"508\" [label = \"Leaf (0.00035021)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"509\" [label = \"Leaf (-0.00088754)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"510\" [label = \"Leaf (0.00025801)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"511\" [label = \"DD1_Location_Problemsgarbage_dump (0.0034335)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"512\" [label = \"DD1_Location_Problemsgarbage_dump (0.0072461)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"513\" [label = \"Leaf (0.0027588)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"514\" [label = \"CC11_Population_Estimate (0.0026302)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"515\" [label = \"B14__resettled (0.0020651)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"516\" [label = \"CC9_Households (0.0023366)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"517\" [label = \"CC11_Population_Estimate (0.0010919)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"518\" [label = \"Leaf (4.2881e-05)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"519\" [label = \"Leaf (0.0020403)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"520\" [label = \"Leaf (0.0015386)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"521\" [label = \"Leaf (0.00013056)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"522\" [label = \"Leaf (-0.0029613)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"523\" [label = \"Leaf (-0.0013755)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"524\" [label = \"FF1_8_Water_Sourcessprings (0.001483)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"525\" [label = \"Leaf (-0.0016174)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"526\" [label = \"Leaf (-0.0024901)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"527\" [label = \"Leaf (-0.0012223)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"528\" [label = \"Leaf (-0.00087034)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"529\" [label = \"Leaf (-1.912e-05)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"530\" [label = \"DD1_Location_Problemsslope (0.0021031)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"531\" [label = \"Leaf (0.00035227)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"532\" [label = \"CC11_Population_Estimate (0.0014757)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"533\" [label = \"CC10_Household_Size (0.019094)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"534\" [label = \"DD2_Location_Dangerous (0.00045445)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"535\" [label = \"Leaf (-0.0018021)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"536\" [label = \"Leaf (0.00065925)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"537\" [label = \"Leaf (-0.000953)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"538\" [label = \"B14__declared_legal_protected (0.0036344)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"539\" [label = \"Leaf (-0.0026991)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"540\" [label = \"CC9_Households (0.00010316)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"541\" [label = \"Leaf (-4.7465e-06)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"542\" [label = \"Leaf (0.0034394)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"543\" [label = \"Leaf (-0.00012908)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"544\" [label = \"CC12_Total_Population (0.0016865)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"545\" [label = \"CC12_Total_Population (0.00050953)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"546\" [label = \"Leaf (-9.968e-05)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"547\" [label = \"Leaf (-0.0017422)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"548\" [label = \"Leaf (-0.0011359)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"549\" [label = \"Leaf (-0.0005616)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"550\" [label = \"Leaf (-3.3112e-05)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"551\" [label = \"Leaf (-0.0010527)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"552\" [label = \"Leaf (-0.0012102)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"553\" [label = \"Leaf (-0.00051852)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"554\" [label = \"Leaf (0.00081843)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"555\" [label = \"GG7_10_Toilet_Typescommunal_toilets (0.0035589)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"556\" [label = \"B14__resettled (0.0034138)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"557\" [label = \"Leaf (0.00045004)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"558\" [label = \"Leaf (-0.001403)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"559\" [label = \"Leaf (-5.2225e-05)\", fillcolor = \"#F5F5DC\", fontcolor = \"#000000\"] \n  \"1\"->\"2\" \n  \"2\"->\"4\" \n  \"3\"->\"6\" \n  \"4\"->\"8\" \n  \"5\"->\"10\" \n  \"6\"->\"12\" \n  \"7\"->\"14\" \n  \"8\"->\"16\" \n  \"11\"->\"18\" \n  \"12\"->\"20\" \n  \"15\"->\"22\" \n  \"20\"->\"24\" \n  \"24\"->\"26\" \n  \"9\"->\"28\" \n  \"10\"->\"30\" \n  \"13\"->\"32\" \n  \"14\"->\"34\" \n  \"34\"->\"36\" \n  \"22\"->\"38\" \n  \"18\"->\"40\" \n  \"19\"->\"42\" \n  \"40\"->\"44\" \n  \"41\"->\"46\" \n  \"42\"->\"48\" \n  \"44\"->\"50\" \n  \"45\"->\"52\" \n  \"47\"->\"54\" \n  \"50\"->\"56\" \n  \"56\"->\"58\" \n  \"21\"->\"60\" \n  \"25\"->\"62\" \n  \"35\"->\"64\" \n  \"16\"->\"66\" \n  \"17\"->\"68\" \n  \"31\"->\"70\" \n  \"66\"->\"72\" \n  \"69\"->\"74\" \n  \"71\"->\"76\" \n  \"43\"->\"78\" \n  \"76\"->\"80\" \n  \"30\"->\"82\" \n  \"83\"->\"84\" \n  \"78\"->\"86\" \n  \"32\"->\"88\" \n  \"60\"->\"90\" \n  \"82\"->\"92\" \n  \"26\"->\"94\" \n  \"65\"->\"96\" \n  \"70\"->\"98\" \n  \"99\"->\"100\" \n  \"28\"->\"102\" \n  \"33\"->\"104\" \n  \"61\"->\"106\" \n  \"27\"->\"108\" \n  \"23\"->\"110\" \n  \"85\"->\"112\" \n  \"63\"->\"114\" \n  \"88\"->\"116\" \n  \"89\"->\"118\" \n  \"103\"->\"120\" \n  \"121\"->\"122\" \n  \"92\"->\"124\" \n  \"93\"->\"126\" \n  \"84\"->\"128\" \n  \"128\"->\"130\" \n  \"129\"->\"132\" \n  \"112\"->\"134\" \n  \"105\"->\"136\" \n  \"36\"->\"138\" \n  \"137\"->\"140\" \n  \"67\"->\"142\" \n  \"73\"->\"144\" \n  \"144\"->\"146\" \n  \"37\"->\"148\" \n  \"95\"->\"150\" \n  \"94\"->\"152\" \n  \"29\"->\"154\" \n  \"155\"->\"156\" \n  \"125\"->\"158\" \n  \"152\"->\"160\" \n  \"160\"->\"162\" \n  \"151\"->\"164\" \n  \"72\"->\"166\" \n  \"90\"->\"168\" \n  \"107\"->\"170\" \n  \"166\"->\"172\" \n  \"145\"->\"174\" \n  \"146\"->\"176\" \n  \"174\"->\"178\" \n  \"175\"->\"180\" \n  \"120\"->\"182\" \n  \"62\"->\"184\" \n  \"184\"->\"186\" \n  \"116\"->\"188\" \n  \"188\"->\"190\" \n  \"108\"->\"192\" \n  \"150\"->\"194\" \n  \"39\"->\"196\" \n  \"138\"->\"198\" \n  \"199\"->\"200\" \n  \"111\"->\"202\" \n  \"196\"->\"204\" \n  \"197\"->\"206\" \n  \"205\"->\"208\" \n  \"102\"->\"210\" \n  \"98\"->\"212\" \n  \"48\"->\"214\" \n  \"127\"->\"216\" \n  \"212\"->\"218\" \n  \"213\"->\"220\" \n  \"216\"->\"222\" \n  \"220\"->\"224\" \n  \"154\"->\"226\" \n  \"227\"->\"228\" \n  \"229\"->\"230\" \n  \"198\"->\"232\" \n  \"200\"->\"234\" \n  \"142\"->\"236\" \n  \"143\"->\"238\" \n  \"237\"->\"240\" \n  \"238\"->\"242\" \n  \"239\"->\"244\" \n  \"242\"->\"246\" \n  \"247\"->\"248\" \n  \"104\"->\"250\" \n  \"117\"->\"252\" \n  \"251\"->\"254\" \n  \"254\"->\"256\" \n  \"256\"->\"258\" \n  \"257\"->\"260\" \n  \"258\"->\"262\" \n  \"261\"->\"264\" \n  \"79\"->\"266\" \n  \"266\"->\"268\" \n  \"267\"->\"270\" \n  \"269\"->\"272\" \n  \"270\"->\"274\" \n  \"271\"->\"276\" \n  \"272\"->\"278\" \n  \"273\"->\"280\" \n  \"185\"->\"282\" \n  \"282\"->\"284\" \n  \"167\"->\"286\" \n  \"286\"->\"288\" \n  \"289\"->\"290\" \n  \"38\"->\"292\" \n  \"110\"->\"294\" \n  \"250\"->\"296\" \n  \"293\"->\"298\" \n  \"296\"->\"300\" \n  \"297\"->\"302\" \n  \"298\"->\"304\" \n  \"300\"->\"306\" \n  \"301\"->\"308\" \n  \"109\"->\"310\" \n  \"310\"->\"312\" \n  \"255\"->\"314\" \n  \"302\"->\"316\" \n  \"303\"->\"318\" \n  \"315\"->\"320\" \n  \"316\"->\"322\" \n  \"320\"->\"324\" \n  \"321\"->\"326\" \n  \"106\"->\"328\" \n  \"328\"->\"330\" \n  \"171\"->\"332\" \n  \"330\"->\"334\" \n  \"331\"->\"336\" \n  \"334\"->\"338\" \n  \"329\"->\"340\" \n  \"341\"->\"342\" \n  \"210\"->\"344\" \n  \"294\"->\"346\" \n  \"344\"->\"348\" \n  \"345\"->\"350\" \n  \"347\"->\"352\" \n  \"348\"->\"354\" \n  \"349\"->\"356\" \n  \"356\"->\"358\" \n  \"217\"->\"360\" \n  \"360\"->\"362\" \n  \"361\"->\"364\" \n  \"64\"->\"366\" \n  \"186\"->\"368\" \n  \"187\"->\"370\" \n  \"371\"->\"372\" \n  \"68\"->\"374\" \n  \"374\"->\"376\" \n  \"75\"->\"378\" \n  \"376\"->\"380\" \n  \"377\"->\"382\" \n  \"379\"->\"384\" \n  \"381\"->\"386\" \n  \"383\"->\"388\" \n  \"236\"->\"390\" \n  \"240\"->\"392\" \n  \"178\"->\"394\" \n  \"179\"->\"396\" \n  \"139\"->\"398\" \n  \"398\"->\"400\" \n  \"399\"->\"402\" \n  \"346\"->\"404\" \n  \"402\"->\"406\" \n  \"403\"->\"408\" \n  \"408\"->\"410\" \n  \"409\"->\"412\" \n  \"191\"->\"414\" \n  \"182\"->\"416\" \n  \"183\"->\"418\" \n  \"311\"->\"420\" \n  \"124\"->\"422\" \n  \"375\"->\"424\" \n  \"425\"->\"426\" \n  \"284\"->\"428\" \n  \"118\"->\"430\" \n  \"189\"->\"432\" \n  \"432\"->\"434\" \n  \"433\"->\"436\" \n  \"434\"->\"438\" \n  \"435\"->\"440\" \n  \"437\"->\"442\" \n  \"148\"->\"444\" \n  \"202\"->\"446\" \n  \"444\"->\"448\" \n  \"446\"->\"450\" \n  \"233\"->\"452\" \n  \"449\"->\"454\" \n  \"450\"->\"456\" \n  \"454\"->\"458\" \n  \"455\"->\"460\" \n  \"96\"->\"462\" \n  \"97\"->\"464\" \n  \"295\"->\"466\" \n  \"464\"->\"468\" \n  \"466\"->\"470\" \n  \"467\"->\"472\" \n  \"232\"->\"474\" \n  \"201\"->\"476\" \n  \"470\"->\"478\" \n  \"478\"->\"480\" \n  \"74\"->\"482\" \n  \"447\"->\"484\" \n  \"484\"->\"486\" \n  \"485\"->\"488\" \n  \"486\"->\"490\" \n  \"153\"->\"492\" \n  \"192\"->\"494\" \n  \"193\"->\"496\" \n  \"161\"->\"498\" \n  \"493\"->\"500\" \n  \"194\"->\"502\" \n  \"292\"->\"504\" \n  \"405\"->\"506\" \n  \"507\"->\"508\" \n  \"149\"->\"510\" \n  \"366\"->\"512\" \n  \"203\"->\"514\" \n  \"511\"->\"516\" \n  \"512\"->\"518\" \n  \"514\"->\"520\" \n  \"515\"->\"522\" \n  \"516\"->\"524\" \n  \"517\"->\"526\" \n  \"524\"->\"528\" \n  \"46\"->\"530\" \n  \"49\"->\"532\" \n  \"530\"->\"534\" \n  \"214\"->\"536\" \n  \"215\"->\"538\" \n  \"532\"->\"540\" \n  \"533\"->\"542\" \n  \"534\"->\"544\" \n  \"538\"->\"546\" \n  \"540\"->\"548\" \n  \"544\"->\"550\" \n  \"545\"->\"552\" \n  \"126\"->\"554\" \n  \"555\"->\"556\" \n  \"556\"->\"558\" \n  \"1\"->\"3\" \n  \"2\"->\"5\" \n  \"3\"->\"7\" \n  \"4\"->\"9\" \n  \"5\"->\"11\" \n  \"6\"->\"13\" \n  \"7\"->\"15\" \n  \"8\"->\"17\" \n  \"11\"->\"19\" \n  \"12\"->\"21\" \n  \"15\"->\"23\" \n  \"20\"->\"25\" \n  \"24\"->\"27\" \n  \"9\"->\"29\" \n  \"10\"->\"31\" \n  \"13\"->\"33\" \n  \"14\"->\"35\" \n  \"34\"->\"37\" \n  \"22\"->\"39\" \n  \"18\"->\"41\" \n  \"19\"->\"43\" \n  \"40\"->\"45\" \n  \"41\"->\"47\" \n  \"42\"->\"49\" \n  \"44\"->\"51\" \n  \"45\"->\"53\" \n  \"47\"->\"55\" \n  \"50\"->\"57\" \n  \"56\"->\"59\" \n  \"21\"->\"61\" \n  \"25\"->\"63\" \n  \"35\"->\"65\" \n  \"16\"->\"67\" \n  \"17\"->\"69\" \n  \"31\"->\"71\" \n  \"66\"->\"73\" \n  \"69\"->\"75\" \n  \"71\"->\"77\" \n  \"43\"->\"79\" \n  \"76\"->\"81\" \n  \"30\"->\"83\" \n  \"83\"->\"85\" \n  \"78\"->\"87\" \n  \"32\"->\"89\" \n  \"60\"->\"91\" \n  \"82\"->\"93\" \n  \"26\"->\"95\" \n  \"65\"->\"97\" \n  \"70\"->\"99\" \n  \"99\"->\"101\" \n  \"28\"->\"103\" \n  \"33\"->\"105\" \n  \"61\"->\"107\" \n  \"27\"->\"109\" \n  \"23\"->\"111\" \n  \"85\"->\"113\" \n  \"63\"->\"115\" \n  \"88\"->\"117\" \n  \"89\"->\"119\" \n  \"103\"->\"121\" \n  \"121\"->\"123\" \n  \"92\"->\"125\" \n  \"93\"->\"127\" \n  \"84\"->\"129\" \n  \"128\"->\"131\" \n  \"129\"->\"133\" \n  \"112\"->\"135\" \n  \"105\"->\"137\" \n  \"36\"->\"139\" \n  \"137\"->\"141\" \n  \"67\"->\"143\" \n  \"73\"->\"145\" \n  \"144\"->\"147\" \n  \"37\"->\"149\" \n  \"95\"->\"151\" \n  \"94\"->\"153\" \n  \"29\"->\"155\" \n  \"155\"->\"157\" \n  \"125\"->\"159\" \n  \"152\"->\"161\" \n  \"160\"->\"163\" \n  \"151\"->\"165\" \n  \"72\"->\"167\" \n  \"90\"->\"169\" \n  \"107\"->\"171\" \n  \"166\"->\"173\" \n  \"145\"->\"175\" \n  \"146\"->\"177\" \n  \"174\"->\"179\" \n  \"175\"->\"181\" \n  \"120\"->\"183\" \n  \"62\"->\"185\" \n  \"184\"->\"187\" \n  \"116\"->\"189\" \n  \"188\"->\"191\" \n  \"108\"->\"193\" \n  \"150\"->\"195\" \n  \"39\"->\"197\" \n  \"138\"->\"199\" \n  \"199\"->\"201\" \n  \"111\"->\"203\" \n  \"196\"->\"205\" \n  \"197\"->\"207\" \n  \"205\"->\"209\" \n  \"102\"->\"211\" \n  \"98\"->\"213\" \n  \"48\"->\"215\" \n  \"127\"->\"217\" \n  \"212\"->\"219\" \n  \"213\"->\"221\" \n  \"216\"->\"223\" \n  \"220\"->\"225\" \n  \"154\"->\"227\" \n  \"227\"->\"229\" \n  \"229\"->\"231\" \n  \"198\"->\"233\" \n  \"200\"->\"235\" \n  \"142\"->\"237\" \n  \"143\"->\"239\" \n  \"237\"->\"241\" \n  \"238\"->\"243\" \n  \"239\"->\"245\" \n  \"242\"->\"247\" \n  \"247\"->\"249\" \n  \"104\"->\"251\" \n  \"117\"->\"253\" \n  \"251\"->\"255\" \n  \"254\"->\"257\" \n  \"256\"->\"259\" \n  \"257\"->\"261\" \n  \"258\"->\"263\" \n  \"261\"->\"265\" \n  \"79\"->\"267\" \n  \"266\"->\"269\" \n  \"267\"->\"271\" \n  \"269\"->\"273\" \n  \"270\"->\"275\" \n  \"271\"->\"277\" \n  \"272\"->\"279\" \n  \"273\"->\"281\" \n  \"185\"->\"283\" \n  \"282\"->\"285\" \n  \"167\"->\"287\" \n  \"286\"->\"289\" \n  \"289\"->\"291\" \n  \"38\"->\"293\" \n  \"110\"->\"295\" \n  \"250\"->\"297\" \n  \"293\"->\"299\" \n  \"296\"->\"301\" \n  \"297\"->\"303\" \n  \"298\"->\"305\" \n  \"300\"->\"307\" \n  \"301\"->\"309\" \n  \"109\"->\"311\" \n  \"310\"->\"313\" \n  \"255\"->\"315\" \n  \"302\"->\"317\" \n  \"303\"->\"319\" \n  \"315\"->\"321\" \n  \"316\"->\"323\" \n  \"320\"->\"325\" \n  \"321\"->\"327\" \n  \"106\"->\"329\" \n  \"328\"->\"331\" \n  \"171\"->\"333\" \n  \"330\"->\"335\" \n  \"331\"->\"337\" \n  \"334\"->\"339\" \n  \"329\"->\"341\" \n  \"341\"->\"343\" \n  \"210\"->\"345\" \n  \"294\"->\"347\" \n  \"344\"->\"349\" \n  \"345\"->\"351\" \n  \"347\"->\"353\" \n  \"348\"->\"355\" \n  \"349\"->\"357\" \n  \"356\"->\"359\" \n  \"217\"->\"361\" \n  \"360\"->\"363\" \n  \"361\"->\"365\" \n  \"64\"->\"367\" \n  \"186\"->\"369\" \n  \"187\"->\"371\" \n  \"371\"->\"373\" \n  \"68\"->\"375\" \n  \"374\"->\"377\" \n  \"75\"->\"379\" \n  \"376\"->\"381\" \n  \"377\"->\"383\" \n  \"379\"->\"385\" \n  \"381\"->\"387\" \n  \"383\"->\"389\" \n  \"236\"->\"391\" \n  \"240\"->\"393\" \n  \"178\"->\"395\" \n  \"179\"->\"397\" \n  \"139\"->\"399\" \n  \"398\"->\"401\" \n  \"399\"->\"403\" \n  \"346\"->\"405\" \n  \"402\"->\"407\" \n  \"403\"->\"409\" \n  \"408\"->\"411\" \n  \"409\"->\"413\" \n  \"191\"->\"415\" \n  \"182\"->\"417\" \n  \"183\"->\"419\" \n  \"311\"->\"421\" \n  \"124\"->\"423\" \n  \"375\"->\"425\" \n  \"425\"->\"427\" \n  \"284\"->\"429\" \n  \"118\"->\"431\" \n  \"189\"->\"433\" \n  \"432\"->\"435\" \n  \"433\"->\"437\" \n  \"434\"->\"439\" \n  \"435\"->\"441\" \n  \"437\"->\"443\" \n  \"148\"->\"445\" \n  \"202\"->\"447\" \n  \"444\"->\"449\" \n  \"446\"->\"451\" \n  \"233\"->\"453\" \n  \"449\"->\"455\" \n  \"450\"->\"457\" \n  \"454\"->\"459\" \n  \"455\"->\"461\" \n  \"96\"->\"463\" \n  \"97\"->\"465\" \n  \"295\"->\"467\" \n  \"464\"->\"469\" \n  \"466\"->\"471\" \n  \"467\"->\"473\" \n  \"232\"->\"475\" \n  \"201\"->\"477\" \n  \"470\"->\"479\" \n  \"478\"->\"481\" \n  \"74\"->\"483\" \n  \"447\"->\"485\" \n  \"484\"->\"487\" \n  \"485\"->\"489\" \n  \"486\"->\"491\" \n  \"153\"->\"493\" \n  \"192\"->\"495\" \n  \"193\"->\"497\" \n  \"161\"->\"499\" \n  \"493\"->\"501\" \n  \"194\"->\"503\" \n  \"292\"->\"505\" \n  \"405\"->\"507\" \n  \"507\"->\"509\" \n  \"149\"->\"511\" \n  \"366\"->\"513\" \n  \"203\"->\"515\" \n  \"511\"->\"517\" \n  \"512\"->\"519\" \n  \"514\"->\"521\" \n  \"515\"->\"523\" \n  \"516\"->\"525\" \n  \"517\"->\"527\" \n  \"524\"->\"529\" \n  \"46\"->\"531\" \n  \"49\"->\"533\" \n  \"530\"->\"535\" \n  \"214\"->\"537\" \n  \"215\"->\"539\" \n  \"532\"->\"541\" \n  \"533\"->\"543\" \n  \"534\"->\"545\" \n  \"538\"->\"547\" \n  \"540\"->\"549\" \n  \"544\"->\"551\" \n  \"545\"->\"553\" \n  \"126\"->\"555\" \n  \"555\"->\"557\" \n  \"556\"->\"559\" \n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p><em>Future work</em>:<br />
+Trying to use “xgboostExplainer”, still work on it.</p>
+</div>
+<div id="gradient-boosting" class="section level1">
+<h1>2. Gradient boosting</h1>
+<ul>
+<li>Use library <code>gbm</code><br />
+</li>
+<li>Tuning Method: use <code>train</code> function from <code>caret</code> to scan a grid of parameters.</li>
+</ul>
+<pre class="r"><code>library(gbm)   # for Gradient boosting
+library(caret) # scan the parameter grid using `train` function
+time_now &lt;- Sys.time()
+para_grid &lt;- expand.grid(n.trees = (20*c(1:100)), 
+                         shrinkage = c(0.1, 0.05, 0.01), 
+                         interaction.depth = c(1:5),
+                         n.minobsinnode = 10)
+trainControl &lt;- trainControl(method = &quot;cv&quot;, number = 10)
+set.seed(123)
+gbm_caret &lt;- train(Share_Temporary ~ ., mydata4[train_idx,], 
+                   distribution = &quot;gaussian&quot;, method = &quot;gbm&quot;,
+                   trControl = trainControl, verbose = FALSE, 
+                   tuneGrid = para_grid, metric = &quot;RMSE&quot;, bag.fraction = 0.75)  
+
+Sys.time() - time_now </code></pre>
+<pre><code>## Time difference of 2.792 mins</code></pre>
+<ul>
+<li>The tuning parameters that give the lowest MSE in training set CV.</li>
+</ul>
+<pre><code>##      n.trees interaction.depth shrinkage n.minobsinnode
+## 1303      60                 4       0.1             10</code></pre>
+<ul>
+<li>MSE</li>
+</ul>
+<pre><code>## [1] 0.03809</code></pre>
+</div>
+<div id="random-forest" class="section level1">
+<h1>3. Random Forest</h1>
+<ul>
+<li>Use library <code>randomForest</code>.</li>
+</ul>
+<pre class="r"><code>library(randomForest)
+rf.fit &lt;- randomForest(Share_Temporary ~ ., data = mydata4, subset = train_idx)
+# Test on test data: mydata3[-train_idx,]
+yhat_bag &lt;- predict(rf.fit, newdata = mydata4[-train_idx,])</code></pre>
+<ul>
+<li>MSE on the testing dataset:</li>
+</ul>
+<pre><code>## [1] 0.04151</code></pre>
+<ul>
+<li>Feature Importance (showing top 15)
+<ul>
+<li>The variables high on rank show the relative importance of features in the tree model</li>
+<li>For example, <code>Monthly Water Cost</code>, <code>Resettled Housing</code>, and <code>Population Estimate</code> are the most influential features.</li>
+</ul></li>
+</ul>
+<pre class="r"><code>varImpPlot(rf.fit, n.var=15)</code></pre>
+<p><img src="/post/2018-07-09-extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+</div>
+<div id="lasso" class="section level1">
+<h1>4. Lasso</h1>
+<ul>
+<li><p>Use library <code>glmnet</code>.<br />
+Lasso is a shrinkage approach for feature selection. The tuning parameter <em>lambda</em> is the magnitudes of penalty. A increasing penalty shrinks coefficients towards zero. The advantage of a linear model is that the result is highly interpretable.</p></li>
+<li>We use cross-validation to choose the lambda and corresponding features<br />
+</li>
+<li><p>The dotted line on the left is lambda.min, the lambda that generates the lowest MSE in the testing dataset. The dotted line on the right is lambda.1se, its corresponding MSE is not the lowest but acceptable, and it has even fewer features in the model. We use <code>lambda.1se</code> in our case.</p></li>
+</ul>
+<pre class="r"><code># Use cross-validation to select the lambda
+cv_lasso = cv.glmnet(X_train, Y_train, alpha=1) # Lasso regression
+plot.cv.glmnet(cv_lasso)</code></pre>
+<p><img src="/post/2018-07-09-extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<pre class="r"><code># lambda selected by 1se rule
+(best_lam &lt;- cv_lasso$lambda.1se)</code></pre>
+<pre><code>## [1] 0.02564</code></pre>
+<ul>
+<li>MSE</li>
+</ul>
+<pre class="r"><code># Check prediction error in the testing dataset
+lasso_pred &lt;- predict(lasso_mod, s = best_lam, newx = X_test)
+# The Mean squared error (MSE)
+(MSE_Lasso &lt;- mean((lasso_pred - Y_test)^2))</code></pre>
+<pre><code>## [1] 0.05978</code></pre>
+<ul>
+<li>The regression model for the selected lambda (lasso). We extract the coefficients from the selected model and run a linear regression.</li>
+<li><p>The model has used 17 variables.</p></li>
+<li><p>The most useful predictors selected by lasso include <code>Water_MonthlyCost</code>, <code>Water_Sources: shared_taps</code>, <code>Resettled Housing</code> and <code>Eviction Threats</code>. For these variables, higher values or binary variables being <em>Yes</em> are associated with fewer temporary structures in slums.</p></li>
+<li><p>Relative importance of coefficients by showing standardized regression coefficients in decreasing order of their absolute values.</p></li>
+</ul>
+<pre class="r"><code>coef_table2 &lt;- data.frame(reg_lasso_summary$coefficients, stb = c(0, lm.beta(reg_lasso_mod)))
+coef_table2[order(abs(coef_table2$stb), decreasing = T),]</code></pre>
+<pre><code>##                                          Estimate Std..Error t.value
+## FF11_Water_MonthlyCost                 -3.949e-06  6.278e-07 -6.2902
+## B14__resettled                         -1.651e-01  2.893e-02 -5.7052
+## DD1_Location_Problemscanal              1.943e-01  3.020e-02  6.4357
+## FF1_8_Water_Sourceswells               -9.677e-02  2.118e-02 -4.5681
+## Eviction_Threats                        8.793e-02  2.218e-02  3.9638
+## B14__declared_legal_protected           8.435e-02  2.702e-02  3.1216
+## FF1_8_Water_Sourcesshared_taps         -1.119e-01  3.084e-02 -3.6277
+## DD1_Location_Problemsslope              7.522e-02  2.224e-02  3.3817
+## FF1_8_Water_Sourceswater_tankers       -1.247e-01  3.636e-02 -3.4310
+## DD1_Location_Problemsunder_power_lines -8.192e-02  2.565e-02 -3.1944
+## GG1_Sewer_Line                          6.772e-02  2.350e-02  2.8818
+## DD1_Location_Problemswater_body         8.081e-02  2.783e-02  2.9042
+## CC9_Households                         -5.211e-06  1.874e-06 -2.7808
+## DD1_Location_Problemsflood_prone_area   5.697e-02  2.107e-02  2.7037
+## C13__no_rent                            1.515e-01  5.604e-02  2.7030
+## FF1_8_Water_Sourcescommunity_taps       5.601e-02  2.663e-02  2.1033
+## FF1_8_Water_Sourcesrivers              -4.035e-02  3.551e-02 -1.1363
+## DD1_Location_Problemssinking_soil       2.615e-02  3.102e-02  0.8431
+## (Intercept)                             3.961e-01  3.433e-02 11.5381
+##                                         Pr...t..      stb
+## FF11_Water_MonthlyCost                 6.403e-10 -0.21723
+## B14__resettled                         1.886e-08 -0.21544
+## DD1_Location_Problemscanal             2.646e-10  0.18813
+## FF1_8_Water_Sourceswells               6.059e-06 -0.13182
+## Eviction_Threats                       8.332e-05  0.11916
+## B14__declared_legal_protected          1.891e-03  0.11034
+## FF1_8_Water_Sourcesshared_taps         3.121e-04 -0.10669
+## DD1_Location_Problemsslope             7.707e-04  0.09968
+## FF1_8_Water_Sourceswater_tankers       6.458e-04 -0.09805
+## DD1_Location_Problemsunder_power_lines 1.480e-03 -0.08740
+## GG1_Sewer_Line                         4.106e-03  0.08206
+## DD1_Location_Problemswater_body        3.827e-03  0.08085
+## CC9_Households                         5.605e-03 -0.07923
+## DD1_Location_Problemsflood_prone_area  7.066e-03  0.07819
+## C13__no_rent                           7.081e-03  0.07605
+## FF1_8_Water_Sourcescommunity_taps      3.588e-02  0.06259
+## FF1_8_Water_Sourcesrivers              2.563e-01 -0.03116
+## DD1_Location_Problemssinking_soil      3.995e-01  0.02372
+## (Intercept)                            8.958e-28  0.00000</code></pre>
+</div>
+<div id="best-subset" class="section level1">
+<h1>5. Best Subset</h1>
+<ul>
+<li><p>Use library <code>leaps</code>.<br />
+Best subset is a subset selection approach for feature selection. Not like stepwise or forward selection, best subset check all the possible feature combinations in theory. Since I select from 49 predictors but set the maximum size of subsets to be 25, there are C(49,25) + C(49,24) + …+ C(49,0) = 345 trillion models to check. As I <a href="https://yangliuresearch.blogspot.com/2018/07/best-subset-selection-in-both-r-and-sas.html">discussed in my post</a>, it won’t be possible to scan all of them. Both R and SAS use the <em>branch and bound</em> algorithm to speed up the calculation.</p></li>
+<li><p>If without cross-validation we can use the traditional way to choose model: Adjusted R-squared, Cp(AIC), or BIC.</p></li>
+<li><p>The turning parameter is to decide how many predictors to use. The selected number of feature also happens to be 17.<br />
+Cross-validation selects more features than BIC but fewer than Adj Rsq or Cp(AIC).</p></li>
+<li><p>The regression model selected and Standardized parameter estimates showing relative feature importance in decreasing order.</p></li>
+</ul>
+<pre><code>##                                       b.Estimate b.Std..Error b.t.value
+## FF11_Water_MonthlyCost                -5.469e-06    9.276e-07   -5.8960
+## B14__resettled                        -2.061e-01    3.893e-02   -5.2933
+## Eviction_Threats                       1.751e-01    4.399e-02    3.9797
+## DD1_Location_Problemscanal             2.218e-01    4.108e-02    5.3983
+## FF1_8_Water_Sourceswater_tankers      -2.080e-01    5.435e-02   -3.8267
+## FF1_8_Water_Sourcesshared_taps        -1.362e-01    4.393e-02   -3.1006
+## EE2A_Current_Eviction_Threat          -8.252e-02    4.475e-02   -1.8441
+## DD1_Location_Problemsflood_prone_area  7.352e-02    2.866e-02    2.5655
+## B14__declared_legal_protected          6.983e-02    3.690e-02    1.8925
+## FF1_8_Water_Sourcesrivers             -7.327e-02    4.944e-02   -1.4821
+## FF1_8_Water_Sourcessprings            -4.165e-02    4.110e-02   -1.0134
+## FF1_8_Water_Sourcesdams               -5.584e-02    5.874e-02   -0.9507
+## DD1_Location_Problemsgarbage_dump     -2.470e-02    3.155e-02   -0.7828
+## FF12_Water_CollectionTime30_minutes    3.477e-02    4.548e-02    0.7646
+## DD1_Location_Problemsroad_side         1.986e-02    2.998e-02    0.6624
+## GG7_10_Toilet_Typesindividual_toilets -2.052e-02    3.840e-02   -0.5344
+## JJ1_Electricity_Availableyes           5.476e-03    4.093e-02    0.1338
+## (Intercept)                            4.445e-01    6.387e-02    6.9591
+##                                       b.Pr...t..       stb
+## FF11_Water_MonthlyCost                 9.258e-09 -0.299393
+## B14__resettled                         2.204e-07 -0.271580
+## Eviction_Threats                       8.498e-05  0.238699
+## DD1_Location_Problemscanal             1.293e-07  0.216368
+## FF1_8_Water_Sourceswater_tankers       1.555e-04 -0.157373
+## FF1_8_Water_Sourcesshared_taps         2.099e-03 -0.128307
+## EE2A_Current_Eviction_Threat           6.607e-02 -0.107864
+## DD1_Location_Problemsflood_prone_area  1.075e-02  0.101994
+## B14__declared_legal_protected          5.931e-02  0.093230
+## FF1_8_Water_Sourcesrivers              1.393e-01 -0.058064
+## FF1_8_Water_Sourcessprings             3.116e-01 -0.044319
+## FF1_8_Water_Sourcesdams                3.424e-01 -0.036997
+## DD1_Location_Problemsgarbage_dump      4.343e-01 -0.030778
+## FF12_Water_CollectionTime30_minutes    4.451e-01  0.029456
+## DD1_Location_Problemsroad_side         5.082e-01  0.025531
+## GG7_10_Toilet_Typesindividual_toilets  5.934e-01 -0.020818
+## JJ1_Electricity_Availableyes           8.937e-01  0.005555
+## (Intercept)                            1.869e-11  0.000000</code></pre>
+<ul>
+<li>MSE</li>
+</ul>
+<pre><code>## [1] 0.066</code></pre>
+</div>
+<div id="compare-mses" class="section level1">
+<h1>Compare MSEs</h1>
+<ul>
+<li>The advantage of XGboost is highly distinguishing.</li>
+</ul>
+<pre><code>##    MSE_xgb MSE_boost MSE_Lasso MSE_rForest MSE_best.subset
+## 1 0.004265   0.03809   0.05978     0.04151           0.066</code></pre>
+</div>
+<div id="code" class="section level1">
+<h1>Code</h1>
+<pre class="r"><code>## Working Sample: Predicting Share of Temporary Structure in Slums Settlements ##
+# 07/09/2018
+library(readxl)
+library(plyr)
+library(ggplot2)
+library(QuantPsyc)     # used to show standardized regression coefficients
+library(glmnet)        # for Lasso
+library(leaps)         # for best subset
+library(randomForest)  # random forest
+library(gbm)           # for Gradient boosting
+library(caret)         # grid scan by train
+library(xgboost)       # for Extreme Gradient boosting
+library(Ckmeans.1d.dp) # for xgb.ggplot.importance in xgboost
+library(DiagrammeR)    # for xgb.plot.tree in xgboost
+library(knitr)
+options(digits = 4)
+
+# Data Cleaning -----------------------------------------------------------
+sdi &lt;- read_excel(&quot;C:/Users/lyhel/OneDrive - nyu.edu/NYU Marron/Data/20180618_SDI 2.xlsx&quot;, 
+                  na = &quot;&quot;, skip = 1)
+
+# clean variables names, remove &quot;/&quot;.
+all_varnames &lt;- names(sdi)
+names(sdi) &lt;- gsub(&quot;/&quot;, &quot;&quot;, all_varnames) 
+
+# turn all character variables into factors
+sdi[sapply(sdi, is.character)] &lt;- lapply(sdi[sapply(sdi, is.character)], 
+                                       as.factor)
+sdi$Share_Temporary &lt;- sdi$CC7_Structures_Temporary / 
+  (sdi$CC7_Structures_Temporary +sdi$CC6_Structures_Permanent)
+# remove variables with over 10% NA
+Remove &lt;- (sapply(sdi, function(x) sum(is.na(x))) &lt; dim(sdi)[1]*0.1)
+mydata0 &lt;- sdi[Remove]
+mydata &lt;- na.omit(mydata0) # remove all the NA
+
+# fix some format issue
+mydata$CC10_Household_Size &lt;- as.numeric(mydata$CC10_Household_Size)
+mydata$CC12_Total_Population &lt;- as.numeric(mydata$CC12_Total_Population)
+
+# remove useless factor
+mydata2 &lt;- subset(mydata, select = -c(1, City, Country)) # for some other use not shown here
+# remove what are highly correlated to dependent variable
+mydata3 &lt;- subset(mydata2, select = - grep(&quot;Structure&quot;, names(mydata2)))
+
+# divide training and test dataset
+set.seed(123)
+train_idx &lt;- sample(dim(mydata3)[1], dim(mydata3)[1]* 0.6)
+
+# The model.matrix() function is used in many regression packages for building 
+# an &quot;X&quot; matrix from data.
+# need matrix for glmnet
+X2 &lt;- model.matrix(Share_Temporary~., data = mydata3)
+Y2 &lt;- as.matrix(mydata3[c(&quot;Share_Temporary&quot;)])
+X_train &lt;- X2[train_idx,]
+X_test &lt;- X2[-train_idx,]
+Y_train &lt;- Y2[train_idx]
+Y_test &lt;- Y2[-train_idx]
+# merge back to df again, as df is required for regsubsets (best subset)
+data_train &lt;- data.frame(X2, Y2)[train_idx,] 
+mydata4 &lt;- data.frame(X2, Y2)
+
+
+# 1. Extreme Gradiant Boosting --------------------------------------------------------------
+# Tuning Method: randomnize parameters and update the record with best ones.
+library(xgboost)
+# Matrix for xgb: dtrain
+dtrain &lt;- xgb.DMatrix(X_train, label = Y_train)
+dtest &lt;- xgb.DMatrix(X_test, label = Y_test)
+# # For a single cv
+# xg_cv &lt;- xgb.cv(data = dtrain, nrounds = 3, nthread = 2, nfold = 5,
+#              max_depth = 3, eta = 0.1, objective = &quot;reg:linear&quot;, 
+#              eval_metric = &quot;rmse&quot;)
+# print(xg_cv)
+
+best_param &lt;- list()
+best_seednumber &lt;- 1234
+best_rmse &lt;- Inf
+best_rmse_index &lt;- 0
+
+time_now &lt;- Sys.time()
+set.seed(1234)
+for (iter in 1:100) {
+  param &lt;- list(objective = &quot;reg:linear&quot;,
+                eval_metric = &quot;rmse&quot;,
+                max_depth = sample(6:10, 1),
+                eta = runif(1, .01, .3), # Learning rate, default: 0.3
+                subsample = runif(1, .6, .9),
+                colsample_bytree = runif(1, .5, .8), 
+                min_child_weight = sample(1:40, 1),
+                max_delta_step = sample(1:10, 1)
+  )
+  cv.nround &lt;-  1000
+  cv.nfold &lt;-  5 # 5-fold cross-validation
+  seed.number  &lt;-  sample.int(10000, 1) # set seed for the cv
+  set.seed(seed.number)
+  mdcv &lt;- xgb.cv(data = dtrain, params = param,  
+                 nfold = cv.nfold, nrounds = cv.nround,
+                 verbose = F, early_stopping_rounds = 8, maximize = FALSE)
+  
+  min_rmse_index  &lt;-  mdcv$best_iteration
+  min_rmse &lt;-  mdcv$evaluation_log[min_rmse_index]$test_rmse_mean
+  
+  if (min_rmse &lt; best_rmse) {
+    best_rmse &lt;- min_rmse
+    best_rmse_index &lt;- min_rmse_index
+    best_seednumber &lt;- seed.number
+    best_param &lt;- param
+  }
+}
+
+# The best index (min_rmse_index) is the best &quot;nround&quot; in the model
+nround = best_rmse_index
+set.seed(best_seednumber)
+xg_mod &lt;- xgboost(data = dtest, params = best_param, nround = nround, verbose = F)
+# Check error in testing data
+yhat_xg &lt;- predict(xg_mod, dtest)
+(MSE_xgb &lt;- mean((yhat_xg - Y_test)^2))
+Sys.time() - time_now
+
+# Feature importance
+importance_matrix &lt;- xgb.importance(colnames(X_train), model = xg_mod)
+
+# Use `xgb.plot.importance`, which create a _barplot_ or use `xgb.ggplot.importance`
+library(Ckmeans.1d.dp) # for xgb.ggplot.importance
+xgb.ggplot.importance(importance_matrix, top_n = 15, 
+                      measure = &quot;Gain&quot;)
+
+# plot the trees from model using `xgb.plot.tree`
+# xgb.plot.tree needs to be revised a little bit by adding `fontcolor=&quot;black&quot;` 
+# in the `nodes &lt;- DiagrammeR::create_node_df` line
+# only show 1 tree as an example.
+# 
+source(&quot;C:/Users/lyhel/OneDrive - nyu.edu/NYU Marron/R/xgb.plot.tree2.R&quot;)
+library(&quot;DiagrammeR&quot;)
+xgb.plot.tree(model = xg_mod, trees = 1, feature_names = colnames(X_train))
+xgb.plot.tree2(model = xg_mod, n_first_tree = 1, feature_names = colnames(X_train))
+
+# Project all trees on one tree and plot it: A huge plot
+xgb.plot.multi.trees(model = xg_mod, n_first_tree = 1, 
+                     feature_names = colnames(X_train),features_keep = 3)
+
+
+# 2. Gradiant boosting ----------------------------------------------------
+# Tuning Method: use `train` function from `caret` to scan for parameters.
+library(gbm)   # for Gradiant boosting
+library(caret) # scan the parameter grid using `train` function
+time_now &lt;- Sys.time()
+para_grid &lt;- expand.grid(n.trees = (20*c(1:100)), 
+                         shrinkage = c(0.1, 0.05, 0.01), 
+                         interaction.depth = c(1:5),
+                         n.minobsinnode = 10)
+trainControl &lt;- trainControl(method = &quot;cv&quot;, number = 10)
+set.seed(123)
+gbm_caret &lt;- train(Share_Temporary ~ ., mydata4[train_idx,], 
+                   distribution = &quot;gaussian&quot;, method = &quot;gbm&quot;,
+                   trControl = trainControl, verbose = FALSE, 
+                   tuneGrid = para_grid, metric = &quot;RMSE&quot;, bag.fraction = 0.75)
+Sys.time() - time_now           
+
+# The tuning parameters that give lowest MSE in training set CV.
+gbm_caret$bestTune
+yhat_boost &lt;- predict(gbm_caret, mydata4[-train_idx,])
+(MSE_boost &lt;- mean((yhat_boost - Y_test)^2))
+
+
+# 3. Random Forest --------------------------------------------------------
+# Easy to use, there is no hyperparameter to tune
+bag.fit &lt;- randomForest(Share_Temporary ~ ., data = mydata4, subset = train_idx)
+# rf_test &lt;- mydata3[-train_idx, &quot;Share_Temporary&quot;]
+# test on test data: mydata3[-train_idx,]
+yhat_bag &lt;- predict(bag.fit, newdata = mydata4[-train_idx,])
+# MSE
+(MSE_rForest &lt;- mean((yhat_bag - Y_test)^2))
+varImpPlot(bag.fit, n.var=15)
+
+
+# 4. Lasso ----------------------------------------------------------------
+# The lasso model, used to feed the selected lambda to predict fitted value
+lasso_mod &lt;- glmnet(X_train, Y_train, alpha = 1)
+
+# We use cross-validation to choose the lambda, and corresponding variables 
+# used to fit the linear regression.  
+cv_lasso &lt;-  cv.glmnet(X_train, Y_train, alpha=1) # Lasso regression
+plot.cv.glmnet(cv_lasso)
+# lambda selected by 1se rule
+(best_lam &lt;- cv_lasso$lambda.1se)
+# MSE  
+# Check prediction error in the testing dataset
+lasso_pred &lt;- predict(lasso_mod, s = best_lam, newx = X_test)
+# The Mean squared error (MSE)
+(MSE_Lasso &lt;- mean((lasso_pred - Y_test)^2))
+
+## Show the regression model for the selected lambda (lasso).
+# We extract the coefficients from the selected model and run a linear regression.
+# coef_table is class &#39;dgCMatrix&#39; of the selected coefficients for each lambda 
+coef_table &lt;- coef(cv_lasso, s = cv_lasso$lambda.1se)
+# Because there is the intercept on the first column, we use [coef_table@i + 1] to
+# extract the names of coefficients (Dimnames) from class &#39;dgCMatrix&#39;
+var_list &lt;- unlist(coef_table@Dimnames[[1]][coef_table@i + 1])
+sdi_sub &lt;- mydata4[c(coef_table@Dimnames[[1]][coef_table@i + 1], &quot;Share_Temporary&quot;)[-1]]
+reg_lasso_mod &lt;- lm(data = sdi_sub, Share_Temporary~.)
+reg_lasso_summary &lt;- summary(reg_lasso_mod)
+
+# Relative importance of coefficients by showing standardized regression
+# coefficients in decreasing order of their absolute values.  
+coef_table2 &lt;- data.frame(reg_lasso_summary$coefficients, stb = c(0, lm.beta(reg_lasso_mod)))
+coef_table2[order(abs(coef_table2$stb), decreasing = T),]
+
+
+# 5. Best Subset ----------------------------------------------------------
+time_now &lt;- Sys.time()
+nv_max &lt;- 5 # the maximum allowed number of features to test
+fit_s &lt;- regsubsets(Share_Temporary~., data_train,
+                    really.big = T, nbest=1, nvmax = nv_max
+)
+Sys.time() - time_now
+
+val.errors =rep(0, nv_max)
+# Need the X_test with intercept
+for(i in 1:nv_max){
+  coefi = coef(fit_s, id=i)
+  pred = X_test[,names(coefi)]%*%coefi # need to use matrix here
+  val.errors[i]= mean((Y_test - pred)^2)
+}
+# choose the best number of predictors to use
+(val_err_min &lt;- which.min(val.errors))
+# MSE
+(MSE_best.subset &lt;- val.errors[val_err_min])
+
+# The reg model selected:
+coef_list = coef(fit_s, id = val_err_min)
+# create sdi_sub2 which has all the selected predictors, and dependent variable,
+# remove intercept by adding [-1]
+sdi_sub2 &lt;- mydata4[c(names(coef_list), &quot;Share_Temporary&quot;)[-1]]
+
+# get output of b and stb sorted by |stb|
+reg_bs_mod &lt;- lm(data = sdi_sub2, Share_Temporary ~ .)
+reg_bs_summary &lt;- summary(reg_bs_mod)
+
+coef_table &lt;- data.frame(reg_bs_summary$coefficients, stb = c(0, lm.beta(reg_bs_mod)))
+coef_table[order(abs(coef_table$stb), decreasing = T),]
+
+
+# Summarize MSEs ----------------------------------------------------------
+(MSE &lt;- data.frame(MSE_best.subset, MSE_Lasso, 
+                   MSE_rForest, MSE_boost, MSE_xgb))</code></pre>
+</div>
+
+</main>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<nav class="post-nav">
+  <span class="nav-prev"><a href="/post/2018/07/16/how-to-draw-heatmap-with-colorful-dendrogram/">&larr; How to Draw Heatmap with Colorful Dendrogram</a></span>
+  <span class="nav-next"></span>
+</nav>
+
+
+
+</article>
+</div>
+
+<script async src="//yihui.name/js/center-img.js"></script>
+
+<footer>
+
+<div class="footer">
+  <ul class="menu">
+    
+    <li><a href="/"><span data-hover="Home">Home</span></a></li>
+    
+    <li><a href="/tags/"><span data-hover="Tags">Tags</span></a></li>
+    
+    <li><a href="/categories/"><span data-hover="Categories">Categories</span></a></li>
+    
+    <li><a href="/about-hugo/"><span data-hover="About Blogdown">About Blogdown</span></a></li>
+    
+    <li><a href="/about-me/"><span data-hover="About Me">About Me</span></a></li>
+    
+  </ul>
+  
+  <div class="copyright">Acknowledgement to Yihui Xie for this hugo theme: yihui/hugo-xmag</div>
+  
+</div>
+</footer>
+
+
+<script src="//yihui.name/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.12.0/languages/r.min.js"></script>
+<script>
+hljs.configure({languages: []});
+hljs.initHighlightingOnLoad();
+</script>
+
+
+
+
+</body>
+</html>
+

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <title>How to Draw Heatmap with Colorful Dendrogram | Welcome to my blog</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    <link href="//cdn.bootcss.com/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+
+  </head>
+
+  <body class="page">
+    <nav class="header">
+      <div class="banner">
+<a href="/">
+
+<img src="/ocean%202.jpg" alt="Text on Image" />
+</a>
+</div>
+
+      <div class="head-meta">
+      
+        <span><a href="/">&larr; Back to Home</a></span>
+        <span class="date">2018-07-16</span>
+        
+        
+        
+          
+        
+        
+        <span><a href="https://github.com/yihui/hugo-xmag/edit/master/exampleSite/content/post%5c2018-07-16-how-to-draw-heatmap-with-colorful-dendrogram.Rmd">Edit this page &rarr;</a></span>
+        
+        
+      
+      </div>
+    </nav>
+
+<div class="container">
+<article>
+<div class="article-meta">
+
+  <div class="categories">
+  
+    <a href="/categories/data-visualization">Data Visualization</a>
+  
+  </div>
+
+  <h1><span class="title">How to Draw Heatmap with Colorful Dendrogram</span></h1>
+
+  
+  <h3 class="author">Yang Liu
+</h3>
+  
+
+  
+  <p>Tags: <a href="/tags/r">R</a>; <a href="/tags/markdown">Markdown</a>
+  </p>
+  
+  
+
+</div>
+
+
+
+<main>
+<div id="TOC">
+<ul>
+<li><a href="#data">Data</a></li>
+<li><a href="#version-1-color-both-the-branches-and-labels">Version 1: Color both the branches and labels</a></li>
+<li><a href="#version-2-color-only-the-labels.">Version 2: color only the labels.</a></li>
+<li><a href="#version-3-if-there-is-no-color-and-we-do-not-reorder-the-branches">Version 3: If there is no color, and we do not reorder the branches</a></li>
+</ul>
+</div>
+
+<p>This data visualization example include:<br />
+* Hierarchical clustering, dendrogram and heat map based on normalized odds ratios<br />
+* The dendrogram was built separately to give color to dendrogram’s branches/labels based on cluster using <code>dendextend</code><br />
+* Heatmap is made by <code>heatmap.2</code> from <code>gplots</code> using the built dendrogram<br />
+* The rows are sorted by means from highest to lowest, it can be done in either the dendrogram or the <code>heatmap.2</code><br />
+* Use color palettes from <code>colorspace</code></p>
+<div id="data" class="section level2">
+<h2>Data</h2>
+<ul>
+<li>YRBSS (Youth Risk Behavior Surveillance System) survey data from CDC. This example plots the odds ratios of 63 behavioral questions on one question regarding disordered eating.<br />
+</li>
+<li>The odds ratios are median centered by column and log2 transformed</li>
+</ul>
+</div>
+<div id="version-1-color-both-the-branches-and-labels" class="section level2">
+<h2>Version 1: Color both the branches and labels</h2>
+<pre class="r"><code>library(curl)       # read file from google drive
+library(gplots)     # heatmap.2
+library(dendextend) # make and color dendrogram
+library(colorspace) # diverge_hcl / rainbow_hcl / heat_hcl color palettes
+
+id &lt;- &quot;1pIPphAGJcjKxkgWKrS_heLyjEPxOEYl4&quot; # google file ID
+Fasted &lt;- read.csv(sprintf(&quot;https://docs.google.com/uc?id=%s&amp;export=download&quot;, id))
+# The ID is contained in the sharing link copied from google drive:
+# https://drive.google.com/file/d/1pIPphAGJcjKxkgWKrS_heLyjEPxOEYl4/view?usp=sharing
+# the dataset can be downloaded using this link as well.
+
+names(Fasted) &lt;- c(&quot;Questions&quot;, &quot;2003&quot;, &quot;2005&quot;, &quot;2007&quot;, &quot;2009&quot;, &quot;2011&quot;, &quot;2013&quot;)
+# Top 5 questions and their odds ratio on Eating disorder: fasting to loose weight
+head(Fasted, 5)</code></pre>
+<pre><code>##                        Questions      2003      2005      2007      2009
+## 1    Has vomited to lose weight* 11.777595 14.518211 15.970263 15.811237
+## 2 Has taken pill to lose weight*  7.327949  7.730568  8.192262  9.330225
+## 3             Attempted suicide^  4.815106  5.777019  5.837320  5.828913
+## 4        Has considered suicide^  3.634248  4.166731  4.189314  3.862336
+## 5 Made a plan to commit suicide^  3.666772  3.894834  4.097571  4.020502
+##        2011      2013
+## 1 14.050416 16.791709
+## 2  8.227031  7.803919
+## 3  5.450131  5.881054
+## 4  4.542538  4.750469
+## 5  4.151721  4.541670</code></pre>
+<pre class="r"><code>## Normalization, re-format into matrix ##
+F_m &lt;- as.matrix(Fasted[,2:7],dimnames=list((Fasted$Questions), names(Fasted)[2:7]))
+# normalized by column median (direction: 2) and log2.
+F_m2 &lt;- (apply(F_m, 2, function(x){log2(x/median(x, na.rm = T))}))
+# add the labels (Questions)
+dimnames(F_m2)[1] &lt;- list(Fasted$Questions)
+
+## Add colors to dendrogram ##
+# library(dendextend)
+# library(colorspace)
+# distance &amp; hierarchical clustering
+dend1 &lt;- as.dendrogram(hclust(dist(F_m2)))
+c_group &lt;- 8 # number of clusters
+dend1 &lt;- color_branches(dend1, k = c_group, col = rainbow_hcl) # add color to the lines
+dend1 &lt;- color_labels(dend1, k = c_group, col = rainbow_hcl)   # add color to the labels
+
+# reorder the dendrogram, must incl. `agglo.FUN = mean`
+rMeans &lt;- rowMeans(F_m2, na.rm = T)
+dend1 &lt;- reorder(dend1, rowMeans(F_m2, na.rm = T), agglo.FUN = mean)
+
+# get the color of the leaves (labels) for `heatmap.2`
+col_labels &lt;- get_leaves_branches_col(dend1)
+col_labels &lt;- col_labels[order(order.dendrogram(dend1))]
+
+# if plot the dendrogram alone:
+# the size of the labels:
+dend1 &lt;- set(dend1, &quot;labels_cex&quot;, 0.8)
+par(mar = c(1,1,1,14))
+plot_horiz.dendrogram(dend1, side = F) # use side = T to horiz mirror if needed</code></pre>
+<p><img src="/post/2018-07-16-how-to-draw-heatmap-with-colorful-dendrogram_files/figure-html/unnamed-chunk-1-1.png" width="1152" /></p>
+<pre class="r"><code>## plot the heatmap with the dendrogram above ##
+par(cex.main=0.8)                   # adjust font size of titles
+heatmap.2(F_m2, main = &#39;Fasting to Lose Weight&#39;,
+          # reorderfun=function(d, w) reorder(d, w, agglo.FUN = mean),
+                                     # order by branch mean so the deepest color is at the top
+          dendrogram = &quot;row&quot;,        # no dendrogram for columns
+          Rowv = dend1,              # * use self-made dendrogram
+          Colv = &quot;NA&quot;,               # make sure the columns follow data&#39;s order
+          col = diverge_hcl,         # color pattern of the heatmap
+          
+          trace=&quot;none&quot;,              # hide trace
+          density.info=&quot;none&quot;,       # hide histogram
+          
+          margins = c(5,18),         # margin on top(bottom) and left(right) side.
+          cexRow=1, cexCol = 0.8,      # size of row / column labels
+          xlab = &quot;Year&quot;,
+          srtCol=0, adjCol = c(0.5,1), # adjust the direction of row label to be horizontal
+          # margin for the color key
+          # (&quot;bottom.margin&quot;, &quot;left.margin&quot;, &quot;top.margin&quot;, &quot;left.margin&quot; )
+          key.par=list(mar=c(5,1,3,1)),
+          RowSideColors = col_labels, # to add nice colored strips        
+          colRow = col_labels         # add color to label
+          )</code></pre>
+<p><img src="/post/2018-07-16-how-to-draw-heatmap-with-colorful-dendrogram_files/figure-html/unnamed-chunk-1-2.png" width="1152" /></p>
+</div>
+<div id="version-2-color-only-the-labels." class="section level2">
+<h2>Version 2: color only the labels.</h2>
+<ul>
+<li>There is no need to use the predesigned <code>dend1</code> in <code>heatmap.2</code><br />
+</li>
+<li>But then need to reorder the trees by adding <code>reorderfun</code><br />
+</li>
+<li>Still need to create the <code>col_labels</code></li>
+</ul>
+<pre class="r"><code>heatmap.2(F_m2, main = &#39;Fasting to Lose Weight&#39;,
+          reorderfun=function(d, w) reorder(d, w, agglo.FUN = mean),
+                                     # order by branch mean so the deepest color is at the top
+          dendrogram = &quot;row&quot;,        # no dendrogram for columns
+          # Rowv = dend1,              # * use self-made dendrogram
+          Colv = &quot;NA&quot;,               # make sure the columns follow data&#39;s order
+          col = diverge_hcl,         # color pattern of the heatmap
+          
+          trace=&quot;none&quot;,              # hide trace
+          # density.info=&quot;none&quot;,       # hide histogram
+          
+          margins = c(5,18),         # margin on top(bottom) and left(right) side.
+          cexRow=1, cexCol = 0.8,      # size of row / column labels
+          xlab = &quot;Year&quot;,
+          srtCol=0, adjCol = c(0.5,1), # adjust the direction of row label to be horizontal
+          # margin for the color key
+          # (&quot;bottom.margin&quot;, &quot;left.margin&quot;, &quot;top.margin&quot;, &quot;left.margin&quot; )
+          key.par=list(mar=c(5,1,3,1)),
+          # RowSideColors = col_labels, # to add nice colored strips        
+          colRow = col_labels         # add color to label
+          )</code></pre>
+<p><img src="/post/2018-07-16-how-to-draw-heatmap-with-colorful-dendrogram_files/figure-html/unnamed-chunk-2-1.png" width="1152" /></p>
+</div>
+<div id="version-3-if-there-is-no-color-and-we-do-not-reorder-the-branches" class="section level2">
+<h2>Version 3: If there is no color, and we do not reorder the branches</h2>
+<ul>
+<li>Then there is no need to create an extra dendrogram using <code>dendextend</code></li>
+</ul>
+<pre class="r"><code>par(cex.main=0.8)                   # adjust font size of titles
+heatmap.2(F_m2, main = &#39;Fasting to Lose Weight&#39;,
+          # reorderfun=function(d, w) reorder(d, w, agglo.FUN = mean),
+                                     # order by branch mean so the deepest color is at the top
+          dendrogram = &quot;row&quot;,        # no dendrogram for columns
+          Colv = &quot;NA&quot;,               # make sure the columns follow data&#39;s order
+          col = diverge_hcl,         # color pattern of the heatmap
+          trace=&quot;none&quot;,              # hide trace
+          density.info=&quot;none&quot;,       # hide histogram
+          margins = c(5,18),         # margin on top(bottom) and left(right) side.
+          cexRow=1, cexCol = 0.8,      # size of row / column labels
+          xlab = &quot;Year&quot;,
+          srtCol=0, adjCol = c(0.5,1), # adjust the direction of row label to be horizontal
+          # margin for the color key
+          # (&quot;bottom.margin&quot;, &quot;left.margin&quot;, &quot;top.margin&quot;, &quot;left.margin&quot; )
+          key.par=list(mar=c(5,1,3,1))
+          )</code></pre>
+<p><img src="/post/2018-07-16-how-to-draw-heatmap-with-colorful-dendrogram_files/figure-html/unnamed-chunk-3-1.png" width="1152" /></p>
+</div>
+
+</main>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<nav class="post-nav">
+  <span class="nav-prev"><a href="/post/2018/07/20/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/">&larr; Spatial data in R: Dividing raster layers into equal-area rings</a></span>
+  <span class="nav-next"><a href="/post/2018/07/09/extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting/">eXtreme Gradient Boosting (XGBoost): Better than random forest or gradient boosting &rarr;</a></span>
+</nav>
+
+
+
+</article>
+</div>
+
+<script async src="//yihui.name/js/center-img.js"></script>
+
+<footer>
+
+<div class="footer">
+  <ul class="menu">
+    
+    <li><a href="/"><span data-hover="Home">Home</span></a></li>
+    
+    <li><a href="/tags/"><span data-hover="Tags">Tags</span></a></li>
+    
+    <li><a href="/categories/"><span data-hover="Categories">Categories</span></a></li>
+    
+    <li><a href="/about-hugo/"><span data-hover="About Blogdown">About Blogdown</span></a></li>
+    
+    <li><a href="/about-me/"><span data-hover="About Me">About Me</span></a></li>
+    
+  </ul>
+  
+  <div class="copyright">Acknowledgement to Yihui Xie for this hugo theme: yihui/hugo-xmag</div>
+  
+</div>
+</footer>
+
+
+<script src="//yihui.name/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.12.0/languages/r.min.js"></script>
+<script>
+hljs.configure({languages: []});
+hljs.initHighlightingOnLoad();
+</script>
+
+
+
+
+</body>
+</html>
+
