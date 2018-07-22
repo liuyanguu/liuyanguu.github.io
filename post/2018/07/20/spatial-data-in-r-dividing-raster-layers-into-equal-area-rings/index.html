@@ -30,7 +30,7 @@
           
         
         
-        <span><a href="https://github.com/yihui/hugo-xmag/edit/master/exampleSite/content/post%5c2018-07-19-spatial-data-in-r-dividing-raster-layers-into-equal-area-rings.Rmd">Edit this page &rarr;</a></span>
+        <span><a href="https://github.com/liuyanguu/Blogdown/edit/master/hugo-xmag/content/post%5c2018-07-19-spatial-data-in-r-dividing-raster-layers-into-equal-area-rings.Rmd">Edit this page &rarr;</a></span>
         
         
       
@@ -107,7 +107,7 @@ library(&#39;RColorBrewer&#39;) # for `brewer.pal` in ggplot2
 library(&#39;knitr&#39;)    # kable
 options(digits = 4)
 
-parent_dir &lt;- c(&quot;C:/Users/lyhel/OneDrive - nyu.edu/NYU Marron/180716_Draw Circle/Data/&quot;)
+parent_dir &lt;- c(&quot;D:/OneDrive - nyu.edu/NYU Marron/180716_Draw Circle/Data/&quot;)
 # Get all the folder names (names of the cities) in the directory
 # Used to scan all the cities
 city_list &lt;- list.files(parent_dir)
@@ -127,7 +127,7 @@ city_list &lt;- list.files(parent_dir)
   # A point that shows the center of the city
   cbd &lt;-  readOGR(dsn = newdir, layer = paste(city1, &quot;_CBD_Project&quot;, sep=&quot;&quot;))</code></pre>
 <pre><code>## OGR data source with driver: ESRI Shapefile 
-## Source: &quot;C:\Users\lyhel\OneDrive - nyu.edu\NYU Marron\180716_Draw Circle\Data\Hong_Kong&quot;, layer: &quot;Hong_Kong_CBD_Project&quot;
+## Source: &quot;D:\OneDrive - nyu.edu\NYU Marron\180716_Draw Circle\Data\Hong_Kong&quot;, layer: &quot;Hong_Kong_CBD_Project&quot;
 ## with 1 features
 ## It has 6 fields
 ## Integer64 fields read as strings:  Id</code></pre>
@@ -301,6 +301,10 @@ city_list &lt;- list.files(parent_dir)
 <script async src="//yihui.name/js/center-img.js"></script>
 
 <footer>
+<script src="//yihui.name/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+<script async src="//yihui.name/js/center-img.js"></script>
 
 <div class="footer">
   <ul class="menu">
@@ -317,7 +321,7 @@ city_list &lt;- list.files(parent_dir)
     
   </ul>
   
-  <div class="copyright">Acknowledgement to Yihui Xie for this hugo theme: yihui/hugo-xmag</div>
+  <div class="copyright">Acknowledgement to Yihui Xie for R Blogdown and hugo-xmag theme</div>
   
 </div>
 </footer>
