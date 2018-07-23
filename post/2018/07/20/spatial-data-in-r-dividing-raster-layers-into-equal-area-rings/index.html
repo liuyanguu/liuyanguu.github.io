@@ -85,7 +85,11 @@
 </div>
 <div id="r-code-for-one-city" class="section level2">
 <h2>R Code for one city</h2>
-<pre class="r"><code>library(&#39;raster&#39;)   # obtain raster from GIS image file, and plot
+<pre class="r"><code>list.of.packages &lt;- c(&quot;raster&quot;, &quot;rgdal&quot;,&quot;Hmisc&quot;,&quot;plyr&quot;, &quot;RColorBrewer&quot;)
+new.packages &lt;- list.of.packages[!(list.of.packages %in% installed.packages()[,&quot;Package&quot;])]
+if(length(new.packages)) install.packages(new.packages)
+
+library(&#39;raster&#39;)   # obtain raster from GIS image file, and plot
 library(&#39;rgdal&#39;)    # readOGR: read ArcGIS vector maps into Spatial objects
 library(&#39;Hmisc&#39;)    # cut2: cut vector into equal-length
 library(&#39;plyr&#39;)     # join
@@ -283,7 +287,6 @@ city_list &lt;- list.files(parent_dir)
 
 </article>
 </div>
-
 <script async src="//yihui.name/js/center-img.js"></script>
 
 <footer>
@@ -301,7 +304,8 @@ if (!doNotTrack) {
 }
 </script>
 
-<div id="disqus_thread"></div>
+
+  <div id="disqus_thread"></div>
 <script>
     var disqus_config = function () {
     

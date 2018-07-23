@@ -72,9 +72,9 @@ XMag is the second Hugo theme I have designed. It is based on my first Hugo them
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/about-me/</guid>
-      <description>I am a statistician working in New York City who mainly use R and SAS. I started my old blog in the beginning of 2018 to keep a better record of my work and share some of my experience in R programming.
-This blog was created from the R package blogdown written by Yihui Xie. Lots of thanks. All the posts were written exclusively using R Markdown.
-The banner photo was taken at Zakynthos Island in Greece in 2014.</description>
+      <description>I am a statistician working in the research fields of healthcare and urban science. I have been living in New York City since 2014.
+I started my old blog in the beginning of 2018 to keep a better record of my work and share some of my experience in R programming.
+This blog was created from the R package blogdown written by Yihui Xie. Lots of thanks. All the posts were written exclusively using R Markdown.</description>
     </item>
     
   </channel>
