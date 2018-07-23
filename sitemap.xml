@@ -3,11 +3,6 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>/post/2018/07/20/catalogue-of-my-old-blogger/</loc>
-    <lastmod>2018-07-20T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/post/2018/07/20/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/</loc>
     <lastmod>2018-07-20T00:00:00+00:00</lastmod>
   </url>
@@ -23,24 +18,29 @@
   </url>
   
   <url>
+    <loc>/post/2018/07/01/catalogue-of-my-old-blogger/</loc>
+    <lastmod>2018-07-01T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/about-hugo/</loc>
   </url>
   
   <url>
     <loc>/tags/catalog/</loc>
-    <lastmod>2018-07-20T00:00:00+00:00</lastmod>
+    <lastmod>2018-07-01T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/categories/catalog/</loc>
-    <lastmod>2018-07-20T00:00:00+00:00</lastmod>
+    <lastmod>2018-07-01T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/categories/</loc>
-    <lastmod>2018-07-20T00:00:00+00:00</lastmod>
+    <lastmod>2018-07-01T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -100,7 +100,7 @@
   
   <url>
     <loc>/tags/</loc>
-    <lastmod>2018-07-20T00:00:00+00:00</lastmod>
+    <lastmod>2018-07-01T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   

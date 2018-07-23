@@ -12,16 +12,6 @@
     
     
     <item>
-      <title>Catalog of my old blogger</title>
-      <link>/post/2018/07/20/catalogue-of-my-old-blogger/</link>
-      <pubDate>Fri, 20 Jul 2018 00:00:00 +0000</pubDate>
-      
-      <guid>/post/2018/07/20/catalogue-of-my-old-blogger/</guid>
-      <description>Introducing my new blog written solely in R MarkdownWhen I realized it is so convenient to write blog directly using R Markdown, I searched if there is a specialized tool for it. And I found Blogdown, an R package written by Yihui Xie, who is also the author of R Markdown.
-CatalogAs a summary, I would like to create a catalog for the main topics I wrote on google blogger before July 2018.</description>
-    </item>
-    
-    <item>
       <title>Spatial data in R: Dividing raster layers into equal-area rings</title>
       <link>/post/2018/07/20/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/</link>
       <pubDate>Fri, 20 Jul 2018 00:00:00 +0000</pubDate>
@@ -54,6 +44,16 @@
       
       <guid>/post/2018/07/09/extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting/</guid>
       <description>OverviewAbout the Data1. Extreme Gradient Boosting2. Gradient boosting3. Random Forest4. Lasso5. Best SubsetCompare MSEsCodeOverviewI recently had the great pleasure to meet with Professor Allan Just and he introduced me to eXtreme Gradient Boosting (XGBoost). I have extended the earlier work on my old blog by comparing the results across XGBoost, Gradient Boosting (GBM), Random Forest, Lasso, and Best Subset.</description>
+    </item>
+    
+    <item>
+      <title>Catalog of my old blogger</title>
+      <link>/post/2018/07/01/catalogue-of-my-old-blogger/</link>
+      <pubDate>Sun, 01 Jul 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/post/2018/07/01/catalogue-of-my-old-blogger/</guid>
+      <description>Introducing my new blog written solely in R MarkdownWhen I realized it is so convenient to write blog directly using R Markdown, I searched if there is a specialized tool for it. And I found Blogdown, an R package written by Yihui Xie, who is also the author of R Markdown.
+CatalogAs a summary, I would like to create a catalog for the main topics I wrote on google blogger before July 2018.</description>
     </item>
     
     <item>

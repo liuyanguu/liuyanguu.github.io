@@ -144,7 +144,7 @@ for (iter in 1:100) {
   }
 }
 Sys.time() - time_now</code></pre>
-<pre><code>## Time difference of 3.504 mins</code></pre>
+<pre><code>## Time difference of 2.392 mins</code></pre>
 <ul>
 <li>The best tuning parameters</li>
 </ul>
@@ -211,7 +211,7 @@ gbm_caret &lt;- train(Share_Temporary ~ ., mydata4[train_idx,],
                    tuneGrid = para_grid, metric = &quot;RMSE&quot;, bag.fraction = 0.75)  
 
 Sys.time() - time_now </code></pre>
-<pre><code>## Time difference of 2.916 mins</code></pre>
+<pre><code>## Time difference of 4.45 mins</code></pre>
 <ul>
 <li>The tuning parameters that give the lowest MSE in training set CV.</li>
 </ul>
@@ -650,7 +650,7 @@ coef_table[order(abs(coef_table$stb), decreasing = T),]
 
 <nav class="post-nav">
   <span class="nav-prev"><a href="/post/2018/07/16/how-to-draw-heatmap-with-colorful-dendrogram/">&larr; How to Draw Heatmap with Colorful Dendrogram</a></span>
-  <span class="nav-next"></span>
+  <span class="nav-next"><a href="/post/2018/07/01/catalogue-of-my-old-blogger/">Catalog of my old blogger &rarr;</a></span>
 </nav>
 
 
