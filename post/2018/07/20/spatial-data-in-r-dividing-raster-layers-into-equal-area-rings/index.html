@@ -70,28 +70,30 @@
 <main>
 <div id="TOC">
 <ul>
-<li><a href="#saturation-in-10-cities-with-equal-area-rings">Saturation in 10 cities with equal-area rings</a></li>
+<li><a href="#saturation-in-ten-cities-with-equal-area-rings">Saturation in ten cities with equal-area rings</a></li>
 <li><a href="#r-code-for-one-city">R Code for one city</a></li>
 <li><a href="#results-for-the-ring-saturations">Results for the ring saturations</a></li>
 <li><a href="#average-saturation-in-each-ring">Average saturation in each ring</a></li>
 <li><a href="#methodology">Methodology</a></li>
+<li><a href="#original-code">Original Code</a></li>
 </ul>
 </div>
 
 <p><strong>This data visualization example include:</strong><br />
 * Import <code>.img</code> file as a raster<br />
-* Turn raster into a dataframe of points (coordinates) and values<br />
+* Turn raster into a <em>data.frame</em> of points (coordinates) and values<br />
 * Dividing the points into 100 equal-area rings<br />
 * Calculate <em>Built-up Area/Urban Extent</em> for each ring<br />
 * Turn dataframe into raster<br />
-* Plot multiple figures on the same color scale.</p>
-<div id="saturation-in-10-cities-with-equal-area-rings" class="section level2">
-<h2>Saturation in 10 cities with equal-area rings</h2>
+* Plot multiple figures on the same color scale</p>
+<div id="saturation-in-ten-cities-with-equal-area-rings" class="section level2">
+<h2>Saturation in ten cities with equal-area rings</h2>
 <ul>
-<li>The 1000 rings have a minimum saturation of 30.5% and a maximum of 99.9%.</li>
-<li>Same color scale for every map, with a boundary of [0.3, 1].<br />
+<li>The 1000 rings have a minimum saturation of 30.5% and a maximum of 99.9%<br />
 </li>
-<li>Dark green corresponds to a ring saturation of 0.3, and dark red corresponds to 1.</li>
+<li>Same color scale for every map, with a boundary of [0.3, 1]<br />
+</li>
+<li>Dark green corresponds to a ring saturation of 0.3, and dark red corresponds to 1</li>
 </ul>
 <div class="figure">
 <img src="/post/2018-07-19-spatial-data-in-r-dividing-raster-layers-into-equal-area-rings_files/ten%20cities%20100%20rings.jpeg" />
@@ -100,7 +102,10 @@
 </div>
 <div id="r-code-for-one-city" class="section level2">
 <h2>R Code for one city</h2>
-<pre class="r"><code>list.of.packages &lt;- c(&quot;raster&quot;, &quot;rgdal&quot;,&quot;Hmisc&quot;,&quot;plyr&quot;, &quot;RColorBrewer&quot;)
+<ul>
+<li>The setting of the code can loop around several different cities, here we only load one city.</li>
+</ul>
+<pre class="r"><code>list.of.packages &lt;- c(&quot;raster&quot;, &quot;rgdal&quot;, &quot;Hmisc&quot;, &quot;plyr&quot;, &quot;RColorBrewer&quot;, &quot;googledrive&quot;)
 new.packages &lt;- list.of.packages[!(list.of.packages %in% installed.packages()[,&quot;Package&quot;])]
 if(length(new.packages)) install.packages(new.packages)
 
@@ -110,44 +115,58 @@ library(&#39;Hmisc&#39;)    # cut2: cut vector into equal-length
 library(&#39;plyr&#39;)     # join
 library(&#39;RColorBrewer&#39;) # for `brewer.pal` in ggplot2
 library(&#39;knitr&#39;)    # kable
-options(digits = 4)
-
+options(digits = 4)</code></pre>
+<ul>
+<li>The local version:</li>
+</ul>
+<pre class="r"><code># Where are all the data files located:
 parent_dir &lt;- c(&quot;D:/OneDrive - nyu.edu/NYU Marron/180716_Draw Circle/Data/&quot;)
-# Get all the folder names (names of the cities) in the directory
-# Used to scan all the cities
+# Get all the folder names (names of the cities) in the directory, used to scan all the cities
 city_list &lt;- list.files(parent_dir)
 
-# Hong Kong as an example
+# If use Hong Kong as an example
   city1 &lt;- city_list[6]
   newdir &lt;- paste(parent_dir, city1, sep = &quot;&quot;)
-  image &lt;- raster(paste(newdir, c(&quot;./city_urbFootprint_clp_t3.img&quot;), sep = &quot;&quot;))</code></pre>
-<ul>
-<li>Read raster as points: <code>rasterToPoints</code></li>
-</ul>
-<pre class="r"><code>  # mydata contains coordinate (x,y) and category (type)
-  mydata &lt;- as.data.frame(rasterToPoints(image))
-  names(mydata) &lt;- c(&quot;x&quot;, &quot;y&quot;, &quot;type&quot;)
-  pts &lt;- as.matrix(mydata[,1:2])
-  
+  image &lt;- raster(paste(newdir, c(&quot;./city_urbFootprint_clp_t3.img&quot;), sep = &quot;&quot;))
+    
   # A point that shows the center of the city
-  cbd &lt;-  readOGR(dsn = newdir, layer = paste(city1, &quot;_CBD_Project&quot;, sep=&quot;&quot;))</code></pre>
+  cbd &lt;-  readOGR(dsn = newdir, layer = paste(city1, &quot;_CBD_Project&quot;, sep=&quot;&quot;))
+  cbdpoint &lt;- SpatialPoints(cbd)</code></pre>
+<ul>
+<li>In this blog data is downloaded from googledrive</li>
+</ul>
+<pre class="r"><code>city1 &lt;-&quot;Hong_Kong&quot;
+library(googledrive)
+temp &lt;- tempfile(fileext = &quot;.zip&quot;)
+dl &lt;- drive_download(as_id(&quot;1z-aD2orN2k2BINkDD6whEhHFga_4HIu8&quot;), path = temp, overwrite = TRUE)
+out &lt;- unzip(temp, exdir = tempdir())
+image &lt;- raster(out[1])
+cbdpoint &lt;- SpatialPoints(readOGR(dsn = paste(tempdir(),&quot;\\Hong_Kong&quot;,sep = &quot;&quot;),
+                                  layer = &quot;Hong_Kong_CBD_Project&quot;))</code></pre>
 <pre><code>## OGR data source with driver: ESRI Shapefile 
-## Source: &quot;D:\OneDrive - nyu.edu\NYU Marron\180716_Draw Circle\Data\Hong_Kong&quot;, layer: &quot;Hong_Kong_CBD_Project&quot;
+## Source: &quot;C:\Users\lyhel\AppData\Local\Temp\RtmpGcMe1l\Hong_Kong&quot;, layer: &quot;Hong_Kong_CBD_Project&quot;
 ## with 1 features
 ## It has 6 fields
 ## Integer64 fields read as strings:  Id</code></pre>
-<pre class="r"><code>  cbdpoint &lt;- SpatialPoints(cbd)</code></pre>
+<ul>
+<li>Read raster as points: <code>rasterToPoints</code></li>
+</ul>
+<pre class="r"><code>  # mydata_HK contains coordinate (x,y) and category (type)
+  mydata_HK &lt;- as.data.frame(rasterToPoints(image))
+  names(mydata_HK) &lt;- c(&quot;x&quot;, &quot;y&quot;, &quot;type&quot;)</code></pre>
 <ul>
 <li>Divide points into ten equal-size rings<br />
 </li>
 <li>Calculate distances using <code>sp::spDistsN1</code></li>
 </ul>
 <pre class="r"><code>  # calculate distance to the cbd from every point
-  mydata$cbd_dist &lt;- spDistsN1(pts, cbdpoint, longlat = F)
+  pts &lt;- as.matrix(mydata_HK[,1:2])
+  mydata_HK$cbd_dist &lt;- spDistsN1(pts, cbdpoint, longlat = F)
+  
   # library(&#39;Hmisc&#39;) # cut2
-  mydata$ring &lt;- as.numeric(cut2(mydata$cbd_dist,g = 100)) # get 1:100
-  mydata$type &lt;- as.factor(mydata$type)
-  mydata$ring &lt;- as.factor(mydata$ring)
+  mydata_HK$ring &lt;- as.numeric(cut2(mydata_HK$cbd_dist,g = 100)) # get 1:100
+  mydata_HK$type &lt;- as.factor(mydata_HK$type)
+  mydata_HK$ring &lt;- as.factor(mydata_HK$ring)
 
   # Function to get saturation, as the raster have 7 layers, 1 to 3 belong to built-up area
   get_sat &lt;- function(x){
@@ -157,11 +176,11 @@ city_list &lt;- list.files(parent_dir)
   }
 
   # get saturation by rings
-  sat_output &lt;- aggregate(mydata$type, by = list(mydata$ring), FUN = get_sat)
+  sat_output &lt;- aggregate(mydata_HK$type, by = list(mydata_HK$ring), FUN = get_sat)
   names(sat_output) &lt;- c(&quot;ring&quot;, &quot;ring_saturation&quot;)
-  # join back to mydata2 so we can later plot by values of ring_saturation
-  mydata2 &lt;- join(mydata, sat_output, by = &quot;ring&quot;)
-  kable(head(mydata2))  </code></pre>
+  # join back to mydata_HK2 so we can later plot by values of ring_saturation
+  mydata_HK2 &lt;- join(mydata_HK, sat_output, by = &quot;ring&quot;)
+  kable(head(mydata_HK2))  </code></pre>
 <table>
 <thead>
 <tr class="header">
@@ -225,13 +244,13 @@ city_list &lt;- list.files(parent_dir)
 </tbody>
 </table>
 <ul>
-<li>Turn dataframe (<code>mydata2</code>) into raster using <code>rasterFromXYZ</code><br />
+<li>Turn dataframe (<code>mydata_HK2</code>) into raster using <code>rasterFromXYZ</code><br />
 </li>
 <li>Numeric columns are automatically assigned as values in the raster, and if we plot it directly:</li>
 </ul>
-<pre class="r"><code>  r1 &lt;- rasterFromXYZ(mydata2)
+<pre class="r"><code>  r1 &lt;- rasterFromXYZ(mydata_HK2)
   plot(r1)</code></pre>
-<p><img src="/post/2018-07-19-spatial-data-in-r-dividing-raster-layers-into-equal-area-rings_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p><img src="/post/2018-07-19-spatial-data-in-r-dividing-raster-layers-into-equal-area-rings_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 <pre class="r"><code>  # choose a color scale from `RColorBrewer`
   color_scale &lt;- brewer.pal(n = 10, name = &quot;RdYlGn&quot;)
   myPalette &lt;- colorRampPalette(rev(color_scale)) # reverse the order so highly value ~ dark red
@@ -239,7 +258,7 @@ city_list &lt;- list.files(parent_dir)
   plot(r1$ring_saturation, col=myPalette(70), breaks = c(30:100)/100,
        legend=FALSE,  main = city1)
   plot(cbdpoint, add = TRUE, size = 3) # drawn on top of a map using `add = TRUE`</code></pre>
-<p><img src="/post/2018-07-19-spatial-data-in-r-dividing-raster-layers-into-equal-area-rings_files/figure-html/unnamed-chunk-3-2.png" width="672" /></p>
+<p><img src="/post/2018-07-19-spatial-data-in-r-dividing-raster-layers-into-equal-area-rings_files/figure-html/unnamed-chunk-5-2.png" width="672" /></p>
 <pre class="r"><code>  # if need to output the raster
   # writeRaster(r1, paste(raster_dir, city1, sep = &quot;&quot;), format = &quot;HFA&quot;, overwrite=TRUE)
 
@@ -251,17 +270,16 @@ city_list &lt;- list.files(parent_dir)
 <ul>
 <li>I run the code using a loop for ten cities<br />
 </li>
-<li>Ring saturation in the 10 cities has a minimum of 30.5% and a maximum of 99.9%.</li>
+<li>Ring saturation in the 10 cities has a minimum of 30.5% and a maximum of 99.9%:</li>
 </ul>
-<pre class="r"><code>summary(sat$ring_saturation)</code></pre>
-<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##   0.305   0.545   0.646   0.656   0.771   0.999</code></pre>
+<pre class="r"><code>#   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#  0.305   0.545   0.646   0.656   0.771   0.999 </code></pre>
 </div>
 <div id="average-saturation-in-each-ring" class="section level2">
 <h2>Average saturation in each ring</h2>
 <ul>
 <li>There is a clear declining trend in saturation as we move towards the boundary of the cities<br />
-<img src="/post/2018-07-19-spatial-data-in-r-dividing-raster-layers-into-equal-area-rings_files/figure-html/unnamed-chunk-6-1.png" width="672" /></li>
+<img src="/post/2018-07-19-spatial-data-in-r-dividing-raster-layers-into-equal-area-rings_files/figure-html/unnamed-chunk-8-1.png" width="672" /></li>
 </ul>
 </div>
 <div id="methodology" class="section level2">
@@ -272,6 +290,131 @@ city_list &lt;- list.files(parent_dir)
 3. Calculate the distance from each point to the CBD.<br />
 4. Create 10 groups from these pixels, where each group has the same area. These groups radiate outward from the CBD. Since each pixel has the same size, all we need are ten groups with the same number of pixels, where the pixels in one group are closer to the CBD than the pixels in the next group.<br />
 5. Once we have the groups, we can calculate the saturation value in each group. Saturation is Built Up / (Built Up - Open Space), in other words, saturation is Pixels (1 + 2 + 3) / (1 + 2 + 3 + 4 + 5 + 6 + 7). Each of the ten groups now has a saturation value associated with it.</p>
+</div>
+<div id="original-code" class="section level2">
+<h2>Original Code</h2>
+<ul>
+<li>Local version, loop over ten cities</li>
+</ul>
+<pre class="r"><code># Fragmentation: Saturation  (Built-up Area/Urban Extent) in each ring
+# how about 100 rings
+
+# install.packages(&#39;raster&#39;)
+library(&#39;raster&#39;)   # obtain raster from GIS image file, and plot
+library(&#39;rgdal&#39;)    # readOGR: read ArcGIS vector maps into Spatial objects
+library(&#39;Hmisc&#39;)    # cut2
+library(&#39;plyr&#39;)     # join
+library(&#39;RColorBrewer&#39;) # for `brewer.pal` in ggplot2
+library(&#39;knitr&#39;)    # kable
+options(digits = 4)
+
+# get saturation
+get_sat &lt;- function(x){
+  x &lt;- as.factor(x)
+  # (1 + 2 + 3) / (1 + 2 + 3 + 4 + 5 + 6 + 7)
+  sum(x==1|x==2|x==3)/length(x)
+}
+
+parent_dir &lt;- c(&quot;D:/OneDrive - nyu.edu/NYU Marron/180716_Draw Circle/Data/&quot;)
+# Get all the folder names (names of the cities) in the directory
+city_list &lt;- list.files(parent_dir)
+
+sat_out &lt;- data.frame()
+par(mar = c(1,2,1,0), bty=&quot;n&quot;) # c(bottom, left, top, right)
+layout(matrix(c(1:10),ncol=2, byrow = T))
+# length(city_list)
+for (i in 1:10){
+  city1 &lt;- city_list[i]
+  newdir &lt;- paste(parent_dir, city1, sep = &quot;&quot;)
+  image &lt;- raster(paste(newdir, c(&quot;./city_urbFootprint_clp_t3.img&quot;), sep = &quot;&quot;))
+  # mydata: df that contains coordinate and category
+  mydata &lt;- as.data.frame(rasterToPoints(image))
+  names(mydata) &lt;- c(&quot;x&quot;, &quot;y&quot;, &quot;type&quot;)
+  pts &lt;- as.matrix(mydata[,1:2])
+  
+  # cbd
+  cbd &lt;-  readOGR(dsn = newdir, layer = paste(city1, &quot;_CBD_Project&quot;, sep=&quot;&quot;))
+  cbdpoint &lt;- SpatialPoints(cbd)
+
+  # distance to the cbd
+  mydata$cbd_dist &lt;- spDistsN1(pts, cbdpoint, longlat = F)
+  # library(&#39;Hmisc&#39;) # cut2
+  mydata$ring &lt;- as.numeric(cut2(mydata$cbd_dist,g = 100))
+  mydata$type &lt;- as.factor(mydata$type)
+  mydata$ring &lt;- as.factor(mydata$ring)
+
+  
+  sat_output &lt;- aggregate(mydata$type, by = list(mydata$ring), FUN = get_sat)
+  sat_output$City &lt;- city1
+  sat_output$City_Saturation &lt;- get_sat(mydata$type)
+  names(sat_output) &lt;- c(&quot;ring&quot;, &quot;ring_saturation&quot;,&quot;city&quot;, &quot;city_saturation&quot;)
+  sat_out &lt;- rbind(sat_out, sat_output)
+  
+
+  # draw the figure ---------------------------------------------------------
+  
+  mydata2 &lt;- join(mydata, sat_output, by = &quot;ring&quot;)
+  r1 &lt;- rasterFromXYZ(mydata2)
+  # writeRaster(r1, paste(raster_dir, city1, sep = &quot;&quot;), format = &quot;HFA&quot;, overwrite=TRUE)
+
+  # To preview the color panel:
+  # display.brewer.pal(n = 12, name = &#39;RdYlGn&#39;)
+  color_scale &lt;- brewer.pal(n = 10, name = &quot;RdYlGn&quot;)
+  myPalette &lt;- colorRampPalette(rev(color_scale))
+
+  plot(r1$ring_saturation, col=myPalette(70), breaks = c(30:100)/100,
+       legend=FALSE,  main = city1)
+  plot(cbdpoint, add = TRUE, size = 3) # drawn on top of a map using `add = TRUE`
+
+}
+
+
+# Some visulization options -----------------------------------------------------------
+id &lt;- &quot;1DNyQLX0apRVWmRC1xKhpqZLE6SLcQF5p&quot; # google file ID
+sat &lt;- read.csv(sprintf(&quot;https://docs.google.com/uc?id=%s&amp;export=download&quot;, id))
+sat$idx &lt;- rep(c(1:100),10)
+
+# linear regression smoothing
+ggplot(sat, aes(x=idx, y=ring_saturation)) +
+  geom_point(size = 0.5, color = &#39;blue&#39;) +  
+  geom_smooth(method = &#39;lm&#39;)+
+  theme_classic() + 
+  geom_hline(yintercept = 0) +
+  scale_y_continuous(limits = c(0,1)) +
+  labs(x = &quot;Equal-Area Rings from CBD&quot;, y = &quot;Average Built-up Area/Urban Extent&quot;) +
+  ggtitle(&quot;Average Saturation in the 100 Rings&quot;)
+
+## some other options
+# one plot for each city
+par(mar = rep(2,4), bty=&quot;n&quot;)
+layout(matrix(c(1:10),ncol=2, byrow = T))
+for (i in 1:10){
+  sat_sub &lt;- subset(sat, city == city_list[i])
+  plot(x = sat_sub$idx, y = sat_sub$ring_saturation, type = &quot;l&quot;,
+       xlab=c(&quot;Ring from CBD&quot;), ylab =c(&quot;Built-up Area/Urban Extent&quot;),
+       main = city_list[i])
+}
+
+# a barchart for each ring?
+sat$weight_blank &lt;- 1
+source(&quot;D:/OneDrive - nyu.edu/NYU Marron/R/Get Weighted SE and CI.R&quot;)
+Mean_byGroup &lt;- get_WM_and_CI2(sat, &quot;idx&quot;, &quot;ring_saturation&quot;, &quot;weight_blank&quot;) 
+bar_width &lt;- 0.8
+ggplot(Mean_byGroup, aes(x=idx, y=wm, 
+                         ymin=CI_low, ymax=CI_high)) +
+  geom_bar(stat=&#39;identity&#39;, position = position_dodge(), width = bar_width, alpha=0.8)+
+  geom_errorbar (width=bar_width-0.1, lwd=1, position=position_dodge(bar_width))+
+  labs(x = &quot;Ten Rings from CBD&quot;, y = &quot;Average Built-up Area/Urban Extent&quot;) +
+  ggtitle(&quot;Average Saturation in Each Ring&quot;)+
+  theme_classic()  +  
+  geom_hline(yintercept = 0)
+
+# scatterplot all the points for ten cities 
+ggplot(sat, aes(x=idx, y=ring_saturation, color = city)) +
+  geom_point(size = 1) 
+  labs(x = &quot;Ten Rings from CBD&quot;, y = &quot;Built-up Area/Urban Extent&quot;) +
+  ggtitle(&quot;Saturation in Each Ring of Ten Cities&quot;)+
+  theme_classic() </code></pre>
 </div>
 
 </main>
@@ -293,7 +436,7 @@ city_list &lt;- list.files(parent_dir)
 <section class="article-meta article-footer">
   <h3>About the Author</h3>
   
-    <p>Yang Liu is Statistician around New York City. Website: <a href="https://liuyanguu.github.io">https://liuyanguu.github.io</a></p>
+    <p>Yang Liu is a (Bio)Statistician working in New York City. Website: <a href="https://liuyanguu.github.io">https://liuyanguu.github.io</a></p>
   
 </section>
 
@@ -303,7 +446,7 @@ city_list &lt;- list.files(parent_dir)
 
 
 <nav class="post-nav">
-  <span class="nav-prev"></span>
+  <span class="nav-prev"><a href="/post/2018/10/03/autoxgboost-bayesian-optimization/">&larr; autoxgboost: Bayesian Optimization</a></span>
   <span class="nav-next"><a href="/post/2018/07/16/how-to-draw-heatmap-with-colorful-dendrogram/">How to Draw Heatmap with Colorful Dendrogram &rarr;</a></span>
 </nav>
 

@@ -17,7 +17,7 @@
       <pubDate>Sun, 01 Jul 2018 00:00:00 +0000</pubDate>
       
       <guid>/post/2018/07/01/catalogue-of-my-old-blogger/</guid>
-      <description>Introducing my new blog written solely in R MarkdownWhen I realized it is so convenient to write blog directly using R Markdown, I searched if there is a specialized tool for it. And I found Blogdown, an R package written by Yihui Xie, who is also the author of R Markdown.
+      <description>Introducing my new blog written solely in R MarkdownWhen I realized it is so convenient to write blog directly using R Markdown, I searched if there is a specialized tool for it. And I found Blogdown, an R package developed by Yihui Xie, who is also the author of R Markdown.
 CatalogAs a summary, I would like to create a catalog for the main topics I wrote on google blogger before July 2018.</description>
     </item>
     

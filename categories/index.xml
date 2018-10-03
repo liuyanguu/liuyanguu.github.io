@@ -30,6 +30,15 @@
     </item>
     
     <item>
+      <title>Machine Learning</title>
+      <link>/categories/machine-learning/</link>
+      <pubDate>Wed, 03 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/machine-learning/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Spatial Data</title>
       <link>/categories/spatial-data/</link>
       <pubDate>Fri, 20 Jul 2018 00:00:00 +0000</pubDate>
@@ -39,11 +48,11 @@
     </item>
     
     <item>
-      <title>Statistical Learning</title>
-      <link>/categories/statistical-learning/</link>
-      <pubDate>Mon, 09 Jul 2018 00:00:00 +0000</pubDate>
+      <title>Tuning</title>
+      <link>/categories/tuning/</link>
+      <pubDate>Wed, 03 Oct 2018 00:00:00 +0000</pubDate>
       
-      <guid>/categories/statistical-learning/</guid>
+      <guid>/categories/tuning/</guid>
       <description></description>
     </item>
     

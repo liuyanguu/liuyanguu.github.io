@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <title>autoxgboost: Bayesian Optimization | Welcome to my blog</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    <link href="//cdn.bootcss.com/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+
+  </head>
+
+  <body class="page">
+    <nav class="header">
+      <div class="banner">
+<a href="/">
+
+<img src="/ocean%202.jpg" alt="Text on Image" />
+</a>
+</div>
+
+      <div class="head-meta">
+      
+        <span><a href="/">&larr; Back to Home</a></span>
+        <span class="date">2018-10-03</span>
+        
+        
+        
+          
+        
+        
+        
+        <span><a href="https://github.com/liuyanguu/Blogdown/edit/master/hugo-xmag/content/post/2018-10-03-autoxgboost.Rmd">Edit this page &rarr;</a></span>
+        
+        
+      
+      </div>
+    </nav>
+
+<div class="container">
+<article>
+<div class="article-meta">
+
+  <div class="categories">
+  
+    <a href="/categories/machine-learning">Machine Learning</a>
+  
+     &hercon; <a href="/categories/tuning">Tuning</a>
+  
+  </div>
+
+  <h1><span class="title">autoxgboost: Bayesian Optimization</span></h1>
+
+  
+  <h3 class="author">Yang Liu
+</h3>
+  
+
+  
+  <p>Tags: <a href="/tags/xgboost">XGBoost</a>
+  </p>
+  
+  
+
+</div>
+
+
+
+<main>
+<div id="TOC">
+<ul>
+<li><a href="#background">Background</a></li>
+<li><a href="#original-result">Original Result</a></li>
+<li><a href="#using-autoxgboost">Using <code>autoxgboost</code></a></li>
+<li><a href="#new-result">New Result</a></li>
+</ul>
+</div>
+
+<div id="background" class="section level1">
+<h1>Background</h1>
+<p>It has been a while since my last update. I have been working on lots of interesting projects since I joined Mount Sinai in August. We have a great team here and obviously I can learn a lot from everyone around me. Most of my job so far focuses on extreme gradient boosting and visualization of results. Suggested by Allan, I recently tested <code>autoxgboost</code>, which is so easy to use and runs much faster than the naive grid or random search illustrated in my <a href="https://liuyanguu.github.io/post/2018/07/09/extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting/">earlier post on XGBoost</a>. The results are also as good as the best effort we could obtain from the time-consuming random search (when the dataset is large). This short illustration actually produces a counter-example.</p>
+<p>I use the same dataset to exemplify <code>autoxgboost</code><br />
+To install the package, run <code>devtools::install_github(&quot;ja-thomas/autoxgboost&quot;)</code></p>
+</div>
+<div id="original-result" class="section level1">
+<h1>Original Result</h1>
+<ul>
+<li>Parameters</li>
+</ul>
+<pre><code>##   nrounds max_depth   eta gamma colsample_bytree min_child_weight
+## 1     228         8 0.034     0           0.7208                7
+##   subsample
+## 1    0.7017</code></pre>
+<ul>
+<li>rmse</li>
+</ul>
+<pre class="r"><code># 0.0433</code></pre>
+</div>
+<div id="using-autoxgboost" class="section level1">
+<h1>Using <code>autoxgboost</code></h1>
+<ul>
+<li>A paper on <em><a href="https://arxiv.org/pdf/1807.02811.pdf">Bayesian Optimization</a></em><br />
+</li>
+<li>A presentation: <em><a href="http://gpss.cc/gpmc17/slides/LancasterMasterclass_1.pdf">Introduction to Bayesian Optimization</a></em><br />
+</li>
+<li>By default, the optimizer runs for for 160 iterations or 1 hour, results using 80 iterations are good enough<br />
+</li>
+<li>By default, <code>par.set</code>: parameter set to tune over, is <code>autoxgbparset</code>:</li>
+</ul>
+<pre class="r"><code>autoxgbparset</code></pre>
+<pre><code>##                      Type len Def      Constr Req Tunable Trafo
+## eta               numeric   -   - 0.01 to 0.2   -    TRUE     -
+## gamma             numeric   -   -     -7 to 6   -    TRUE     Y
+## max_depth         integer   -   -     3 to 20   -    TRUE     -
+## colsample_bytree  numeric   -   -    0.5 to 1   -    TRUE     -
+## colsample_bylevel numeric   -   -    0.5 to 1   -    TRUE     -
+## lambda            numeric   -   -   -10 to 10   -    TRUE     Y
+## alpha             numeric   -   -   -10 to 10   -    TRUE     Y
+## subsample         numeric   -   -    0.5 to 1   -    TRUE     -</code></pre>
+<ul>
+<li>This dataset is a regression problem, for classification, just use <code>reg_task &lt;- makeClassifTask</code>. There are more options for different tasks<br />
+</li>
+<li>Use all as default, input a <em>data.frame</em>, and that’s it…</li>
+</ul>
+<pre class="r"><code>library(autoxgboost)
+reg_task &lt;- makeRegrTask(data = data_train, target = &quot;Share_Temporary&quot;)
+set.seed(1234)
+system.time(reg_auto &lt;- autoxgboost(reg_task))
+# If need to change iterations or control, all are very easy:
+# MBOctrl &lt;- makeMBOControl()
+# ctrl &lt;- setMBOControlTermination(control = MBOctrl, iters = 160L)
+# system.time(reg_auto &lt;- autoxgboost(reg_task, control = ctrl))
+# saveRDS(reg_auto, file = &quot;D:/SDIautoxgboost_80.rds&quot;)</code></pre>
+</div>
+<div id="new-result" class="section level1">
+<h1>New Result</h1>
+<pre><code>## Autoxgboost tuning result
+## 
+## Recommended parameters:
+##               eta: 0.118
+##             gamma: 0.035
+##         max_depth: 7
+##  colsample_bytree: 0.860
+## colsample_bylevel: 0.671
+##            lambda: 7.731
+##             alpha: 0.236
+##         subsample: 0.642
+##           nrounds: 57
+## 
+## 
+## Preprocessing pipeline:
+## dropconst(rel.tol = 1e-08, abs.tol = 1e-08, ignore.na = FALSE)
+## 
+## With tuning result: mse = 0.044</code></pre>
+<ul>
+<li>Testing rmse: 0.1097 compared to 0.043, it is actually much worse than the result from random search (in my dataset from work, <code>autoxgboost</code> did no worse). I suspect this is because the number of observations is not abundant compared to the number of features (316 x 88).</li>
+</ul>
+<pre><code>## [1] 0.109729</code></pre>
+</div>
+
+</main>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section class="article-meta article-footer">
+  <h3>About the Author</h3>
+  
+    <p>Yang Liu is a (Bio)Statistician working in New York City. Website: <a href="https://liuyanguu.github.io">https://liuyanguu.github.io</a></p>
+  
+</section>
+
+
+
+
+
+
+<nav class="post-nav">
+  <span class="nav-prev"></span>
+  <span class="nav-next"><a href="/post/2018/07/20/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/">Spatial data in R: Dividing raster layers into equal-area rings &rarr;</a></span>
+</nav>
+
+
+<div id="disqus_thread"></div>
+<script>
+(function() {
+var d = document, s = d.createElement('script');
+s.src = 'https://liuyanguu.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</article>
+</div>
+
+<script async src="//yihui.name/js/center-img.js"></script>
+
+<footer>
+
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-122668586-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+
+  <div id="disqus_thread"></div>
+<script>
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "liuyanguu" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+<div class="footer">
+  <ul class="menu">
+    
+    <li><a href="/"><span data-hover="Home">Home</span></a></li>
+    
+    <li><a href="/tags/"><span data-hover="Tags">Tags</span></a></li>
+    
+    <li><a href="/categories/"><span data-hover="Categories">Categories</span></a></li>
+    
+    <li><a href="/about-me/"><span data-hover="About Me">About Me</span></a></li>
+    
+  </ul>
+  
+  <div class="copyright">Acknowledgement to Yihui Xie for R Blogdown and hugo-xmag theme</div>
+  
+</div>
+</footer>
+
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.12.0/languages/r.min.js"></script>
+<script>
+hljs.configure({languages: []});
+hljs.initHighlightingOnLoad();
+</script>
+
+
+
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-122668586-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+
+</body>
+</html>
+
