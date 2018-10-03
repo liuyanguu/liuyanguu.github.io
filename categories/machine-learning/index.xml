@@ -2,30 +2,30 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Machine Learning on Welcome to my blog</title>
-    <link>/categories/machine-learning/</link>
+    <link>https://liuyanguu.github.io/categories/machine-learning/</link>
     <description>Recent content in Machine Learning on Welcome to my blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Wed, 03 Oct 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/categories/machine-learning/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://liuyanguu.github.io/categories/machine-learning/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>autoxgboost: Bayesian Optimization</title>
-      <link>/post/2018/10/03/autoxgboost-bayesian-optimization/</link>
+      <link>https://liuyanguu.github.io/post/2018/10/03/autoxgboost-bayesian-optimization/</link>
       <pubDate>Wed, 03 Oct 2018 00:00:00 +0000</pubDate>
       
-      <guid>/post/2018/10/03/autoxgboost-bayesian-optimization/</guid>
+      <guid>https://liuyanguu.github.io/post/2018/10/03/autoxgboost-bayesian-optimization/</guid>
       <description>BackgroundOriginal ResultUsing autoxgboostNew ResultBackgroundIt has been a while since my last update. I have been working on lots of interesting projects since I joined Mount Sinai in August. We have a great team here and obviously I can learn a lot from everyone around me. Most of my job so far focuses on extreme gradient boosting and visualization of results. Suggested by Allan, I recently tested autoxgboost, which is so easy to use and runs much faster than the naive grid or random search illustrated in my earlier post on XGBoost.</description>
     </item>
     
     <item>
       <title>eXtreme Gradient Boosting (XGBoost): Better than random forest or gradient boosting</title>
-      <link>/post/2018/07/09/extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting/</link>
+      <link>https://liuyanguu.github.io/post/2018/07/09/extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting/</link>
       <pubDate>Mon, 09 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>/post/2018/07/09/extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting/</guid>
+      <guid>https://liuyanguu.github.io/post/2018/07/09/extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting/</guid>
       <description>OverviewAbout the Data1. Extreme Gradient Boosting2. Gradient boosting3. Random Forest4. Lasso5. Best SubsetCompare MSEsOriginal CodeOverviewI recently had the great pleasure to meet with Professor Allan Just and he introduced me to eXtreme Gradient Boosting (XGBoost). I have extended the earlier work on my old blog by comparing the results across XGBoost, Gradient Boosting (GBM), Random Forest, Lasso, and Best Subset.</description>
     </item>
     

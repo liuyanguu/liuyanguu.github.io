@@ -2,30 +2,30 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Posts on Welcome to my blog</title>
-    <link>/post/</link>
+    <link>https://liuyanguu.github.io/post/</link>
     <description>Recent content in Posts on Welcome to my blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Wed, 03 Oct 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://liuyanguu.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>autoxgboost: Bayesian Optimization</title>
-      <link>/post/2018/10/03/autoxgboost-bayesian-optimization/</link>
+      <link>https://liuyanguu.github.io/post/2018/10/03/autoxgboost-bayesian-optimization/</link>
       <pubDate>Wed, 03 Oct 2018 00:00:00 +0000</pubDate>
       
-      <guid>/post/2018/10/03/autoxgboost-bayesian-optimization/</guid>
+      <guid>https://liuyanguu.github.io/post/2018/10/03/autoxgboost-bayesian-optimization/</guid>
       <description>BackgroundOriginal ResultUsing autoxgboostNew ResultBackgroundIt has been a while since my last update. I have been working on lots of interesting projects since I joined Mount Sinai in August. We have a great team here and obviously I can learn a lot from everyone around me. Most of my job so far focuses on extreme gradient boosting and visualization of results. Suggested by Allan, I recently tested autoxgboost, which is so easy to use and runs much faster than the naive grid or random search illustrated in my earlier post on XGBoost.</description>
     </item>
     
     <item>
       <title>Spatial data in R: Dividing raster layers into equal-area rings</title>
-      <link>/post/2018/07/20/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/</link>
+      <link>https://liuyanguu.github.io/post/2018/07/20/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/</link>
       <pubDate>Fri, 20 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>/post/2018/07/20/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/</guid>
+      <guid>https://liuyanguu.github.io/post/2018/07/20/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/</guid>
       <description>Saturation in ten cities with equal-area ringsR Code for one cityResults for the ring saturationsAverage saturation in each ringMethodologyOriginal CodeThis data visualization example include:
 * Import .img file as a raster
 * Turn raster into a data.frame of points (coordinates) and values
@@ -36,10 +36,10 @@
     
     <item>
       <title>How to Draw Heatmap with Colorful Dendrogram</title>
-      <link>/post/2018/07/16/how-to-draw-heatmap-with-colorful-dendrogram/</link>
+      <link>https://liuyanguu.github.io/post/2018/07/16/how-to-draw-heatmap-with-colorful-dendrogram/</link>
       <pubDate>Mon, 16 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>/post/2018/07/16/how-to-draw-heatmap-with-colorful-dendrogram/</guid>
+      <guid>https://liuyanguu.github.io/post/2018/07/16/how-to-draw-heatmap-with-colorful-dendrogram/</guid>
       <description>DataVersion 1: Color both the branches and labelsVersion 2: color only the labels.Version 3: If there is no color, and we do not reorder the branchesThis data visualization example include:
 * Hierarchical clustering, dendrogram and heat map based on normalized odds ratios
 * The dendrogram was built separately to give color to dendrogram’s branches/labels based on cluster using dendextend
@@ -48,19 +48,19 @@
     
     <item>
       <title>eXtreme Gradient Boosting (XGBoost): Better than random forest or gradient boosting</title>
-      <link>/post/2018/07/09/extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting/</link>
+      <link>https://liuyanguu.github.io/post/2018/07/09/extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting/</link>
       <pubDate>Mon, 09 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>/post/2018/07/09/extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting/</guid>
+      <guid>https://liuyanguu.github.io/post/2018/07/09/extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting/</guid>
       <description>OverviewAbout the Data1. Extreme Gradient Boosting2. Gradient boosting3. Random Forest4. Lasso5. Best SubsetCompare MSEsOriginal CodeOverviewI recently had the great pleasure to meet with Professor Allan Just and he introduced me to eXtreme Gradient Boosting (XGBoost). I have extended the earlier work on my old blog by comparing the results across XGBoost, Gradient Boosting (GBM), Random Forest, Lasso, and Best Subset.</description>
     </item>
     
     <item>
       <title>Catalog of my old blogger</title>
-      <link>/post/2018/07/01/catalogue-of-my-old-blogger/</link>
+      <link>https://liuyanguu.github.io/post/2018/07/01/catalogue-of-my-old-blogger/</link>
       <pubDate>Sun, 01 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>/post/2018/07/01/catalogue-of-my-old-blogger/</guid>
+      <guid>https://liuyanguu.github.io/post/2018/07/01/catalogue-of-my-old-blogger/</guid>
       <description>Introducing my new blog written solely in R MarkdownWhen I realized it is so convenient to write blog directly using R Markdown, I searched if there is a specialized tool for it. And I found Blogdown, an R package developed by Yihui Xie, who is also the author of R Markdown.
 CatalogAs a summary, I would like to create a catalog for the main topics I wrote on google blogger before July 2018.</description>
     </item>
