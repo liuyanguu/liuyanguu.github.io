@@ -154,6 +154,62 @@ for (iter in 1:10) {
 <ul>
 <li>MSE</li>
 </ul>
+<pre><code>## [1]  train-rmse:0.370362 
+## [2]  train-rmse:0.350867 
+## [3]  train-rmse:0.330285 
+## [4]  train-rmse:0.309543 
+## [5]  train-rmse:0.290205 
+## [6]  train-rmse:0.272829 
+## [7]  train-rmse:0.256376 
+## [8]  train-rmse:0.244360 
+## [9]  train-rmse:0.232919 
+## [10] train-rmse:0.220504 
+## [11] train-rmse:0.210410 
+## [12] train-rmse:0.200651 
+## [13] train-rmse:0.192944 
+## [14] train-rmse:0.185783 
+## [15] train-rmse:0.179196 
+## [16] train-rmse:0.173460 
+## [17] train-rmse:0.167468 
+## [18] train-rmse:0.162072 
+## [19] train-rmse:0.156951 
+## [20] train-rmse:0.153035 
+## [21] train-rmse:0.147921 
+## [22] train-rmse:0.144033 
+## [23] train-rmse:0.140319 
+## [24] train-rmse:0.136402 
+## [25] train-rmse:0.132804 
+## [26] train-rmse:0.128907 
+## [27] train-rmse:0.125711 
+## [28] train-rmse:0.122999 
+## [29] train-rmse:0.120526 
+## [30] train-rmse:0.118440 
+## [31] train-rmse:0.115196 
+## [32] train-rmse:0.112017 
+## [33] train-rmse:0.109731 
+## [34] train-rmse:0.106783 
+## [35] train-rmse:0.104807 
+## [36] train-rmse:0.103228 
+## [37] train-rmse:0.101256 
+## [38] train-rmse:0.099362 
+## [39] train-rmse:0.097631 
+## [40] train-rmse:0.095785 
+## [41] train-rmse:0.094235 
+## [42] train-rmse:0.092758 
+## [43] train-rmse:0.091042 
+## [44] train-rmse:0.089190 
+## [45] train-rmse:0.087415 
+## [46] train-rmse:0.085752 
+## [47] train-rmse:0.084605 
+## [48] train-rmse:0.082883 
+## [49] train-rmse:0.081265 
+## [50] train-rmse:0.079710 
+## [51] train-rmse:0.078118 
+## [52] train-rmse:0.076652 
+## [53] train-rmse:0.075359 
+## [54] train-rmse:0.073909 
+## [55] train-rmse:0.072953 
+## [56] train-rmse:0.071443</code></pre>
 <pre><code>## [1] 0.04332</code></pre>
 <ul>
 <li>Feature Importance</li>
@@ -205,7 +261,7 @@ gbm_caret &lt;- train(Share_Temporary ~ ., mydata[train_idx,],
                    tuneGrid = para_grid, metric = &quot;RMSE&quot;, bag.fraction = 0.75)  
 
 Sys.time() - time_now </code></pre>
-<pre><code>## Time difference of 2.295 mins</code></pre>
+<pre><code>## Time difference of 2.327 mins</code></pre>
 <ul>
 <li>The tuning parameters that give the lowest MSE in training set CV.</li>
 </ul>

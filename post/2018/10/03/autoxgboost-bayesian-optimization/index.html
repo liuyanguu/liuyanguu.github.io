@@ -71,20 +71,22 @@
 <div id="TOC">
 <ul>
 <li><a href="#background">Background</a></li>
-<li><a href="#original-result">Original Result</a></li>
+<li><a href="#old-result">Old Result</a></li>
 <li><a href="#using-autoxgboost">Using <code>autoxgboost</code></a></li>
 <li><a href="#new-result">New Result</a></li>
+<li><a href="#tuning-over-different-boosters">Tuning over Different Boosters</a></li>
 </ul>
 </div>
 
+<p>(updated on Oct 14)</p>
 <div id="background" class="section level1">
 <h1>Background</h1>
 <p>It has been a while since my last update. I have been working on lots of interesting projects since I joined Mount Sinai in August. We have a great team here and obviously I can learn a lot from everyone around me. Most of my job so far focuses on extreme gradient boosting and visualization of results. Suggested by Allan, I recently tested <code>autoxgboost</code>, which is so easy to use and runs much faster than the naive grid or random search illustrated in my <a href="https://liuyanguu.github.io/post/2018/07/09/extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting/">earlier post on XGBoost</a>. The results are also as good as the best effort we could obtain from the time-consuming random search (when the dataset is large). This short illustration actually produces a counter-example.</p>
 <p>I use the same dataset to exemplify <code>autoxgboost</code><br />
-To install the package, run <code>devtools::install_github(&quot;ja-thomas/autoxgboost&quot;)</code></p>
+To install the package, run <em><code>devtools::install_github(&quot;ja-thomas/autoxgboost&quot;)</code></em></p>
 </div>
-<div id="original-result" class="section level1">
-<h1>Original Result</h1>
+<div id="old-result" class="section level1">
+<h1>Old Result</h1>
 <ul>
 <li>Parameters</li>
 </ul>
@@ -119,7 +121,7 @@ To install the package, run <code>devtools::install_github(&quot;ja-thomas/autox
 ## alpha             numeric   -   -   -10 to 10   -    TRUE     Y
 ## subsample         numeric   -   -    0.5 to 1   -    TRUE     -</code></pre>
 <ul>
-<li>This dataset is a regression problem, for classification, just use <code>reg_task &lt;- makeClassifTask</code>. There are more options for different tasks<br />
+<li>This dataset is a regression problem, for classification, use <code>makeClassifTask</code> instead of <code>makeRegrTask</code> in the <code>makeRegrTask</code> function. There are more options for different tasks<br />
 </li>
 <li>Use all as default, input a <em>data.frame</em>, and that’s it…</li>
 </ul>
@@ -127,10 +129,6 @@ To install the package, run <code>devtools::install_github(&quot;ja-thomas/autox
 reg_task &lt;- makeRegrTask(data = data_train, target = &quot;Share_Temporary&quot;)
 set.seed(1234)
 system.time(reg_auto &lt;- autoxgboost(reg_task))
-# If need to change iterations or control, all are very easy:
-# MBOctrl &lt;- makeMBOControl()
-# ctrl &lt;- setMBOControlTermination(control = MBOctrl, iters = 160L)
-# system.time(reg_auto &lt;- autoxgboost(reg_task, control = ctrl))
 # saveRDS(reg_auto, file = &quot;D:/SDIautoxgboost_80.rds&quot;)</code></pre>
 </div>
 <div id="new-result" class="section level1">
@@ -154,9 +152,72 @@ system.time(reg_auto &lt;- autoxgboost(reg_task))
 ## 
 ## With tuning result: mse = 0.044</code></pre>
 <ul>
-<li>Testing rmse: 0.1097 compared to 0.043, it is actually much worse than the result from random search (in my dataset from work, <code>autoxgboost</code> did no worse). I suspect this is because the number of observations is not abundant compared to the number of features (316 x 88).</li>
+<li>Testing mse: 0.047 (rmse is: 0.2168) is quite close to the 0.043 from previous post. But it is much faster using only 57 rounds. Notice that the cross-valiation tuning mse is almost the same: 0.044.</li>
 </ul>
-<pre><code>## [1] 0.109729</code></pre>
+<pre><code>## [1] 0.0469821</code></pre>
+</div>
+<div id="tuning-over-different-boosters" class="section level1">
+<h1>Tuning over Different Boosters</h1>
+<ul>
+<li><code>autoxgboost</code> also allows us to tune over the three types of boosters: <em>gbtree, gblinear and dart</em></li>
+<li>The paraset <code>autoxgbparset.mixed</code> was predifined by author, but it seems I still need to load it<br />
+</li>
+<li>Here is the <a href="https://github.com/ja-thomas/autoxgboost/issues/60#issuecomment-428991564">question I consulted on github</a></li>
+</ul>
+<pre class="r"><code>reg_task &lt;- makeRegrTask(data = data_train, target = &quot;Share_Temporary&quot;)
+
+autoxgbparset.mixed = makeParamSet(
+  makeDiscreteParam(&quot;booster&quot;, values = c(&quot;gbtree&quot;, &quot;gblinear&quot;, &quot;dart&quot;)),
+  makeDiscreteParam(&quot;sample_type&quot;, values = c(&quot;uniform&quot;, &quot;weighted&quot;), requires = quote(booster == &quot;dart&quot;)),
+  makeDiscreteParam(&quot;normalize_type&quot;, values = c(&quot;tree&quot;, &quot;forest&quot;), requires = quote(booster == &quot;dart&quot;)),
+  makeNumericParam(&quot;rate_drop&quot;, lower = 0, upper = 1, requires = quote(booster == &quot;dart&quot;)),
+  makeNumericParam(&quot;skip_drop&quot;, lower = 0, upper = 1, requires = quote(booster == &quot;dart&quot;)),
+  makeLogicalParam(&quot;one_drop&quot;, requires = quote(booster == &quot;dart&quot;)),
+  makeDiscreteParam(&quot;grow_policy&quot;, values = c(&quot;depthwise&quot;, &quot;lossguide&quot;)),
+  makeIntegerParam(&quot;max_leaves&quot;, lower = 0, upper = 8, trafo = function(x) 2^x, requires = quote(grow_policy == &quot;lossguide&quot;)),
+  makeIntegerParam(&quot;max_bin&quot;, lower = 2L, upper = 9, trafo = function(x) 2^x),
+  makeNumericParam(&quot;eta&quot;, lower = 0.01, upper = 0.2),
+  makeNumericParam(&quot;gamma&quot;, lower = -7, upper = 6, trafo = function(x) 2^x),
+  makeIntegerParam(&quot;max_depth&quot;, lower = 3, upper = 20),
+  makeNumericParam(&quot;colsample_bytree&quot;, lower = 0.5, upper = 1),
+  makeNumericParam(&quot;colsample_bylevel&quot;, lower = 0.5, upper = 1),
+  makeNumericParam(&quot;lambda&quot;, lower = -10, upper = 10, trafo = function(x) 2^x),
+  makeNumericParam(&quot;alpha&quot;, lower = -10, upper = 10, trafo = function(x) 2^x),
+  makeNumericParam(&quot;subsample&quot;, lower = 0.5, upper = 1)
+)
+system.time(reg_auto_dart &lt;- autoxgboost(reg_task, par.set = autoxgbparset.mixed))</code></pre>
+<ul>
+<li>Interesting enough, a model with dart booster has been chosen, but the results are pretty much the same. Tuning mse = 0.044, and testing mse = 0.048. It means a result around 0.044 is about the best we can achieve through <code>xgboost</code>.</li>
+</ul>
+<pre><code>## Autoxgboost tuning result
+## 
+## Recommended parameters:
+##           booster: dart
+##       sample_type: weighted
+##    normalize_type: forest
+##         rate_drop: 0.635
+##         skip_drop: 0.765
+##          one_drop: TRUE
+##       grow_policy: lossguide
+##        max_leaves: 1
+##           max_bin: 16
+##               eta: 0.051
+##             gamma: 0.086
+##         max_depth: 10
+##  colsample_bytree: 0.838
+## colsample_bylevel: 0.544
+##            lambda: 0.009
+##             alpha: 0.003
+##         subsample: 0.726
+##           nrounds: 54
+## 
+## 
+## Preprocessing pipeline:
+## dropconst(rel.tol = 1e-08, abs.tol = 1e-08, ignore.na = FALSE)
+## 
+## With tuning result: mse = 0.044</code></pre>
+<pre><code>## testing mse:</code></pre>
+<pre><code>## [1] 0.0487725</code></pre>
 </div>
 
 </main>

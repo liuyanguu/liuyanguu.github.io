@@ -130,8 +130,13 @@ city_list &lt;- list.files(parent_dir)
   image &lt;- raster(paste(newdir, c(&quot;./city_urbFootprint_clp_t3.img&quot;), sep = &quot;&quot;))
     
   # A point that shows the center of the city
-  cbd &lt;-  readOGR(dsn = newdir, layer = paste(city1, &quot;_CBD_Project&quot;, sep=&quot;&quot;))
-  cbdpoint &lt;- SpatialPoints(cbd)</code></pre>
+  cbd &lt;-  readOGR(dsn = newdir, layer = paste(city1, &quot;_CBD_Project&quot;, sep=&quot;&quot;))</code></pre>
+<pre><code>## OGR data source with driver: ESRI Shapefile 
+## Source: &quot;D:\OneDrive - nyu.edu\NYU Marron\180716_Draw Circle\Data\Hong_Kong&quot;, layer: &quot;Hong_Kong_CBD_Project&quot;
+## with 1 features
+## It has 6 fields
+## Integer64 fields read as strings:  Id</code></pre>
+<pre class="r"><code>  cbdpoint &lt;- SpatialPoints(cbd)</code></pre>
 <ul>
 <li>In this blog data is downloaded from googledrive</li>
 </ul>
@@ -143,11 +148,6 @@ out &lt;- unzip(temp, exdir = tempdir())
 image &lt;- raster(out[1])
 cbdpoint &lt;- SpatialPoints(readOGR(dsn = paste(tempdir(),&quot;\\Hong_Kong&quot;,sep = &quot;&quot;),
                                   layer = &quot;Hong_Kong_CBD_Project&quot;))</code></pre>
-<pre><code>## OGR data source with driver: ESRI Shapefile 
-## Source: &quot;C:\Users\lyhel\AppData\Local\Temp\RtmpWGxCqD\Hong_Kong&quot;, layer: &quot;Hong_Kong_CBD_Project&quot;
-## with 1 features
-## It has 6 fields
-## Integer64 fields read as strings:  Id</code></pre>
 <ul>
 <li>Read raster as points: <code>rasterToPoints</code></li>
 </ul>
