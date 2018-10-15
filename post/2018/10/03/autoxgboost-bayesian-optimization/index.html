@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
-    <title>autoxgboost: Bayesian Optimization | Welcome to my blog</title>
+    <title>autoxgboost: Automatic XGBoost using Bayesian Optimization | Welcome to my blog</title>
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="/css/fonts.css" />
     <link href="//cdn.bootcss.com/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -46,11 +46,11 @@
   
     <a href="/categories/machine-learning">Machine Learning</a>
   
-     &hercon; <a href="/categories/tuning">Tuning</a>
+     &hercon; <a href="/categories/parameter-tuning">Parameter Tuning</a>
   
   </div>
 
-  <h1><span class="title">autoxgboost: Bayesian Optimization</span></h1>
+  <h1><span class="title">autoxgboost: Automatic XGBoost using Bayesian Optimization</span></h1>
 
   
   <h3 class="author">Yang Liu
@@ -81,7 +81,7 @@
 <p>(updated on Oct 14)</p>
 <div id="background" class="section level1">
 <h1>Background</h1>
-<p>It has been a while since my last update. I have been working on lots of interesting projects since I joined Mount Sinai in August. We have a great team here and obviously I can learn a lot from everyone around me. Most of my job so far focuses on extreme gradient boosting and visualization of results. Suggested by Allan, I recently tested <code>autoxgboost</code>, which is so easy to use and runs much faster than the naive grid or random search illustrated in my <a href="https://liuyanguu.github.io/post/2018/07/09/extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting/">earlier post on XGBoost</a>. The results are also as good as the best effort we could obtain from the time-consuming random search (when the dataset is large). This short illustration actually produces a counter-example.</p>
+<p>It has been a while since my last update. I have been working on lots of interesting projects since I joined Mount Sinai in August. We have a great team here and obviously I can learn a lot from everyone around me. Most of my job so far focuses on extreme gradient boosting and visualization of results. Suggested by Allan, I recently tested <code>autoxgboost</code>, which is so easy to use and runs much faster than the naive grid or random search illustrated in my <a href="https://liuyanguu.github.io/post/2018/07/09/extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting/">earlier post on XGBoost</a>. The results are also as good as the best effort we could obtain from the time-consuming random search.</p>
 <p>I use the same dataset to exemplify <code>autoxgboost</code><br />
 To install the package, run <em><code>devtools::install_github(&quot;ja-thomas/autoxgboost&quot;)</code></em></p>
 </div>
@@ -187,7 +187,7 @@ autoxgbparset.mixed = makeParamSet(
 )
 system.time(reg_auto_dart &lt;- autoxgboost(reg_task, par.set = autoxgbparset.mixed))</code></pre>
 <ul>
-<li>Interesting enough, a model with dart booster has been chosen, but the results are pretty much the same. Tuning mse = 0.044, and testing mse = 0.048. It means a result around 0.044 is about the best we can achieve through <code>xgboost</code>.</li>
+<li>Interestingly enough, a model with dart booster has been chosen, but the results are pretty much the same. Tuning mse = 0.044, and testing mse = 0.048. It means a result around 0.044 is about the best we can achieve through <code>xgboost</code>.</li>
 </ul>
 <pre><code>## Autoxgboost tuning result
 ## 
@@ -249,7 +249,7 @@ system.time(reg_auto_dart &lt;- autoxgboost(reg_task, par.set = autoxgbparset.mi
 
 
 <nav class="post-nav">
-  <span class="nav-prev"></span>
+  <span class="nav-prev"><a href="/post/2018/10/14/shap-visualization-for-xgboost/">&larr; SHAP Visualization for XGBoost</a></span>
   <span class="nav-next"><a href="/post/2018/07/20/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/">Spatial data in R: Dividing raster layers into equal-area rings &rarr;</a></span>
 </nav>
 

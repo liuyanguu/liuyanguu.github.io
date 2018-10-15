@@ -6,10 +6,20 @@
     <description>Recent content in Data Visualization on Welcome to my blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 20 Jul 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 14 Oct 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://liuyanguu.github.io/categories/data-visualization/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>SHAP Visualization for XGBoost</title>
+      <link>https://liuyanguu.github.io/post/2018/10/14/shap-visualization-for-xgboost/</link>
+      <pubDate>Sun, 14 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://liuyanguu.github.io/post/2018/10/14/shap-visualization-for-xgboost/</guid>
+      <description>BackgroundSummary plotSHAP plot for each feature(Under further revise)
+BackgroundI will illustrate here the application of SHAP (SHapley Additive exPlnation) values to visualize the efforts of features on the outcome variable in a XGBoost model. The function was developed by Scott Lundberg in Python Github Link and then combined into xgboost with one visualization function xgb.plot.shap. But we can make better summary figures as those functions in its Python package in more flexible ways by extracting the SHAP values and plot by ourselves.</description>
+    </item>
     
     <item>
       <title>Spatial data in R: Dividing raster layers into equal-area rings</title>

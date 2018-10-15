@@ -23,7 +23,7 @@
     <item>
       <title>Data Visualization</title>
       <link>https://liuyanguu.github.io/categories/data-visualization/</link>
-      <pubDate>Fri, 20 Jul 2018 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 14 Oct 2018 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/categories/data-visualization/</guid>
       <description></description>
@@ -32,9 +32,18 @@
     <item>
       <title>Machine Learning</title>
       <link>https://liuyanguu.github.io/categories/machine-learning/</link>
-      <pubDate>Wed, 03 Oct 2018 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 14 Oct 2018 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/categories/machine-learning/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Parameter Tuning</title>
+      <link>https://liuyanguu.github.io/categories/parameter-tuning/</link>
+      <pubDate>Wed, 03 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://liuyanguu.github.io/categories/parameter-tuning/</guid>
       <description></description>
     </item>
     
@@ -44,15 +53,6 @@
       <pubDate>Fri, 20 Jul 2018 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/categories/spatial-data/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Tuning</title>
-      <link>https://liuyanguu.github.io/categories/tuning/</link>
-      <pubDate>Wed, 03 Oct 2018 00:00:00 +0000</pubDate>
-      
-      <guid>https://liuyanguu.github.io/categories/tuning/</guid>
       <description></description>
     </item>
     
