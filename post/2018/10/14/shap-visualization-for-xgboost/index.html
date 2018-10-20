@@ -79,12 +79,17 @@
 <p>(Under further revise)</p>
 <div id="background" class="section level1">
 <h1>Background</h1>
-<p>I will illustrate here the application of SHAP (SHapley Additive exPlnation) values to visualize the efforts of features on the outcome variable in a XGBoost model. The function was developed by <em>Scott Lundberg</em> in Python <a href="https://github.com/slundberg/shap">Github Link</a> and then combined into <em>xgboost</em> with one visualization function <em>xgb.plot.shap</em>. But we can make better summary figures as those functions in its Python package in more flexible ways by extracting the SHAP values and plot by ourselves.</p>
+<p>I will illustrate here the application of SHAP (SHapley Additive exPlnation) values to visualize the efforts of features on the outcome variable in a XGBoost model.<br />
+The function was developed by <em>Scott Lundberg</em> in Python <a href="https://github.com/slundberg/shap">Github Link</a> and then combined into <em>xgboost</em> with one visualization function <em>xgb.plot.shap</em>. But we can make better summary figures as those functions in its Python package in more flexible ways by extracting the SHAP values and plot by ourselves.</p>
 </div>
 <div id="summary-plot" class="section level1">
 <h1>Summary plot</h1>
 <ul>
-<li>Using a self-defined function</li>
+<li>Using a self-defined function<br />
+</li>
+<li>We can see clearly for the most influential variable on the top: Monthly water cost. A Higher cost is associated with the declined share of temporary housing. But a very low cost has a strong impact on the increased share of temporary housing<br />
+</li>
+<li>The effects of binary variables are highly distinctive. The secound variable shows that Resettled housing is highly unlikely to be temporary. So does being close to wells as water sources.</li>
 </ul>
 <pre><code>## make SHAP score by decreasing order</code></pre>
 <p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
@@ -93,6 +98,7 @@
 <h1>SHAP plot for each feature</h1>
 <ul>
 <li>Using the built-in <code>xgb.plot.shap</code> function</li>
+<li>Here we choose to show top 9 features ranked by impact on the dependent variable</li>
 </ul>
 <pre class="r"><code>f_ranked &lt;- names(shap_result$mean_shap_score)
 xgb.plot.shap(data = X_train, model = xg_mod, features = f_ranked[1:9], n_col = 3)</code></pre>
