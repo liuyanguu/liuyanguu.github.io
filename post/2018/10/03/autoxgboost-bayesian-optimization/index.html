@@ -71,33 +71,21 @@
 <div id="TOC">
 <ul>
 <li><a href="#background">Background</a></li>
-<li><a href="#old-result">Old Result</a></li>
 <li><a href="#using-autoxgboost">Using <code>autoxgboost</code></a></li>
-<li><a href="#new-result">New Result</a></li>
+<li><a href="#new-result">New Result</a><ul>
+<li><a href="#compared-to-old-result">Compared to old Result</a></li>
 <li><a href="#tuning-over-different-boosters">Tuning over Different Boosters</a></li>
+<li><a href="#return-the-recommendedchosen-parameters">Return the recommended/chosen parameters</a></li>
+</ul></li>
 </ul>
 </div>
 
 <p>(updated on Oct 14)</p>
 <div id="background" class="section level1">
 <h1>Background</h1>
-<p>It has been a while since my last update. I have been working on lots of interesting projects since I joined Mount Sinai in August. We have a great team here and obviously I can learn a lot from everyone around me. Most of my job so far focuses on extreme gradient boosting and visualization of results. Suggested by Allan, I recently tested <code>autoxgboost</code>, which is so easy to use and runs much faster than the naive grid or random search illustrated in my <a href="https://liuyanguu.github.io/post/2018/07/09/extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting/">earlier post on XGBoost</a>. The results are also as good as the best effort we could obtain from the time-consuming random search.</p>
+<p>It has been a while since my last update. I have been working on lots of interesting projects since I joined Mount Sinai in August. We have a great team here and obviously I can learn a lot from everyone around me. Most of my job so far focuses on applying machine learning techniques, mainly extreme gradient boosting and the visualization of results. Parameter tuning could be challenging in XGBoost. I recently tried <code>autoxgboost</code>, which is so easy to use and runs much faster than the naive grid or random search illustrated in my <a href="https://liuyanguu.github.io/post/2018/07/09/extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting/">earlier post on XGBoost</a>. The results are also as good as the best effort we could obtain from the time-consuming random search.</p>
 <p>I use the same dataset to exemplify <code>autoxgboost</code><br />
 To install the package, run <em><code>devtools::install_github(&quot;ja-thomas/autoxgboost&quot;)</code></em></p>
-</div>
-<div id="old-result" class="section level1">
-<h1>Old Result</h1>
-<ul>
-<li>Parameters</li>
-</ul>
-<pre><code>##   nrounds max_depth   eta gamma colsample_bytree min_child_weight
-## 1     228         8 0.034     0           0.7208                7
-##   subsample
-## 1    0.7017</code></pre>
-<ul>
-<li>rmse</li>
-</ul>
-<pre class="r"><code># 0.0433</code></pre>
 </div>
 <div id="using-autoxgboost" class="section level1">
 <h1>Using <code>autoxgboost</code></h1>
@@ -155,9 +143,22 @@ system.time(reg_auto &lt;- autoxgboost(reg_task))
 <li>Testing mse: 0.047 (rmse is: 0.2168) is quite close to the 0.043 from previous post. But it is much faster using only 57 rounds. Notice that the cross-valiation tuning mse is almost the same: 0.044.</li>
 </ul>
 <pre><code>## [1] 0.0469821</code></pre>
+<div id="compared-to-old-result" class="section level2">
+<h2>Compared to old Result</h2>
+<ul>
+<li>Parameters</li>
+</ul>
+<pre><code>##   nrounds max_depth   eta gamma colsample_bytree min_child_weight
+## 1     228         8 0.034     0           0.7208                7
+##   subsample
+## 1    0.7017</code></pre>
+<ul>
+<li>rmse</li>
+</ul>
+<pre class="r"><code># 0.0433</code></pre>
 </div>
-<div id="tuning-over-different-boosters" class="section level1">
-<h1>Tuning over Different Boosters</h1>
+<div id="tuning-over-different-boosters" class="section level2">
+<h2>Tuning over Different Boosters</h2>
 <ul>
 <li><code>autoxgboost</code> also allows us to tune over the three types of boosters: <em>gbtree, gblinear and dart</em></li>
 <li>The paraset <code>autoxgbparset.mixed</code> was predifined by author, but it seems I still need to load it<br />
@@ -218,6 +219,29 @@ system.time(reg_auto_dart &lt;- autoxgboost(reg_task, par.set = autoxgbparset.mi
 ## With tuning result: mse = 0.044</code></pre>
 <pre><code>## testing mse:</code></pre>
 <pre><code>## [1] 0.0487725</code></pre>
+</div>
+<div id="return-the-recommendedchosen-parameters" class="section level2">
+<h2>Return the recommended/chosen parameters</h2>
+<ul>
+<li>By the way, since <code>autoxgboost</code> was built on <code>mlr</code> package, it might appear difficult to further engineer the output, for example, extract parameters for further use. To extract the the tuned parameters using <code>getHyperPars</code> from the <code>mlr</code> package:</li>
+</ul>
+<pre class="r"><code>Param_chosen &lt;- mlr::getHyperPars(reg_auto_dart$final.learner)
+print(unlist(Param_chosen))</code></pre>
+<pre><code>##               nrounds               verbose             objective 
+##                  &quot;54&quot;                   &quot;0&quot;          &quot;reg:linear&quot; 
+##               booster           sample_type        normalize_type 
+##                &quot;dart&quot;            &quot;weighted&quot;              &quot;forest&quot; 
+##             rate_drop             skip_drop              one_drop 
+##   &quot;0.634519323528358&quot;   &quot;0.765370830696091&quot;                &quot;TRUE&quot; 
+##           grow_policy            max_leaves               max_bin 
+##           &quot;lossguide&quot;                   &quot;1&quot;                  &quot;16&quot; 
+##                   eta                 gamma             max_depth 
+##  &quot;0.0507358974376265&quot;  &quot;0.0863826961866801&quot;                  &quot;10&quot; 
+##      colsample_bytree     colsample_bylevel                lambda 
+##   &quot;0.837704133330852&quot;   &quot;0.543820898304747&quot;  &quot;0.0090610428548379&quot; 
+##                 alpha             subsample 
+## &quot;0.00319982004364013&quot;   &quot;0.726191523257774&quot;</code></pre>
+</div>
 </div>
 
 </main>
@@ -326,6 +350,9 @@ if (!doNotTrack) {
 </div>
 </footer>
 
+
+<script src="//yihui.name/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
 
 
 
