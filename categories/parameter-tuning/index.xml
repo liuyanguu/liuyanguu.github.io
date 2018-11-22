@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Parameter Tuning on Welcome to my blog</title>
-    <link>/categories/parameter-tuning/</link>
+    <link>https://liuyanguu.github.io/categories/parameter-tuning/</link>
     <description>Recent content in Parameter Tuning on Welcome to my blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Wed, 03 Oct 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/categories/parameter-tuning/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://liuyanguu.github.io/categories/parameter-tuning/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>autoxgboost: Automatic XGBoost using Bayesian Optimization</title>
-      <link>/post/2018/10/03/autoxgboost-bayesian-optimization/</link>
+      <link>https://liuyanguu.github.io/post/2018/10/03/autoxgboost-bayesian-optimization/</link>
       <pubDate>Wed, 03 Oct 2018 00:00:00 +0000</pubDate>
       
-      <guid>/post/2018/10/03/autoxgboost-bayesian-optimization/</guid>
+      <guid>https://liuyanguu.github.io/post/2018/10/03/autoxgboost-bayesian-optimization/</guid>
       <description>BackgroundUsing autoxgboostNew ResultCompared to old ResultTuning over Different BoostersReturn the recommended/chosen parameters(updated on Oct 14)
 BackgroundIt has been a while since my last update. I have been working on lots of interesting projects since I joined Mount Sinai in August. We have a great team here and obviously I can learn a lot from everyone around me. Most of my job so far focuses on applying machine learning techniques, mainly extreme gradient boosting and the visualization of results.</description>
     </item>
