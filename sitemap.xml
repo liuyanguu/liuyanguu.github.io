@@ -3,148 +3,165 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://liuyanguu.github.io/post/2018/11/15/xgboost-dart-example/</loc>
+    <loc>/post/2019/02/24/shiny-in-blogdown/</loc>
+    <lastmod>2019-02-24T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/2018/11/15/xgboost-dart-example/</loc>
     <lastmod>2018-11-15T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://liuyanguu.github.io/post/2018/10/14/shap-visualization-for-xgboost/</loc>
+    <loc>/post/2018/10/14/shap-visualization-for-xgboost/</loc>
     <lastmod>2018-10-14T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://liuyanguu.github.io/post/2018/10/03/autoxgboost-bayesian-optimization/</loc>
+    <loc>/post/2018/10/03/autoxgboost-bayesian-optimization/</loc>
     <lastmod>2018-10-03T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://liuyanguu.github.io/post/2018/07/20/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/</loc>
+    <loc>/post/2018/07/20/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/</loc>
     <lastmod>2018-07-20T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://liuyanguu.github.io/post/2018/07/16/how-to-draw-heatmap-with-colorful-dendrogram/</loc>
+    <loc>/post/2018/07/16/how-to-draw-heatmap-with-colorful-dendrogram/</loc>
     <lastmod>2018-07-16T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://liuyanguu.github.io/post/2018/07/09/extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting/</loc>
+    <loc>/post/2018/07/09/extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting/</loc>
     <lastmod>2018-07-09T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://liuyanguu.github.io/post/2018/07/01/catalogue-of-my-old-blog/</loc>
+    <loc>/post/2018/07/01/catalogue-of-my-old-blog/</loc>
     <lastmod>2018-07-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://liuyanguu.github.io/about-hugo/</loc>
+    <loc>/about-hugo/</loc>
   </url>
   
   <url>
-    <loc>https://liuyanguu.github.io/tags/catalog/</loc>
-    <lastmod>2018-07-01T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>https://liuyanguu.github.io/categories/catalog/</loc>
+    <loc>/tags/catalog/</loc>
     <lastmod>2018-07-01T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://liuyanguu.github.io/categories/</loc>
+    <loc>/categories/catalog/</loc>
     <lastmod>2018-07-01T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://liuyanguu.github.io/tags/dart/</loc>
+    <loc>/categories/</loc>
+    <lastmod>2018-07-01T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/dart/</loc>
     <lastmod>2018-11-15T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://liuyanguu.github.io/categories/data-visualization/</loc>
-    <lastmod>2018-10-14T00:00:00+00:00</lastmod>
+    <loc>/categories/data-visualization/</loc>
+    <lastmod>2019-02-24T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://liuyanguu.github.io/tags/geographic/</loc>
+    <loc>/tags/geographic/</loc>
     <lastmod>2018-07-20T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://liuyanguu.github.io/categories/machine-learning/</loc>
+    <loc>/categories/machine-learning/</loc>
     <lastmod>2018-11-15T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://liuyanguu.github.io/tags/markdown/</loc>
+    <loc>/tags/markdown/</loc>
     <lastmod>2018-07-16T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://liuyanguu.github.io/categories/parameter-tuning/</loc>
+    <loc>/categories/parameter-tuning/</loc>
     <lastmod>2018-10-03T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://liuyanguu.github.io/post/</loc>
-    <lastmod>2018-11-15T00:00:00+00:00</lastmod>
+    <loc>/post/</loc>
+    <lastmod>2019-02-24T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://liuyanguu.github.io/tags/r/</loc>
+    <loc>/tags/r/</loc>
     <lastmod>2018-07-20T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://liuyanguu.github.io/tags/shap/</loc>
+    <loc>/tags/shap/</loc>
     <lastmod>2018-10-14T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://liuyanguu.github.io/tags/spatial/</loc>
+    <loc>/tags/shiny/</loc>
+    <lastmod>2019-02-24T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/categories/shiny/</loc>
+    <lastmod>2019-02-24T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/spatial/</loc>
     <lastmod>2018-07-20T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://liuyanguu.github.io/categories/spatial-data/</loc>
+    <loc>/categories/spatial-data/</loc>
     <lastmod>2018-07-20T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://liuyanguu.github.io/tags/</loc>
+    <loc>/tags/</loc>
     <lastmod>2018-07-01T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://liuyanguu.github.io/</loc>
+    <loc>/</loc>
+    <lastmod>2019-02-24T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/xgboost/</loc>
     <lastmod>2018-11-15T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://liuyanguu.github.io/tags/xgboost/</loc>
-    <lastmod>2018-11-15T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>https://liuyanguu.github.io/about-me/</loc>
+    <loc>/about-me/</loc>
   </url>
   
 </urlset>
