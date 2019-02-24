@@ -17,10 +17,10 @@
       <pubDate>Sun, 24 Feb 2019 00:00:00 +0000</pubDate>
       
       <guid>/post/2019/02/24/shiny-in-blogdown/</guid>
-      <description>Embed ShinyMy Shiny app exampleThe code for the appEmbed ShinySince Blogdown is for static websites, it cannot run Shiny in rmarkdown directly. According to discussions here and blogdown documents here.
-The only way to do it is using iframe, just put the code outside the rmarkdown chunk:
+      <description>How to embed ShinyMy Shiny app exampleHow to embed ShinySince Blogdown is for static websites, it cannot run Shiny in rmarkdown directly. According to discussion here and document here.
+The only way to do it is using iframe put the code outside the chunk:
 &amp;lt;iframe src=&amp;quot;https://liuyanguu.shinyapps.io/bcl_app/&amp;quot; width=1000 height=800&amp;quot;&amp;gt;&amp;lt;/iframe&amp;gt;
-There is also a built-in function in knitr to do the same thing so it can also be put in a chunk.</description>
+There is also a built-in function in knitr to do the same thing so if write in the chunk.</description>
     </item>
     
     <item>
@@ -115,8 +115,8 @@ XMag is the second Hugo theme I have designed. It is based on my first Hugo them
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/about-me/</guid>
-      <description>I am a statistician working in the fields of healthcare, epidemiology, environmental science and urban science. I came from Shanghai, have lived in New York City since 2014. I studied in Uppsala, Sweden for two years, wonderful experience.
-I started my old blog in the beginning of 2018 to keep a simple record of my work and share some of my experience in R programming.
+      <description>I am a statistician working in the fields of healthcare, epidemiology, environmental science and urban science. I came from Shanghai, have lived in New York City since 2014. In 2010 I studied in Uppsala, Sweden for two years, wonderful experience.
+I started my old blog at the beginning of 2018 to keep a simple record of my work and share some of my experience in R programming.
 This blog was created from the R package blogdown written by Yihui Xie.</description>
     </item>
     

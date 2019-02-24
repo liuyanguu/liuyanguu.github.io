@@ -17,10 +17,10 @@
       <pubDate>Sun, 24 Feb 2019 00:00:00 +0000</pubDate>
       
       <guid>/post/2019/02/24/shiny-in-blogdown/</guid>
-      <description>Embed ShinyMy Shiny app exampleThe code for the appEmbed ShinySince Blogdown is for static websites, it cannot run Shiny in rmarkdown directly. According to discussions here and blogdown documents here.
-The only way to do it is using iframe, just put the code outside the rmarkdown chunk:
+      <description>How to embed ShinyMy Shiny app exampleHow to embed ShinySince Blogdown is for static websites, it cannot run Shiny in rmarkdown directly. According to discussion here and document here.
+The only way to do it is using iframe put the code outside the chunk:
 &amp;lt;iframe src=&amp;quot;https://liuyanguu.shinyapps.io/bcl_app/&amp;quot; width=1000 height=800&amp;quot;&amp;gt;&amp;lt;/iframe&amp;gt;
-There is also a built-in function in knitr to do the same thing so it can also be put in a chunk.</description>
+There is also a built-in function in knitr to do the same thing so if write in the chunk.</description>
     </item>
     
   </channel>

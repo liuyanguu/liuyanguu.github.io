@@ -70,186 +70,29 @@
 <main>
 <div id="TOC">
 <ul>
-<li><a href="#embed-shiny">Embed <em>Shiny</em></a></li>
-<li><a href="#my-shiny-app-example">My <em>Shiny</em> app example</a><ul>
-<li><a href="#the-code-for-the-app">The code for the app</a></li>
-</ul></li>
+<li><a href="#how-to-embed-shiny">How to embed <em>Shiny</em></a></li>
+<li><a href="#my-shiny-app-example">My <em>Shiny</em> app example</a></li>
 </ul>
 </div>
 
-<div id="embed-shiny" class="section level2">
-<h2>Embed <em>Shiny</em></h2>
-<p>Since <em>Blogdown</em> is for static websites, it cannot run <code>Shiny</code> in rmarkdown directly. According to discussions <a href="https://github.com/rstudio/blogdown/issues/166">here</a> and blogdown documents <a href="https://bookdown.org/yihui/blogdown/html-widgets.html">here</a>.</p>
-<p>The only way to do it is using iframe, just put the code outside the rmarkdown chunk:<br />
+<div id="how-to-embed-shiny" class="section level2">
+<h2>How to embed <em>Shiny</em></h2>
+<p>Since <em>Blogdown</em> is for static websites, it cannot run <em>Shiny</em> in rmarkdown directly. According to discussion <a href="https://github.com/rstudio/blogdown/issues/166">here</a> and document <a href="https://bookdown.org/yihui/blogdown/html-widgets.html">here</a>.</p>
+<p>The only way to do it is using iframe put the code outside the chunk:<br />
 <code>&lt;iframe src=&quot;https://liuyanguu.shinyapps.io/bcl_app/&quot; width=1000 height=800&quot;&gt;&lt;/iframe&gt;</code></p>
-<p>There is also a built-in function in <code>knitr</code> to do the same thing so it can also be put in a chunk.<br />
-The only difference is that we can only set <code>height</code>, and the shiny app would appear slightly differently with the <code>siderbarPanel</code> at the top and the <code>mainPanel</code> beneath it.</p>
+<p>There is also a built-in function in <em>knitr</em> to do the same thing so if write in the chunk.<br />
+The only difference is that we can only set <code>height</code>, and the shiny app would appear slightly differently with the <strong>siderbarPanel</strong> at the top and the <strong>mainPanel</strong> beneath it.</p>
 <pre class="r"><code>knitr::include_app(&quot;https://liuyanguu.shinyapps.io/bcl_app/&quot;, height = &quot;100%&quot;)
 # by the way, you can also embed slides in a similar way, for example:
 knitr::include_url(&#39;https://timmastny.rbind.io/slides/first_presentation#2&#39;)</code></pre>
 </div>
 <div id="my-shiny-app-example" class="section level2">
 <h2>My <em>Shiny</em> app example</h2>
-<p>I modified based on the <a href="https://deanattali.com/blog/building-shiny-apps-tutorial/">great example and tutorial</a> by Dean Attali, whom I found is also the author of <code>ggExtra</code>’s marginal plot. It is definitely better than Shiny’s own training materials.<br />
+<p>I modified based on the <a href="https://deanattali.com/blog/building-shiny-apps-tutorial/">great example and tutorial</a> by Dean Attali, whom I found is also the author of <em>ggExtra</em>’s marginal plot. It is definitely better than Shiny’s own training materials.<br />
 Thanks a lot. Yes, I have donated.</p>
 <p>If this embedment doesn’t appear well on your screen, here is <a href="https://liuyanguu.shinyapps.io/bcl_app/">the link to the app</a>. <iframe src="https://liuyanguu.shinyapps.io/bcl_app/" width=1000 height=800"></iframe></p>
-<div id="the-code-for-the-app" class="section level3">
-<h3>The code for the app</h3>
-<p>I did not split ui with server since it is pretty short. All the code needed are in one file.</p>
-<pre class="r"><code># exercise on https://deanattali.com/blog/building-shiny-apps-tutorial/
-
-library(shiny)
-library(ggplot2)
-library(data.table)
-library(DT) # for `renderDataTable`
-
-# The data is put in a local folder named `Data`
-bcl &lt;- setDT(read.csv(&quot;./Data/bcl-data.csv&quot;, stringsAsFactors = FALSE))
-
-ui &lt;- fluidPage(
-  titlePanel(&quot;Shiny Example: Liquor Store Selection&quot;),
-  
-# sidebarLayout  
-  sidebarLayout(
-    # side panel
-        sidebarPanel(
-    # price, type, and country 
-          sliderInput(inputId = &quot;price_input&quot;, label = &quot;Price&quot;, min = 0, max = 100,
-                      value = c(0, 50), pre = &quot;$&quot;),
-          checkboxGroupInput(&quot;type_input&quot;, &quot;Product Type&quot;,
-                       choices = c(&quot;BEER&quot;, &quot;REFRESHMENT&quot;, &quot;SPIRITS&quot;, &quot;WINE&quot;),
-                       selected = c(&quot;BEER&quot;,&quot;WINE&quot;)),
-          
-          # a conditional panel to select sweetness 
-          conditionalPanel(
-            condition = &quot;input.type_input.indexOf(&#39;WINE&#39;)!=-1&quot;,
-            p(&quot;Filter by sweetness if wine is selected:&quot;),
-            sliderInput(inputId = &quot;sweet_input&quot;, label = &quot;Sweetness Level&quot;, min = 0, max = 10,
-                        value = c(0, 5))
-          ),
-          
-          checkboxInput(&quot;sort_by_price&quot;, &quot;Sort results table by price&quot;, value = TRUE),
-          checkboxInput(&quot;show_country&quot;, &quot;Filter by country&quot;, value = FALSE),
-          # populate the country selection
-          conditionalPanel(
-            condition = &quot;input.show_country&quot;,
-            p(&quot;Available selection from these countries:&quot;),
-            uiOutput(&quot;country_output&quot;)
-            )
-          ),
-    
-    # main panel for contents
-        mainPanel(
-            tabsetPanel(
-              tabPanel(&quot;Results Table&quot;,
-                      h3(textOutput(&quot;text_summary&quot;)), # add a headline of short summary
-                      downloadLink(&#39;download_data&#39;, &#39;Download&#39;), # add download option   
-                      br(),br(),
-                      plotOutput(&quot;myplot0&quot;),
-                      DT::dataTableOutput(&quot;results_table&quot;)),
-              tabPanel(&quot;Alcohol%&quot;, plotOutput(&quot;myplot1&quot;)),
-              tabPanel(&quot;Sweetness&quot;, plotOutput(&quot;myplot2&quot;)) 
-            )
-          )
-    )
-)
-
-server &lt;- function(input, output) {
-  # use a reactive function to screen for available countries to be shown in list
-  # the input would be `country_input`
-  output$country_output &lt;- renderUI({
-    selectInput(&quot;country_input&quot;, &quot;Country&quot;,
-                select.country(), # only show available countries from list
-                selected = &quot;CANADA&quot;)
-  })
-  
-  # the select.country function to return the list of `Country`
-  select.country &lt;- reactive({
-    # : 
-    bcl_temp &lt;- bcl[Price &gt;= input$price_input[1]&amp;
-          Price &lt;= input$price_input[2]&amp;
-          Type %in% input$type_input,]
-    if (!is.null(input$sweet_input)) bcl_temp &lt;- bcl_temp[Sweetness &gt;= input$sweet_input[1]&amp;
-                                                            Sweetness &lt;= input$sweet_input[2]]
-    bcl_temp[, sort(unique(Country))]
-  })
-  
-  # subset the dataset
-  filtered &lt;- reactive({
-    bcl_temp &lt;- bcl[Price &gt;= input$price_input[1]&amp;
-                 Price &lt;= input$price_input[2]&amp;
-                 Type %in% input$type_input]
-    if (input$show_country) bcl_temp &lt;- bcl_temp[Country %in% input$country_input]
-    if (!is.null(input$sweet_input)) bcl_temp &lt;- bcl_temp[Sweetness &gt;= input$sweet_input[1]&amp;
-                                                            Sweetness &lt;= input$sweet_input[2]]
-    if (input$sort_by_price) bcl_temp[order(Price),] 
-    else bcl_temp[order(Country),]
-  })
-  
-  # Add text: &quot;There are in total # selections:&quot;
-  output$text_summary &lt;- renderText({
-    paste(&quot;There are in total&quot;, filtered()[,.N], &quot;options:&quot;)
-  })
-  
-  # The data table
-  output$results_table &lt;- DT::renderDataTable({
-    filtered()
-  })
-  
-  # Download buttom
-  output$download_data &lt;- downloadHandler(
-    filename = function() {
-      paste(&#39;BCL_Data_Selection&#39;, Sys.Date(), &#39;.csv&#39;, sep=&quot;&quot;)
-    },
-    content = function(file) {
-      write.csv(filtered(), file, row.names = F)
-    }
-  )
-  
-  # Figures
-  ## fig.1 summary of price above results table
-  output$myplot0 &lt;- renderPlot({
-      if (is.null(filtered())){
-        return()
-      }
-        ggplot(filtered(), aes(x = Price, fill = Type)) +
-        geom_histogram(alpha = 0.7, aes(y = ..density..), position = &#39;identity&#39;) + 
-        theme_bw() + 
-        scale_fill_viridis_d(begin = 1, end = 0)+
-        ggtitle(&quot;Distribution of Price in the Selection&quot;) + 
-        labs(y = &quot;Frequency&quot;)
-    })
-  
-   
-  ## fig.1 Alcohol Content
-  output$myplot1 &lt;- renderPlot({
-    if (is.null(filtered())){
-      return()
-    }
-    ggplot(filtered(), aes(x = Alcohol_Content, fill = Type)) +
-      geom_histogram(alpha = 0.7, aes(y = ..density..), position = &#39;identity&#39;) + 
-      theme_bw() + 
-      scale_fill_viridis_d(begin = 1, end = 0)+
-      ggtitle(&quot;Distribution of Alcohol Content in the Selection&quot;) + 
-      labs(y = &quot;Count&quot;)
-  })
-  
-  ## fig.2 Sweetness 
-  output$myplot2 &lt;- renderPlot({
-    if (is.null(filtered())){
-      return()
-    }
-    ggplot(filtered(), aes(x = Sweetness, fill = Type)) +
-      geom_histogram(alpha = 0.7, aes(y = ..density..), position = &#39;identity&#39;) + 
-      theme_bw() + 
-      scale_fill_viridis_d(begin = 1, end = 0)+
-      ggtitle(&quot;Distribution of Sweetness in the Selection&quot;) + 
-      labs(y = &quot;Count&quot;)
-  })
-}
-
-shinyApp(ui = ui, server = server)</code></pre>
-</div>
+<p><strong>The code for the app</strong><br />
+All the code needed are in one file. I did not split ui with server since it is not long. The code are hosted <a href="https://github.com/liuyanguu/shiny_app/blob/master/bcl_app.R">on github</a>.</p>
 </div>
 
 </main>
@@ -358,9 +201,6 @@ if (!doNotTrack) {
 </div>
 </footer>
 
-
-<script src="//yihui.name/js/math-code.js"></script>
-<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
 
 
 
