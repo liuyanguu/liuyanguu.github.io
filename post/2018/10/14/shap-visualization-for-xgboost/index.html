@@ -71,27 +71,158 @@
 <div id="TOC">
 <ul>
 <li><a href="#background">Background</a></li>
-<li><a href="#summary-plot">Summary plot</a></li>
+<li><a href="#summary-plot">Summary plot</a><ul>
+<li><a href="#function-to-get-shap-value-matrix">Function to get SHAP value matrix</a></li>
+<li><a href="#functions-for-summary-plot">Functions for summary plot</a></li>
+</ul></li>
 <li><a href="#shap-plot-for-each-feature">SHAP plot for each feature</a></li>
+<li><a href="#shap-stack-plot-for-observation">SHAP stack plot for observation</a><ul>
+<li><a href="#function-for-stack-plot">Function for stack plot</a></li>
+</ul></li>
 </ul>
 </div>
 
 <p>(Under further revise)</p>
 <div id="background" class="section level1">
 <h1>Background</h1>
-<p>I will illustrate here the application of SHAP (SHapley Additive exPlnation) values to visualize the efforts of features on the outcome variable in a XGBoost model.<br />
-The function was developed by <em>Scott Lundberg</em> in Python <a href="https://github.com/slundberg/shap">Github Link</a> and then combined into <em>xgboost</em> with one visualization function <em>xgb.plot.shap</em>. But we can make better summary figures as those functions in its Python package in more flexible ways by extracting the SHAP values and plot by ourselves.</p>
+<p>I will illustrate the application of SHAP (SHapley Additive exPlnation) values to visualize the efforts of features on the outcome variable in a XGBoost model.<br />
+The function was developed by <a href="https://github.com/slundberg/shap"><em>Scott Lundberg</em> in Python and explained here</a>. SHAP was combined into <em>xgboost</em> with one visualization function <em>xgb.plot.shap</em>. But we can make better summary figures as in the Python package in more flexible ways by extracting the SHAP values.</p>
 </div>
 <div id="summary-plot" class="section level1">
 <h1>Summary plot</h1>
 <ul>
-<li>Using <code>geom_sina</code> from <code>ggforce</code> and <code>ggplot2</code></li>
+<li>Using <code>geom_sina</code> from <code>ggforce</code> to make the sina plot<br />
+</li>
 <li>We can see clearly for the most influential variable on the top: Monthly water cost. A Higher cost is associated with the declined share of temporary housing. But a very low cost has a strong impact on the increased share of temporary housing<br />
 </li>
 <li>The effects of binary variables are highly distinctive. The second variable shows that Resettled housing is highly unlikely to be temporary, so does being close to wells as water sources.</li>
 </ul>
-<pre><code>## make SHAP score by decreasing order</code></pre>
-<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<p><strong>Load the xgboost model</strong></p>
+<pre class="r"><code>best_rmse_index &lt;- 56
+best_rmse &lt;- 0.2102
+best_seednumber &lt;- 3660
+best_param &lt;- list(objective = &quot;reg:linear&quot;,  # For regression
+                eval_metric = &quot;rmse&quot;,      # rmse is used for regression
+                max_depth = 9,
+                eta = 0.09822,   # Learning rate, default: 0.3
+                subsample = 0.64,
+                colsample_bytree = 0.6853, 
+                min_child_weight = 6, # These two are important
+                max_delta_step = 8)
+# The best index (min_rmse_index) is the best &quot;nround&quot; in the model
+nround &lt;- best_rmse_index
+set.seed(best_seednumber)
+xg_mod &lt;- xgboost(data = X_train, label = Y_train, params = best_param, nround = nround, verbose = F)</code></pre>
+<div id="function-to-get-shap-value-matrix" class="section level3">
+<h3>Function to get SHAP value matrix</h3>
+<p><strong>Also need it for the stacked plot for observation</strong></p>
+<pre class="r"><code>## not necessary to use these functions... I just wrapped them up...
+## return matrix of shap score and mean ranked score list
+shap.score.rank &lt;- function(xgb_model = xgb_mod, shap_approx = TRUE, 
+                            X_train){
+  require(xgboost)
+  # `shap_contrib` returns the matrix of SHAP values: dim is (Number of obs)x(Number of Features)
+  shap_contrib &lt;- predict(xgb_model, X_train,
+                          predcontrib = TRUE, approxcontrib = shap_approx)
+  shap_contrib &lt;- as.data.table(shap_contrib)
+  shap_contrib[,BIAS:=NULL]
+  # rank SHAP score by decreasing order:
+  mean_shap_score &lt;- colMeans(abs(shap_contrib))[order(colMeans(abs(shap_contrib)), decreasing = T)]
+  return(list(shap_score = shap_contrib,
+              mean_shap_score = (mean_shap_score)))
+}</code></pre>
+</div>
+<div id="functions-for-summary-plot" class="section level3">
+<h3>Functions for summary plot</h3>
+<p><strong>To get it work, please install ‘ggforce’ from github, as there was a bug in the new <code>geom_sina</code></strong><br />
+Now in <code>geom_sina</code> the default method is “density”, to do it my originally way, need to change into <code>method = "counts", maxwidth = 0.7</code></p>
+<pre class="r"><code>devtools::install_github(&quot;thomasp85/ggforce&quot;)</code></pre>
+<pre class="r"><code>packageVersion(&quot;ggforce&quot;)</code></pre>
+<pre><code>## [1] &#39;0.2.1.9000&#39;</code></pre>
+<pre class="r"><code>## a function to standardize feature values into same range
+std1 &lt;- function(x){
+  return ((x - min(x, na.rm = T))/(max(x, na.rm = T) - min(x, na.rm = T)))
+}
+
+## prep shap data into long format, option to plot only `top_n` features  
+shap.prep &lt;- function(shap  = shap_result, X_train, top_n){
+  # descending order
+  if (missing(top_n)) top_n &lt;- dim(X_train)[2] # by default, use all features
+  if (!top_n%in%c(1:dim(X_train)[2])) stop(&#39;supply correct top_n&#39;)
+  require(data.table)
+  shap_score_sub &lt;- as.data.table(shap$shap_score)
+  shap_score_sub &lt;- shap_score_sub[, names(shap$mean_shap_score)[1:top_n], with = F]
+  shap_score_long &lt;- melt.data.table(shap_score_sub, measure.vars = colnames(shap_score_sub))
+  
+  # feature values: the values in the original dataset
+  fv_sub &lt;- as.data.table(X_train)[, names(shap$mean_shap_score)[1:top_n], with = F]
+  # standardize feature values
+  fv_sub_long &lt;- melt.data.table(fv_sub, measure.vars = colnames(fv_sub))
+  fv_sub_long[, stdfvalue := std1(value), by = &quot;variable&quot;]
+  # SHAP value: value
+  # raw feature value: rfvalue; 
+  # standarized: stdfvalue
+  names(fv_sub_long) &lt;- c(&quot;variable&quot;, &quot;rfvalue&quot;, &quot;stdfvalue&quot; )
+  shap_long2 &lt;- cbind(shap_score_long, fv_sub_long[,c(&#39;rfvalue&#39;,&#39;stdfvalue&#39;)])
+  shap_long2[, mean_value := mean(abs(value)), by = variable]
+  setkey(shap_long2, variable)
+  return(shap_long2) 
+}
+
+## the function to plot the summary plot:
+plot.shap.summary &lt;- function(data_long){
+  x_bound &lt;- max(abs(data_long$value))
+  require(&#39;ggplot2&#39;)
+  require(&#39;ggforce&#39;) # for `geom_sina`
+  plot1 &lt;- ggplot(data = data_long)+
+    coord_flip() + 
+    # sina plot: 
+    geom_sina(aes(x = variable, y = value, color = stdfvalue),
+              method = &quot;counts&quot;, maxwidth = 0.7) +
+    # print the mean absolute value on the left: 
+    geom_text(data = unique(data_long[, c(&quot;variable&quot;, &quot;mean_value&quot;), with = F]),
+              aes(x = variable, y=-Inf, label = sprintf(&quot;%.3f&quot;, mean_value)),
+              size = 3, alpha = 0.7,
+              hjust = -0.2, 
+              fontface = &quot;bold&quot;) + # bold
+    # # if want to add a &quot;SHAP&quot; bar notation
+    # annotate(&quot;text&quot;, x = -Inf, y = -Inf, vjust = -0.2, hjust = 0, size = 3,
+    #          label = expression(group(&quot;|&quot;, bar(SHAP), &quot;|&quot;))) + 
+    scale_color_gradient(low=&quot;#FFCC33&quot;, high=&quot;#6600CC&quot;, 
+                         breaks=c(0,1), labels=c(&quot;Low&quot;,&quot;High&quot;)) +
+    scale_y_continuous(limits = c(-x_bound, x_bound)) +
+    # reverse the order of features
+    scale_x_discrete(limits = rev(levels(data_long$variable))) + 
+    geom_hline(yintercept = 0) + # the vertical line
+    labs(y = &quot;SHAP value (impact on model output)&quot;, x = &quot;&quot;, color = &quot;Feature value&quot;) +
+    theme_bw() + 
+    theme(axis.line.y = element_blank(), axis.ticks.y = element_blank(), # remove axis line
+          legend.position=&quot;bottom&quot;)
+  return(plot1)
+}
+
+## Prepare data:
+shap_result &lt;- shap.score.rank(xgb_model = xg_mod, shap_approx = F, 
+                               X_train = X_train)
+shap_long &lt;- shap.prep(X_train = X_train, top_n = 10)
+## The data prepared: variable, SHAP value, raw feature value, standarded feature value, mean value by feature
+print(shap_long)</code></pre>
+<pre><code>##                         variable    value rfvalue stdfvalue mean_value
+##    1:     FF11_Water_MonthlyCost -0.13100   30000 0.2307870    0.12987
+##    2:     FF11_Water_MonthlyCost -0.10213   30000 0.2307870    0.12987
+##    3:     FF11_Water_MonthlyCost -0.10744   30000 0.2307870    0.12987
+##    4:     FF11_Water_MonthlyCost -0.10904   30000 0.2307870    0.12987
+##    5:     FF11_Water_MonthlyCost -0.02674     120 0.0009461    0.12987
+##   ---                                                                 
+## 3156: DD1_Location_Problemscanal -0.01229       0 0.0000000    0.01726
+## 3157: DD1_Location_Problemscanal  0.05833       1 1.0000000    0.01726
+## 3158: DD1_Location_Problemscanal  0.04726       1 1.0000000    0.01726
+## 3159: DD1_Location_Problemscanal  0.03609       1 1.0000000    0.01726
+## 3160: DD1_Location_Problemscanal -0.01016       0 0.0000000    0.01726</code></pre>
+<pre class="r"><code>## make summary plot
+plot.shap.summary(data_long = shap_long)</code></pre>
+<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+</div>
 </div>
 <div id="shap-plot-for-each-feature" class="section level1">
 <h1>SHAP plot for each feature</h1>
@@ -100,8 +231,64 @@ The function was developed by <em>Scott Lundberg</em> in Python <a href="https:/
 <li>Here we choose to show top 9 features ranked by impact on the dependent variable</li>
 </ul>
 <pre class="r"><code>f_ranked &lt;- names(shap_result$mean_shap_score)
-xgb.plot.shap(data = X_train, model = xg_mod, features = f_ranked[1:9], n_col = 3)</code></pre>
-<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+xgb.plot.shap(data = X_train, model = xg_mod, features = f_ranked[1:6], n_col = 3)</code></pre>
+<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+</div>
+<div id="shap-stack-plot-for-observation" class="section level1">
+<h1>SHAP stack plot for observation</h1>
+<ul>
+<li>Using <code>geom_col</code> to “show features each contributing to push the model output from the base value (the average model output) to the model output.”<br />
+</li>
+<li>Tried <code>geom_area</code> but dones’t work very well due to gaps in the plot caused by fluctuation of positive and negative values</li>
+</ul>
+<div id="function-for-stack-plot" class="section level3">
+<h3>Function for stack plot</h3>
+<pre class="r"><code># uses the shap_result from `shap.score.rank`, mainly contains the SHAP value matrix 
+shap.stack.plot &lt;- function(shap_result, top_n, data_percent = 1){
+  require(&#39;data.table&#39;)
+  require(&#39;ggplot2&#39;)
+  require(&#39;ggforce&#39;) # for zoom in (the way to write it has been updated in the new version)
+  ranked_col &lt;- names(shap_result$mean_shap_score)
+  top_ranked_col &lt;- ranked_col[1:top_n]
+  bottom_col &lt;- ranked_col[-(1:top_n)]
+  shap_contrib2 &lt;- setDT(shap_result$shap_score)[,..ranked_col]
+  # plot part of the data if needed
+  set.seed(1234)
+  shap_contrib2 &lt;- shap_contrib2[sample(.N, .N * data_percent)]
+  shap_contrib2[, yhat:= rowSums(.SD)]
+  shap_contrib2[, rest_variables:= rowSums(.SD), .SDcol = bottom_col]
+  
+  # shap_contrib2 &lt;- shap_contrib2[1:100]
+  setkey(shap_contrib2, yhat)
+  shap_contrib2[,id:= .I]
+  
+  # dataset with desired variables for plot
+  shapobs &lt;- shap_contrib2[, c(&quot;id&quot;, top_ranked_col, &quot;rest_variables&quot;), with = F]
+  shapobs_long &lt;- melt.data.table(shapobs, id.vars = &#39;id&#39;)
+  
+  ## make the stack plot
+  x_mid &lt;- shap_contrib2[,median(id)*1.4] # optional: location to zoom in certain part of the plot
+  p &lt;- ggplot(shapobs_long, aes(x = id, y = value , fill = variable)) + 
+    geom_col(width = 1, alpha = 0.9) +
+    scale_fill_viridis_d(option = &quot;D&quot;) + # viridis color scale
+    # theme(axis.text.x=element_blank(), axis.ticks.x=element_blank()) +
+    labs(fill = &#39;Feature&#39;, x = &#39;Observation&#39;, 
+         y = &#39;SHAP values by feature:\n (Contribution to the base value)&#39;) + 
+    # zoom in if needed, it requires the ggforce 0.2.1 (the new version)
+    ggforce::facet_zoom(xlim = c(x_mid, x_mid+max(20, shap_contrib2[,.N]*0.01))) +
+    theme(zoom.y = element_blank(), validate = FALSE) +
+    theme_bw() 
+  p
+  return(p)
+}
+
+# use the SHAP value matrix created above and stored in object `shap_result`  
+## Prepare data:
+shap_result &lt;- shap.score.rank(xgb_model = xg_mod, shap_approx = F, 
+                               X_train = X_train)
+shap.stack.plot(shap_result = shap_result, top_n = 6, data_percent = 1)</code></pre>
+<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+</div>
 </div>
 
 </main>

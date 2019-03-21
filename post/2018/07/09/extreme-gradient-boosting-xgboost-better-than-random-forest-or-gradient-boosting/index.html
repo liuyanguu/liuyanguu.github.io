@@ -87,8 +87,10 @@
 
 <div id="overview" class="section level1">
 <h1>Overview</h1>
-<p>I recently had the great pleasure to meet with Professor Allan Just and he introduced me to eXtreme Gradient Boosting (XGBoost). I have extended the earlier work <a href="https://yangliuresearch.blogspot.com/2018/06/modeling-of-slums-model-selection-using.html">on my old blog</a> by comparing the results across XGBoost, Gradient Boosting (GBM), Random Forest, Lasso, and Best Subset. The ensemble method is powerful as it combines the predictions from multiple machine learning algorithms together to make more accurate predictions than an individual model. Random Forest is among the most famous ones and it is easy to use. Random Forest is based on bagging (bootstrap aggregation) which averages the results over many decision trees from sub-samples. It further limits its search to only 1/3 of the features (in regression) to fit each tree, weakening the correlations among decision trees. It is easy to get a lower testing error compared to linear models.</p>
-<p>Boosting takes slower steps, making predictors sequentially instead of independently. It repetitively leverages the patterns in residuals, strengthens the model with weak predictions, and make it better. By combining the advantages from both random forest and gradient boosting, XGBoost gave the a prediction error <strong>ten times</strong> lower than boosting or random forest in my case.</p>
+<p>I recently had the great pleasure to meet with Professor Allan Just and he introduced me to eXtreme Gradient Boosting (XGBoost). I have extended the earlier work <a href="https://yangliuresearch.blogspot.com/2018/06/modeling-of-slums-model-selection-using.html">on my old blog</a> by comparing the results across XGBoost, Gradient Boosting (GBM), Random Forest, Lasso, and Best Subset.
+The ensemble method is powerful as it combines the predictions from multiple machine learning algorithms together to make more accurate predictions than an individual model. Random Forest is among the most famous ones and it is easy to use. Random Forest is based on bagging (bootstrap aggregation) which averages the results over many decision trees from sub-samples. It further limits its search to only 1/3 of the features (in regression) to fit each tree, weakening the correlations among decision trees. It is easy to get a lower testing error compared to linear models.</p>
+<p>Boosting takes slower steps, making predictors sequentially instead of independently. It repetitively leverages the patterns in residuals, strengthens the model with weak predictions, and make it better.
+By combining the advantages from both random forest and gradient boosting, XGBoost gave the a prediction error <strong>ten times</strong> lower than boosting or random forest in my case.</p>
 <p>(<strong>Correction!</strong>) 18.10.3. When I further test this dataset I realized it was a <strong>mistake</strong>. There is indeed no magic in machine learning. When I got a testing error ten-time smaller than other methods, I should question first if this is a mistake. In the correct result XGBoost still gave the lowest testing rmse but was close to other two methods.</p>
 <p>Link to the earlier version: <em><a href="https://yangliuresearch.blogspot.com/2018/06/modeling-of-slums-model-selection-using.html">Model Selection using Lasso and Best Subset</a></em></p>
 </div>
@@ -261,7 +263,7 @@ gbm_caret &lt;- train(Share_Temporary ~ ., mydata[train_idx,],
                    tuneGrid = para_grid, metric = &quot;RMSE&quot;, bag.fraction = 0.75)  
 
 Sys.time() - time_now </code></pre>
-<pre><code>## Time difference of 2.271 mins</code></pre>
+<pre><code>## Time difference of 2.294 mins</code></pre>
 <ul>
 <li>The tuning parameters that give the lowest MSE in training set CV.</li>
 </ul>
@@ -320,7 +322,8 @@ lasso_pred &lt;- predict(lasso_mod, s = best_lam, newx = X_test)
 (MSE_Lasso &lt;- mean((lasso_pred - Y_test)^2))</code></pre>
 <pre><code>## [1] 0.06762</code></pre>
 <ul>
-<li>The regression model for the selected lambda (lasso). We extract the coefficients from the selected model and run a linear regression.</li>
+<li>The regression model for the selected lambda (lasso).
+We extract the coefficients from the selected model and run a linear regression.</li>
 <li><p>The model has used 17 variables.</p></li>
 <li><p>The most useful predictors selected by lasso include <code>Water_MonthlyCost</code>, <code>Water_Sources: shared_taps</code>, <code>Resettled Housing</code> and <code>Eviction Threats</code>. For these variables, higher values or binary variables being <em>Yes</em> are associated with fewer temporary structures in slums.</p></li>
 <li><p>Relative importance of coefficients by showing standardized regression coefficients in decreasing order of their absolute values.</p></li>
@@ -381,7 +384,8 @@ coef_table2[order(abs(coef_table2$stb), decreasing = T),]</code></pre>
 <ul>
 <li><p>Use library <code>leaps</code>.<br />
 Best subset is a subset selection approach for feature selection. Not like stepwise or forward selection, best subset check all the possible feature combinations in theory. Since I select from 49 predictors but set the maximum size of subsets to be 25, there are C(49,25) + C(49,24) + …+ C(49,0) = 345 trillion models to check. As I <a href="https://yangliuresearch.blogspot.com/2018/07/best-subset-selection-in-both-r-and-sas.html">discussed in my post</a>, it won’t be possible to scan all of them. Both R and SAS use the <em>branch and bound</em> algorithm to speed up the calculation.</p></li>
-<li><p>If without cross-validation we can use the traditional way to choose model: Adjusted R-squared, Cp(AIC), or BIC.</p></li>
+<li><p>If without cross-validation we can use the traditional way to choose model:
+Adjusted R-squared, Cp(AIC), or BIC.</p></li>
 <li><p>The turning parameter is to decide how many predictors to use. The selected number of feature also happens to be 17.<br />
 Cross-validation selects more features than BIC but fewer than Adj Rsq or Cp(AIC).</p></li>
 <li><p>The regression model selected and Standardized parameter estimates showing relative feature importance in decreasing order.</p></li>
