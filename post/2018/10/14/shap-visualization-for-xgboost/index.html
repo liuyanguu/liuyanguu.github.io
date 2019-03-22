@@ -227,7 +227,7 @@ plot.shap.summary(data_long = shap_long)</code></pre>
 <div id="shap-plot-for-each-feature" class="section level1">
 <h1>SHAP plot for each feature</h1>
 <ul>
-<li>Using the built-in <code>xgb.plot.shap</code> function</li>
+<li>Use the built-in <code>xgb.plot.shap</code> function</li>
 <li>Here we choose to show top 9 features ranked by impact on the dependent variable</li>
 </ul>
 <pre class="r"><code>f_ranked &lt;- names(shap_result$mean_shap_score)
@@ -237,57 +237,107 @@ xgb.plot.shap(data = X_train, model = xg_mod, features = f_ranked[1:6], n_col = 
 <div id="shap-stack-plot-for-observation" class="section level1">
 <h1>SHAP stack plot for observation</h1>
 <ul>
-<li>Using <code>geom_col</code> to “show features each contributing to push the model output from the base value (the average model output) to the model output.”<br />
+<li>Use <code>geom_col</code> to “show features each contributing to push the model output from the base value (the average model output) to the model output.”<br />
 </li>
-<li>Tried <code>geom_area</code> but dones’t work very well due to gaps in the plot caused by fluctuation of positive and negative values</li>
+<li>Have tried <code>geom_area</code> but dones’t work very well due to gaps in the plot caused by fluctuation of positive and negative values<br />
+</li>
+<li>Use the order of clustering to group observations under similar influences closer</li>
 </ul>
 <div id="function-for-stack-plot" class="section level3">
 <h3>Function for stack plot</h3>
-<pre class="r"><code># uses the shap_result from `shap.score.rank`, mainly contains the SHAP value matrix 
-shap.stack.plot &lt;- function(shap_result, top_n, data_percent = 1){
-  require(&#39;data.table&#39;)
-  require(&#39;ggplot2&#39;)
-  require(&#39;ggforce&#39;) # for zoom in (the way to write it has been updated in the new version)
-  ranked_col &lt;- names(shap_result$mean_shap_score)
-  top_ranked_col &lt;- ranked_col[1:top_n]
-  bottom_col &lt;- ranked_col[-(1:top_n)]
-  shap_contrib2 &lt;- setDT(shap_result$shap_score)[,..ranked_col]
-  # plot part of the data if needed
+<pre class="r"><code># SHAP stack plot ---------------------------------------------------------
+# shap_contrib is the SHAP value matrix returned from predict, top_n features, option to randomly plot p*100 percent of the data in case the dataset is large 
+shap.stack.data &lt;- function(shap_contrib, top_n, data_percent = 1){
+  require(data.table)
+  ranked_col &lt;- names(colMeans(abs(shap_contrib))[order(colMeans(abs(shap_contrib)), decreasing = T)])
+  shap_contrib2 &lt;- setDT(shap_contrib)[,..ranked_col]
+  
+  # sample `data_percent` of the data
   set.seed(1234)
+  if (data_percent&gt;1) stop(&quot;data_percent &lt;= 1&quot;)
   shap_contrib2 &lt;- shap_contrib2[sample(.N, .N * data_percent)]
-  shap_contrib2[, yhat:= rowSums(.SD)]
-  shap_contrib2[, rest_variables:= rowSums(.SD), .SDcol = bottom_col]
   
-  # shap_contrib2 &lt;- shap_contrib2[1:100]
-  setkey(shap_contrib2, yhat)
-  shap_contrib2[,id:= .I]
+  # select columns    
+  if (top_n &lt; length(ranked_col)){
+    top_ranked_col &lt;- ranked_col[1:top_n]
+    bottom_col &lt;- ranked_col[-(1:top_n)]
+    shap_contrib2[, rest_variables:= rowSums(.SD), .SDcol = bottom_col]
+    # dataset with desired variables for plot
+    shapobs &lt;- shap_contrib2[, c(top_ranked_col, &quot;rest_variables&quot;), with = F]
+  } else if (top_n == length(ranked_col)) {
+    shapobs &lt;- shap_contrib2
+  } else {stop(paste(&quot;top_n should not above&quot;, length(ranked_col)))}
   
-  # dataset with desired variables for plot
-  shapobs &lt;- shap_contrib2[, c(&quot;id&quot;, top_ranked_col, &quot;rest_variables&quot;), with = F]
-  shapobs_long &lt;- melt.data.table(shapobs, id.vars = &#39;id&#39;)
   
-  ## make the stack plot
-  x_mid &lt;- shap_contrib2[,median(id)*1.4] # optional: location to zoom in certain part of the plot
-  p &lt;- ggplot(shapobs_long, aes(x = id, y = value , fill = variable)) + 
-    geom_col(width = 1, alpha = 0.9) +
-    scale_fill_viridis_d(option = &quot;D&quot;) + # viridis color scale
-    # theme(axis.text.x=element_blank(), axis.ticks.x=element_blank()) +
+  # sort by cluster
+  clusters &lt;- hclust(dist(scale(shap_contrib2)), method = &quot;ward.D&quot;)
+  # re-arrange the rows accroding to dendrogram
+  shapobs &lt;- shapobs[, clusterid:= clusters$order][rank(clusterid),]
+  shapobs[,clusterid:=NULL]
+  shapobs[,id:=.I]
+  return(shapobs)
+}
+
+## make the stack plot
+shap.stack.plot &lt;- function(shapobs, id = &#39;id&#39;,
+                            zoom_in_location = NULL, # where to zoom in, default at place of 60% of the data
+                            y_parent_limit = NULL,
+                            y_limit = NULL,          # c(a,b) to limit the y-axis in zoom-in
+                            zoom_in = TRUE){         # option to close zoom-in
+  require(data.table)
+  require(ggplot2)
+  require(ggforce)  
+  # optional: location to zoom in certain part of the plot
+  shapobs_long &lt;- melt.data.table(shapobs, id.vars = id)
+  require(RColorBrewer)
+  # display.brewer.pal(&quot;Paired&quot;)
+  p &lt;- ggplot(shapobs_long, aes_string(x = id, y = &quot;value&quot; , fill = &quot;variable&quot;)) + 
+    geom_col(width =1, alpha = 0.9) +
+    # geom_area() +
     labs(fill = &#39;Feature&#39;, x = &#39;Observation&#39;, 
          y = &#39;SHAP values by feature:\n (Contribution to the base value)&#39;) + 
-    # zoom in if needed, it requires the ggforce 0.2.1 (the new version)
-    ggforce::facet_zoom(xlim = c(x_mid, x_mid+max(20, shap_contrib2[,.N]*0.01))) +
-    theme(zoom.y = element_blank(), validate = FALSE) +
-    theme_bw() 
-  p
+    geom_hline(yintercept = 0, col = &quot;gray40&quot;) + 
+    theme_bw() + 
+    scale_y_continuous(limits = y_parent_limit)
+  # theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())
+  
+  # how to apply color
+  if (dim(shapobs)[2]-1&lt;=12){p &lt;- p +    
+    # [notes] yes this discrete palette has a maximum of 12
+    scale_fill_manual(values = brewer.pal(dim(shapobs)[2]-1, &#39;Paired&#39;))
+  } else {
+    p &lt;- p +  scale_fill_viridis_d(option = &quot;D&quot;)  # viridis color scale
+  }
+  
+  # how to zoom in
+  if(zoom_in){
+    x_mid &lt;- if (is.null(zoom_in_location)) shapobs[,.N]*0.6 else zoom_in_location
+    x_interval &lt;- median(c(50, 150, floor(shapobs[,.N]*0.1)))
+    cat(&quot;Data has N:&quot;, shapobs[,.N],&quot;| zoom in length is&quot;, x_interval, &quot;at location&quot;,x_mid, &quot;\n&quot;)
+    p &lt;- p + 
+      facet_zoom(xlim = c(x_mid, x_mid + x_interval),
+                 ylim = y_limit, horizontal = F
+      ) +
+      theme(zoom.y = element_blank(), validate = FALSE) # zoom in using this line
+  } else {
+    cat(&quot;Data has N:&quot;, shapobs[,.N],&quot;| no zoom in\n&quot;)
+  }
   return(p)
 }
+
 
 # use the SHAP value matrix created above and stored in object `shap_result`  
 ## Prepare data:
 shap_result &lt;- shap.score.rank(xgb_model = xg_mod, shap_approx = F, 
                                X_train = X_train)
-shap.stack.plot(shap_result = shap_result, top_n = 6, data_percent = 1)</code></pre>
-<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+shapobs &lt;- shap.stack.data(shap_contrib = shap_result$shap_score, top_n = 7, data_percent = 1)
+shap.stack.plot(shapobs = shapobs,
+                zoom_in_location  = 50,
+                # y_parent_limit = c(-1,1),
+                y_limit = c(-0.3, 0.5),
+                zoom_in = T)</code></pre>
+<pre><code>## Data has N: 316 | zoom in length is 50 at location 50</code></pre>
+<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-6-1.png" width="768" /></p>
 </div>
 </div>
 
