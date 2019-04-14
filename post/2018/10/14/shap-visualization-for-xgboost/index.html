@@ -78,15 +78,17 @@
 <li><a href="#shap-plot-for-each-feature">SHAP plot for each feature</a></li>
 <li><a href="#shap-stack-plot-for-observation">SHAP stack plot for observation</a><ul>
 <li><a href="#function-for-stack-plot">Function for stack plot</a></li>
+<li><a href="#stack-plot-by-clustering-groups">Stack plot by clustering groups</a></li>
 </ul></li>
 </ul>
 </div>
 
-<p>(Under further revise)</p>
+<p>(Under further updating …)</p>
 <div id="background" class="section level1">
 <h1>Background</h1>
 <p>I will illustrate the application of SHAP (SHapley Additive exPlnation) values to visualize the efforts of features on the outcome variable in a XGBoost model.<br />
 The function was developed by <a href="https://github.com/slundberg/shap"><em>Scott Lundberg</em> in Python and explained here</a>. SHAP was combined into <em>xgboost</em> with one visualization function <em>xgb.plot.shap</em>. But we can make better summary figures as in the Python package in more flexible ways by extracting the SHAP values.</p>
+<p>Code is also hosted on <a href="hugo-xmag/content/post/2018-10-05-shap-visualization-for-xgboost.Rmd">Github</a></p>
 </div>
 <div id="summary-plot" class="section level1">
 <h1>Summary plot</h1>
@@ -241,13 +243,15 @@ xgb.plot.shap(data = X_train, model = xg_mod, features = f_ranked[1:6], n_col = 
 </li>
 <li>Have tried <code>geom_area</code> but dones’t work very well due to gaps in the plot caused by fluctuation of positive and negative values<br />
 </li>
-<li>Use the order of clustering to group observations under similar influences closer</li>
+<li>apply the order of clustering to group observations under similar influences closer</li>
 </ul>
 <div id="function-for-stack-plot" class="section level3">
 <h3>Function for stack plot</h3>
 <pre class="r"><code># SHAP stack plot ---------------------------------------------------------
 # shap_contrib is the SHAP value matrix returned from predict, top_n features, option to randomly plot p*100 percent of the data in case the dataset is large 
-shap.stack.data &lt;- function(shap_contrib, top_n, data_percent = 1){
+shap.stack.data &lt;- function(shap_contrib, top_n, data_percent = 1,
+                            cluster_method = &#39;ward.D&#39;,
+                            n_groups = 10){
   require(data.table)
   ranked_col &lt;- names(colMeans(abs(shap_contrib))[order(colMeans(abs(shap_contrib)), decreasing = T)])
   shap_contrib2 &lt;- setDT(shap_contrib)[,..ranked_col]
@@ -257,21 +261,23 @@ shap.stack.data &lt;- function(shap_contrib, top_n, data_percent = 1){
   if (data_percent&gt;1) stop(&quot;data_percent &lt;= 1&quot;)
   shap_contrib2 &lt;- shap_contrib2[sample(.N, .N * data_percent)]
   
-  # select columns    
+  # select columns into `shapobs`    
   if (top_n &lt; length(ranked_col)){
     top_ranked_col &lt;- ranked_col[1:top_n]
     bottom_col &lt;- ranked_col[-(1:top_n)]
     shap_contrib2[, rest_variables:= rowSums(.SD), .SDcol = bottom_col]
     # dataset with desired variables for plot
     shapobs &lt;- shap_contrib2[, c(top_ranked_col, &quot;rest_variables&quot;), with = F]
+    cat(paste(&quot;The SHAP values of the Rest&quot;, length(ranked_col) - top_n, &quot;variables were summed into variable &#39;rest_variables&#39;.\n&quot;))
   } else if (top_n == length(ranked_col)) {
     shapobs &lt;- shap_contrib2
   } else {stop(paste(&quot;top_n should not above&quot;, length(ranked_col)))}
   
   
   # sort by cluster
-  clusters &lt;- hclust(dist(scale(shap_contrib2)), method = &quot;ward.D&quot;)
+  clusters &lt;- hclust(dist(scale(shapobs)), method = cluster_method)
   # re-arrange the rows accroding to dendrogram
+  shapobs$group &lt;- cutree(clusters, n_groups)
   shapobs &lt;- shapobs[, clusterid:= clusters$order][rank(clusterid),]
   shapobs[,clusterid:=NULL]
   shapobs[,id:=.I]
@@ -282,13 +288,15 @@ shap.stack.data &lt;- function(shap_contrib, top_n, data_percent = 1){
 shap.stack.plot &lt;- function(shapobs, id = &#39;id&#39;,
                             zoom_in_location = NULL, # where to zoom in, default at place of 60% of the data
                             y_parent_limit = NULL,
-                            y_limit = NULL,          # c(a,b) to limit the y-axis in zoom-in
-                            zoom_in = TRUE){         # option to close zoom-in
+                            y_zoomin_limit = NULL,   # c(a,b) to limit the y-axis in zoom-in
+                            zoom_in = TRUE,  # default zoom in to zoom_in_location
+                            zoom_in_group = NULL # if is set (!NULL), zoom-in to the defined cluster
+){         
   require(data.table)
   require(ggplot2)
   require(ggforce)  
   # optional: location to zoom in certain part of the plot
-  shapobs_long &lt;- melt.data.table(shapobs, id.vars = id)
+  shapobs_long &lt;- melt.data.table(shapobs, id.vars = c(id,&quot;group&quot;))
   require(RColorBrewer)
   # display.brewer.pal(&quot;Paired&quot;)
   p &lt;- ggplot(shapobs_long, aes_string(x = id, y = &quot;value&quot; , fill = &quot;variable&quot;)) + 
@@ -298,7 +306,7 @@ shap.stack.plot &lt;- function(shapobs, id = &#39;id&#39;,
          y = &#39;SHAP values by feature:\n (Contribution to the base value)&#39;) + 
     geom_hline(yintercept = 0, col = &quot;gray40&quot;) + 
     theme_bw() + 
-    scale_y_continuous(limits = y_parent_limit)
+    coord_cartesian(ylim = y_parent_limit)
   # theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())
   
   # how to apply color
@@ -310,34 +318,87 @@ shap.stack.plot &lt;- function(shapobs, id = &#39;id&#39;,
   }
   
   # how to zoom in
-  if(zoom_in){
+  if (!is.null(y_parent_limit)&amp;!is.null(y_zoomin_limit)) cat(&quot;Just notice that when parent limit is set, the zoom in axis limit won&#39;t work, it seems to be a problem of ggforce.\n&quot;)
+  if(zoom_in&amp;is.null(zoom_in_group)){
     x_mid &lt;- if (is.null(zoom_in_location)) shapobs[,.N]*0.6 else zoom_in_location
     x_interval &lt;- median(c(50, 150, floor(shapobs[,.N]*0.1)))
     cat(&quot;Data has N:&quot;, shapobs[,.N],&quot;| zoom in length is&quot;, x_interval, &quot;at location&quot;,x_mid, &quot;\n&quot;)
     p &lt;- p + 
       facet_zoom(xlim = c(x_mid, x_mid + x_interval),
-                 ylim = y_limit, horizontal = F
+                 ylim = y_zoomin_limit, horizontal = F,
+                 zoom.size = 0.6
       ) +
       theme(zoom.y = element_blank(), validate = FALSE) # zoom in using this line
-  } else {
+  } else if (zoom_in){
+    cat(&quot;Data has N:&quot;, shapobs[,.N],&quot;| zoom in at cluster&quot;,zoom_in_group,&quot;with N:&quot;,shapobs[group ==zoom_in_group,.N], &quot;\n&quot;)
+    p &lt;- p + 
+      facet_zoom(x = group == zoom_in_group,
+                 ylim = y_zoomin_limit, horizontal = F,
+                 zoom.size = 0.6
+      ) +
+      theme(zoom.y = element_blank(), validate = FALSE) # zoom in using this line
+  }
+  else{
     cat(&quot;Data has N:&quot;, shapobs[,.N],&quot;| no zoom in\n&quot;)
   }
   return(p)
 }
 
-
 # use the SHAP value matrix created above and stored in object `shap_result`  
 ## Prepare data:
 shap_result &lt;- shap.score.rank(xgb_model = xg_mod, shap_approx = F, 
                                X_train = X_train)
-shapobs &lt;- shap.stack.data(shap_contrib = shap_result$shap_score, top_n = 7, data_percent = 1)
-shap.stack.plot(shapobs = shapobs,
+shapobs &lt;- shap.stack.data(shap_contrib = shap_result$shap_score, top_n = 7, data_percent = 1, cluster_method = &#39;ward.D&#39;)</code></pre>
+<pre><code>## The SHAP values of the Rest 80 variables were summed into variable &#39;rest_variables&#39;.</code></pre>
+<pre class="r"><code>shap.stack.plot(shapobs = shapobs,
                 zoom_in_location  = 50,
-                # y_parent_limit = c(-1,1),
-                y_limit = c(-0.3, 0.5),
+                y_parent_limit = c(-0.3,0.4),
+                # y_zoomin_limit = c(-0.3, 0.5),
                 zoom_in = T)</code></pre>
 <pre><code>## Data has N: 316 | zoom in length is 50 at location 50</code></pre>
 <p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-6-1.png" width="768" /></p>
+</div>
+<div id="stack-plot-by-clustering-groups" class="section level3">
+<h3>Stack plot by clustering groups</h3>
+<p>Default to show 10 groups, within each group the features present a similar pattern of contribution to prediction</p>
+<pre class="r"><code># zoomed in plot: one plot of each cluster
+shap.stack.plot.by.group &lt;- function(shapobs, id = &#39;id&#39;,
+                                     y_parent_limit = NULL
+){         
+  require(data.table)
+  require(ggplot2)
+  require(ggforce)  
+  # optional: location to zoom in certain part of the plot
+  shapobs_long &lt;- melt.data.table(shapobs, id.vars = c(id,&quot;group&quot;))
+  require(RColorBrewer)
+  p &lt;- ggplot(shapobs_long, aes_string(x = id, y = &quot;value&quot; , fill = &quot;variable&quot;)) + 
+    geom_col(width =1, alpha = 0.9) +
+    facet_wrap(~ group, scales = &quot;free&quot;, ncol = 2) +
+    # geom_area() +
+    labs(fill = &#39;Feature&#39;, x = &#39;Observation&#39;, 
+         y = &quot;&quot;) + 
+    geom_hline(yintercept = 0, col = &quot;gray40&quot;) + 
+    theme_bw() + 
+    # theme(legend.justification = c(1, 1), legend.position = c(1, 1),
+    #       legend.text=element_text(size=rel(0.8)))+
+    coord_cartesian(ylim = y_parent_limit)
+  # theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())
+  # how to apply color
+  if (dim(shapobs)[2]-1&lt;=12){p &lt;- p +    
+    # [notes] yes this discrete palette has a maximum of 12
+    scale_fill_manual(values = brewer.pal(dim(shapobs)[2]-1, &#39;Paired&#39;))
+  } else {
+    p &lt;- p +  scale_fill_viridis_d(option = &quot;D&quot;)  # viridis color scale
+  }
+  return(p)
+}
+
+# default to cluster into 10 groups, here we show 8. Within each cluster, the patterns of how the predictors drive prediction are closer.
+
+shapobs &lt;- shap.stack.data(shap_contrib = shap_result$shap_score, top_n = 7, data_percent = 1, cluster_method = &#39;ward.D&#39;, n_groups = 8)</code></pre>
+<pre><code>## The SHAP values of the Rest 80 variables were summed into variable &#39;rest_variables&#39;.</code></pre>
+<pre class="r"><code>shap.stack.plot.by.group(shapobs = shapobs)</code></pre>
+<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-7-1.png" width="768" /></p>
 </div>
 </div>
 
