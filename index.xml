@@ -6,10 +6,19 @@
     <description>Recent content on Welcome to my blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 24 Feb 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 17 Apr 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://liuyanguu.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>ggplot heatmap US 50 states map and China province map</title>
+      <link>https://liuyanguu.github.io/post/2019/04/17/ggplot-heatmap-us-50-states-map-and-china-province-map/</link>
+      <pubDate>Wed, 17 Apr 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://liuyanguu.github.io/post/2019/04/17/ggplot-heatmap-us-50-states-map-and-china-province-map/</guid>
+      <description>1.1. US Map (50 states) 1.2. Using map_data shape files and build from scratch 2. China map by province It sounds pretty straight-forward but turned out not as simple as I expected. I will show 1. 50-state (including Alaska and Hawaii) United States thematic map, with map scale, with state abbreviations 2. China thematic map, with map scale, with names of provinces in either English or Chinese 1.1. US Map</description>
+    </item>
     
     <item>
       <title>Shiny in Blogdown</title>
