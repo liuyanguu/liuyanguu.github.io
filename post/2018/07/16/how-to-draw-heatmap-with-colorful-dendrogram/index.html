@@ -91,11 +91,12 @@
 </div>
 <div id="version-1-color-both-the-branches-and-labels" class="section level2">
 <h2>Version 1: Color both the branches and labels</h2>
-<pre class="r"><code>library(curl)       # read file from google drive
+<pre class="r"><code>suppressPackageStartupMessages({
+library(curl)       # read file from google drive
 library(gplots)     # heatmap.2
 library(dendextend) # make and color dendrogram
 library(colorspace) # diverge_hcl / rainbow_hcl / heat_hcl color palettes
-
+})
 id &lt;- &quot;1pIPphAGJcjKxkgWKrS_heLyjEPxOEYl4&quot; # google file ID
 Fasted &lt;- read.csv(sprintf(&quot;https://docs.google.com/uc?id=%s&amp;export=download&quot;, id))
 # The ID is contained in the sharing link copied from google drive:

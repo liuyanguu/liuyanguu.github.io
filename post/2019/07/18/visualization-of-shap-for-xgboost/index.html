@@ -78,7 +78,7 @@
 <li><a href="#consistency-in-global-feature-importance">Consistency in Global Feature Importance</a></li>
 </ul></li>
 <li><a href="#shap-plots">SHAP plots</a><ul>
-<li><a href="#shap-force-plot-stack-plot">SHAP force plot (stack plot)</a></li>
+<li><a href="#shap-force-plot">SHAP force plot</a></li>
 <li><a href="#summary-plot">Summary plot</a></li>
 <li><a href="#dependence-plot">Dependence plot</a></li>
 <li><a href="#interaction-values">Interaction values</a></li>
@@ -106,7 +106,6 @@ Paper 3. 2019 <a href="https://arxiv.org/abs/1905.04610">Explainable AI for Tree
   </script>
 </div>
 <p>This offers model explanation for each observation in the dataset. And offers lots of flexibility when summarizing the whole model.</p>
-<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/Python.stackplot.PNG" /></p>
 </div>
 <div id="consistency-in-global-feature-importance" class="section level2">
 <h2>Consistency in Global Feature Importance</h2>
@@ -219,8 +218,8 @@ xgb.importance(model = m1)</code></pre>
 </div>
 <div id="shap-plots" class="section level1">
 <h1>SHAP plots</h1>
-<div id="shap-force-plot-stack-plot" class="section level2">
-<h2>SHAP force plot (stack plot)</h2>
+<div id="shap-force-plot" class="section level2">
+<h2>SHAP force plot</h2>
 <p>The SHAP force plot basically stacks these SHAP values for each observation, and show how the final output was obtained as a sum of each predictor’s attribution.</p>
 <p>How the plot looks like in python package by running</p>
 <pre class="python"><code>shap.force_plot(explainer.expected_value, shap_values, data_X)</code></pre>
@@ -234,19 +233,19 @@ xgb.importance(model = m1)</code></pre>
 <p>The summary plot shows global feature importance. The sina plots show the distribution of feature contributions to the model output (in this example, the predictions of CWV measurement error) using SHAP values of each feature for every observation. Each dot is an observation (station-day).</p>
 <p>The SHAP values were generated from each fold of cross-validation. As a comparison, I also show the values from final model. Kind of similar.</p>
 <p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-8-1.png" width="960" /></p>
-<p>Same as in Python <code>shap.summary_plot(shap_values, data_X)</code>:<br />
-<img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/Python.summaryplot.PNG" /></p>
+<p>Offers visualization improvement compared to its Python version:</p>
+<pre class="python"><code>shap.summary_plot(shap_values, data_X)</code></pre>
+<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/Python.summaryplot.PNG" style="width:60.0%" /></p>
 </div>
 <div id="dependence-plot" class="section level2">
 <h2>Dependence plot</h2>
-<p>It plots the SHAP values against the feature values for each variable</p>
-<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
-<p>We can also select another feature for coloring</p>
-<p>In this example dot is a station-day observation.<br />
-(LEFT) SHAP values showing the contribution of the time trend to predictions. The color represents the MAIAC CWV for each observation (purple high, yellow low). The LOESS (locally estimated scatterplot smoothing) curve is overlaid in red.<br />
+<p>It plots the SHAP values against the feature values for each variable. Again, each dot is a station-day observation.</p>
+<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p>We can also select another feature for coloring to show some interaction.</p>
+<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-11-1.png" width="960" /></p>
+<p>(LEFT) SHAP values showing the contribution of the time trend to predictions. The color represents the MAIAC CWV for each observation (purple high, yellow low). The LOESS (locally estimated scatterplot smoothing) curve is overlaid in red.<br />
 (RIGHT) SHAP values showing the contribution of the MAIAC CWV to predictions of CWV measurement error shown across the time period of the study. Note distinct y-axis scales for Terra and Aqua datasets. The color represents the MAIAC CWV for each observation (purple high, yellow low).</p>
-<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-10-1.png" width="960" /></p>
-<p>To compare Terra vs. Aqua
+<p>To compare Terra vs. Aqua (As in our paper)
 <img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/Figure_6a_2019_06_14_SHAP_interaction.png" />
 <img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/Figure_6b_2019_06_14_SHAP_interaction.png" /></p>
 </div>
@@ -255,9 +254,22 @@ xgb.importance(model = m1)</code></pre>
 <p>SHAP interaction values separate the impact of variable into main effects and interaction effects. They add up roughly to the dependence plot.</p>
 <p>Quote paper 2: “SHAP <strong>interaction values</strong> can be interpreted as the difference between the SHAP values for feature i when feature j is <strong>present</strong> and
 the SHAP values for feature i when feature j is <strong>absent</strong>.”</p>
-<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-11-1.png" width="960" /></p>
-<p>The example in the paper
-<img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/interactionSHAPplot.JPG" /></p>
+<ul>
+<li>Under work: my version doesn’t seem correct …</li>
+</ul>
+<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-12-1.png" width="960" /></p>
+<ul>
+<li>The correct interaction plot from Python:</li>
+</ul>
+<pre class="python"><code>shap_interaction_values = shap.TreeExplainer(model).shap_interaction_values(data_X) 
+shap.dependence_plot((&quot;dayint&quot;, &quot;Column_WV&quot;),
+    shap_interaction_values, data_X, dot_size=1)</code></pre>
+<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/int1.PNG" /></p>
+<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/int2.PNG" /></p>
+<pre class="python"><code>shap.summary_plot(shap_interaction_values, data_X)</code></pre>
+<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/Python_summary_interaction_values.png" /></p>
+<p>The example in the paper 2: It shows again that the SHAP values = SHAP values without the interaction variable age + Interactive effects by age. In this example the interactive effects are highly visible.</p>
+<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/interactionSHAPplot.JPG" /></p>
 </div>
 </div>
 

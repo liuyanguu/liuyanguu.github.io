@@ -106,12 +106,14 @@
 new.packages &lt;- list.of.packages[!(list.of.packages %in% installed.packages()[,&quot;Package&quot;])]
 if(length(new.packages)) install.packages(new.packages)
 
+suppressPackageStartupMessages({
 library(&#39;raster&#39;)   # obtain raster from GIS image file, and plot
 library(&#39;rgdal&#39;)    # readOGR: read ArcGIS vector maps into Spatial objects
 library(&#39;Hmisc&#39;)    # cut2: cut vector into equal-length
 library(&#39;plyr&#39;)     # join
 library(&#39;RColorBrewer&#39;) # for `brewer.pal` in ggplot2
 library(&#39;knitr&#39;)    # kable
+})
 options(digits = 4)</code></pre>
 <ul>
 <li>The local version:</li>

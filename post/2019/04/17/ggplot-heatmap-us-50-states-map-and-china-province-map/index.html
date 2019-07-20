@@ -97,12 +97,13 @@ I will show</p>
 <h1>1.1. US Map (50 states) using usmap</h1>
 <p>The easiest way is by using <code>usmap</code>, in which adding abbraviation or not is optional in the <code>plot_usmap</code> function. The population data is from state.x77, data of a US census in 1977.</p>
 <pre class="r"><code>#51 states including Alaska and Hawaii
+suppressPackageStartupMessages({
 library(ggplot2)
 library(usmap)
 library(data.table)
 library(ggsn) # for scale bar `scalebar`
 library(ggrepel) # if need to repel labels 
-
+})
 dt1 &lt;- as.data.table(copy(state.x77))
 dt1$state &lt;- tolower(rownames(state.x77))
 dt1 &lt;- dt1[,.(state, Population)]
