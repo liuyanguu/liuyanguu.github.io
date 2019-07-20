@@ -68,9 +68,18 @@
     <item>
       <title>SHAP</title>
       <link>https://liuyanguu.github.io/tags/shap/</link>
-      <pubDate>Sun, 14 Oct 2018 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 18 Jul 2019 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/tags/shap/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Shapforxgboost</title>
+      <link>https://liuyanguu.github.io/tags/shapforxgboost/</link>
+      <pubDate>Thu, 18 Jul 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://liuyanguu.github.io/tags/shapforxgboost/</guid>
       <description></description>
     </item>
     
@@ -95,7 +104,7 @@
     <item>
       <title>XGBoost</title>
       <link>https://liuyanguu.github.io/tags/xgboost/</link>
-      <pubDate>Thu, 15 Nov 2018 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 18 Jul 2019 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/tags/xgboost/</guid>
       <description></description>

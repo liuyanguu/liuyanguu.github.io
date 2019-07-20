@@ -211,10 +211,10 @@ ggplot(data = dt2, aes(x=long, y=lat, group=group))+
 参考的统计之都上的博客都是十年前的了。希望将来能看到<code>mapchina</code> package的出现。</p>
 <pre class="r"><code># China -------------------------------------------------------------------
 library(maptools)
-local_fir_dir &lt;- &quot;D:/OneDrive/David/China/&quot; # local the .shp file is stored  
+local_fir_dir &lt;- &quot;D:/OneDrive/David/China.shp/&quot; # local the .shp file is stored  
 china_map &lt;- rgdal::readOGR(paste0(local_fir_dir, &quot;bou2_4p.shp&quot;))</code></pre>
 <pre><code>## OGR data source with driver: ESRI Shapefile 
-## Source: &quot;D:\OneDrive\David\China\bou2_4p.shp&quot;, layer: &quot;bou2_4p&quot;
+## Source: &quot;D:\OneDrive\David\China.shp\bou2_4p.shp&quot;, layer: &quot;bou2_4p&quot;
 ## with 925 features
 ## It has 7 fields
 ## Integer64 fields read as strings:  BOU2_4M_ BOU2_4M_ID</code></pre>
@@ -365,7 +365,7 @@ head(dt3)</code></pre>
 
 
 <nav class="post-nav">
-  <span class="nav-prev"></span>
+  <span class="nav-prev"><a href="/post/2019/07/18/visualization-of-shap-for-xgboost/">&larr; SHAP visualization for XGBoost in R</a></span>
   <span class="nav-next"><a href="/post/2019/02/24/shiny-in-blogdown/">Shiny in Blogdown &rarr;</a></span>
 </nav>
 
@@ -437,7 +437,7 @@ if (!doNotTrack) {
     
   </ul>
   
-  <div class="copyright">Acknowledgement to Yihui Xie for R Blogdown and hugo-xmag theme</div>
+  <div class="copyright">@2019 Liu. Powered by Github. Blogdown and Hugo Theme by Yihui Xie.</div>
   
 </div>
 </footer>

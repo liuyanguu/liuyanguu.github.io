@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
-    <title>SHAP Visualization for XGBoost | Welcome to my blog</title>
+    <title>SHAP Visualization in R (First post) | Welcome to my blog</title>
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="/css/fonts.css" />
     <link href="//cdn.bootcss.com/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -50,7 +50,7 @@
   
   </div>
 
-  <h1><span class="title">SHAP Visualization for XGBoost</span></h1>
+  <h1><span class="title">SHAP Visualization in R (First post)</span></h1>
 
   
   <h3 class="author">Yang Liu
@@ -83,7 +83,7 @@
 </ul>
 </div>
 
-<p>(Under further updating …)</p>
+<p>An updated version has been posted in a later post</p>
 <div id="background" class="section level1">
 <h1>Background</h1>
 <p>I will illustrate the application of SHAP (SHapley Additive exPlnation) values to visualize the efforts of features on the outcome variable in a XGBoost model.<br />
@@ -138,94 +138,7 @@ shap.score.rank &lt;- function(xgb_model = xgb_mod, shap_approx = TRUE,
 <h3>Functions for summary plot</h3>
 <p><strong>To get it work, please install ‘ggforce’ from github, as there was a bug in the new <code>geom_sina</code></strong><br />
 Now in <code>geom_sina</code> the default method is “density”, to do it my originally way, need to change into <code>method = "counts", maxwidth = 0.7</code></p>
-<pre class="r"><code>devtools::install_github(&quot;thomasp85/ggforce&quot;)</code></pre>
-<pre class="r"><code>packageVersion(&quot;ggforce&quot;)</code></pre>
 <pre><code>## [1] &#39;0.2.1.9000&#39;</code></pre>
-<pre class="r"><code>## a function to standardize feature values into same range
-std1 &lt;- function(x){
-  return ((x - min(x, na.rm = T))/(max(x, na.rm = T) - min(x, na.rm = T)))
-}
-
-## prep shap data into long format, option to plot only `top_n` features  
-shap.prep &lt;- function(shap  = shap_result, X_train, top_n){
-  # descending order
-  if (missing(top_n)) top_n &lt;- dim(X_train)[2] # by default, use all features
-  if (!top_n%in%c(1:dim(X_train)[2])) stop(&#39;supply correct top_n&#39;)
-  require(data.table)
-  shap_score_sub &lt;- as.data.table(shap$shap_score)
-  shap_score_sub &lt;- shap_score_sub[, names(shap$mean_shap_score)[1:top_n], with = F]
-  shap_score_long &lt;- melt.data.table(shap_score_sub, measure.vars = colnames(shap_score_sub))
-  
-  # feature values: the values in the original dataset
-  fv_sub &lt;- as.data.table(X_train)[, names(shap$mean_shap_score)[1:top_n], with = F]
-  # standardize feature values
-  fv_sub_long &lt;- melt.data.table(fv_sub, measure.vars = colnames(fv_sub))
-  fv_sub_long[, stdfvalue := std1(value), by = &quot;variable&quot;]
-  # SHAP value: value
-  # raw feature value: rfvalue; 
-  # standarized: stdfvalue
-  names(fv_sub_long) &lt;- c(&quot;variable&quot;, &quot;rfvalue&quot;, &quot;stdfvalue&quot; )
-  shap_long2 &lt;- cbind(shap_score_long, fv_sub_long[,c(&#39;rfvalue&#39;,&#39;stdfvalue&#39;)])
-  shap_long2[, mean_value := mean(abs(value)), by = variable]
-  setkey(shap_long2, variable)
-  return(shap_long2) 
-}
-
-# SHAP summary plot -------------------------------------------------------
-# make summary plot (sina plot) using long-format data:
-#     variable value rfvalue stdfvalue mean_value
-# 1:   dayint -0.23   11012   0.00000       0.14
-# 2:   dayint -0.20   11012   0.00000       0.14
-plot.shap.summary &lt;- function(data_long, x_bound_given = NULL, dilute = F){
-  require(&#39;ggforce&#39;) # for `geom_sina`
-  if (dilute){
-  set.seed(1234)
-  data_long &lt;- data_long[sample(nrow(data_long), nrow(data_long)/100)] # dilute
-  }
-  # mean_value cannot be 0 in the new version of ggforce
-  data_long &lt;- data_long[mean_value!=0, ]
-  if (is.null(x_bound_given)){
-  x_bound &lt;- max(abs(data_long$value))} else {
-  x_bound &lt;- x_bound_given  # bound of SHAP values
-  }
-  plot1 &lt;- ggplot(data = data_long)+
-    coord_flip() + 
-    # sina plot: 
-    geom_sina(aes(x = variable, y = value, color = stdfvalue),
-              method = &quot;counts&quot;, maxwidth = 0.7, alpha = 0.7) +
-    # print the mean absolute value: 
-    geom_text(data = unique(data_long[, c(&quot;variable&quot;, &quot;mean_value&quot;)]),
-              aes(x = variable, y=-Inf, label = sprintf(&quot;%.3f&quot;, mean_value)),
-              size = 3, alpha = 0.7,
-              hjust = -0.2, 
-              fontface = &quot;bold&quot;) + # bold
-    # # add a &quot;SHAP&quot; bar notation
-    # annotate(&quot;text&quot;, x = -Inf, y = -Inf, vjust = -0.2, hjust = 0, size = 3,
-    #          label = expression(group(&quot;|&quot;, bar(SHAP), &quot;|&quot;))) + 
-    scale_color_gradient(low=&quot;#FFCC33&quot;, high=&quot;#6600CC&quot;, 
-                         breaks=c(0,1), labels=c(&quot;  Low&quot;,&quot;High   &quot;),
-    guide = guide_colorbar(barwidth = 10, barheight = 0.3)) +
-    theme_bw() + 
-    theme(axis.line.y = element_blank(), 
-          axis.ticks.y = element_blank(), # remove axis line
-          legend.position=&quot;bottom&quot;,
-          legend.title=element_text(size=10), 
-          legend.text=element_text(size=8),
-          axis.title.x= element_text(size = 10)) + 
-    geom_hline(yintercept = 0) + # the vertical line
-    scale_y_continuous(limits = c(-x_bound, x_bound)) +
-    # reverse the order of features
-    scale_x_discrete(limits = rev(levels(data_long$variable)))+ 
-    labs(y = &quot;SHAP value (impact on model output)&quot;, x = &quot;&quot;, color = &quot;Feature value  &quot;) 
-  return(plot1)
-}
-
-## Prepare data:
-shap_result &lt;- shap.score.rank(xgb_model = xg_mod, shap_approx = F, 
-                               X_train = X_train)
-shap_long &lt;- shap.prep(X_train = X_train, top_n = 10)
-## The data prepared: variable, SHAP value, raw feature value, standarded feature value, mean value by feature
-print(shap_long)</code></pre>
 <pre><code>##                         variable    value rfvalue stdfvalue mean_value
 ##    1:     FF11_Water_MonthlyCost -0.13100   30000 0.2307870    0.12987
 ##    2:     FF11_Water_MonthlyCost -0.10213   30000 0.2307870    0.12987
@@ -238,8 +151,6 @@ print(shap_long)</code></pre>
 ## 3158: DD1_Location_Problemscanal  0.04726       1 1.0000000    0.01726
 ## 3159: DD1_Location_Problemscanal  0.03609       1 1.0000000    0.01726
 ## 3160: DD1_Location_Problemscanal -0.01016       0 0.0000000    0.01726</code></pre>
-<pre class="r"><code>## make summary plot
-plot.shap.summary(data_long = shap_long)</code></pre>
 <p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 </div>
 </div>
@@ -264,158 +175,14 @@ xgb.plot.shap(data = X_train, model = xg_mod, features = f_ranked[1:6], n_col = 
 </ul>
 <div id="function-for-stack-plot" class="section level3">
 <h3>Function for stack plot</h3>
-<pre class="r"><code># SHAP stack plot ---------------------------------------------------------
-# shap_contrib is the SHAP value matrix returned from predict, top_n features, option to randomly plot p*100 percent of the data in case the dataset is large 
-shap.stack.data &lt;- function(shap_contrib, top_n, data_percent = 1,
-                            cluster_method = &#39;ward.D&#39;,
-                            n_groups = 10){
-  require(data.table)
-  ranked_col &lt;- names(colMeans(abs(shap_contrib))[order(colMeans(abs(shap_contrib)), decreasing = T)])
-  shap_contrib2 &lt;- setDT(shap_contrib)[,..ranked_col]
-  
-  # sample `data_percent` of the data
-  set.seed(1234)
-  if (data_percent&gt;1) stop(&quot;data_percent &lt;= 1&quot;)
-  shap_contrib2 &lt;- shap_contrib2[sample(.N, .N * data_percent)]
-  
-  # select columns into `shapobs`    
-  if (top_n &lt; length(ranked_col)){
-    top_ranked_col &lt;- ranked_col[1:top_n]
-    bottom_col &lt;- ranked_col[-(1:top_n)]
-    shap_contrib2[, rest_variables:= rowSums(.SD), .SDcol = bottom_col]
-    # dataset with desired variables for plot
-    shapobs &lt;- shap_contrib2[, c(top_ranked_col, &quot;rest_variables&quot;), with = F]
-    cat(paste(&quot;The SHAP values of the Rest&quot;, length(ranked_col) - top_n, &quot;variables were summed into variable &#39;rest_variables&#39;.\n&quot;))
-  } else if (top_n == length(ranked_col)) {
-    shapobs &lt;- shap_contrib2
-  } else {stop(paste(&quot;top_n should not above&quot;, length(ranked_col)))}
-  
-  
-  # sort by cluster
-  clusters &lt;- hclust(dist(scale(shapobs)), method = cluster_method)
-  # re-arrange the rows accroding to dendrogram
-  shapobs$group &lt;- cutree(clusters, n_groups)
-  shapobs &lt;- shapobs[, clusterid:= clusters$order][rank(clusterid),]
-  shapobs[,clusterid:=NULL]
-  shapobs[,id:=.I]
-  return(shapobs)
-}
-
-## make the stack plot
-shap.stack.plot &lt;- function(shapobs, id = &#39;id&#39;,
-                            zoom_in_location = NULL, # where to zoom in, default at place of 60% of the data
-                            y_parent_limit = NULL,
-                            y_zoomin_limit = NULL,   # c(a,b) to limit the y-axis in zoom-in
-                            zoom_in = TRUE,  # default zoom in to zoom_in_location
-                            zoom_in_group = NULL # if is set (!NULL), zoom-in to the defined cluster
-){         
-  require(data.table)
-  require(ggplot2)
-  require(ggforce)  
-  # optional: location to zoom in certain part of the plot
-  shapobs_long &lt;- melt.data.table(shapobs, id.vars = c(id,&quot;group&quot;))
-  require(RColorBrewer)
-  # display.brewer.pal(&quot;Paired&quot;)
-  p &lt;- ggplot(shapobs_long, aes_string(x = id, y = &quot;value&quot; , fill = &quot;variable&quot;)) + 
-    geom_col(width =1, alpha = 0.9) +
-    # geom_area() +
-    labs(fill = &#39;Feature&#39;, x = &#39;Observation&#39;, 
-         y = &#39;SHAP values by feature:\n (Contribution to the base value)&#39;) + 
-    geom_hline(yintercept = 0, col = &quot;gray40&quot;) + 
-    theme_bw() + 
-    coord_cartesian(ylim = y_parent_limit)
-  # theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())
-  
-  # how to apply color
-  if (dim(shapobs)[2]-1&lt;=12){p &lt;- p +    
-    # [notes] yes this discrete palette has a maximum of 12
-    scale_fill_manual(values = brewer.pal(dim(shapobs)[2]-1, &#39;Paired&#39;))
-  } else {
-    p &lt;- p +  scale_fill_viridis_d(option = &quot;D&quot;)  # viridis color scale
-  }
-  
-  # how to zoom in
-  if (!is.null(y_parent_limit)&amp;!is.null(y_zoomin_limit)) cat(&quot;Just notice that when parent limit is set, the zoom in axis limit won&#39;t work, it seems to be a problem of ggforce.\n&quot;)
-  if(zoom_in&amp;is.null(zoom_in_group)){
-    x_mid &lt;- if (is.null(zoom_in_location)) shapobs[,.N]*0.6 else zoom_in_location
-    x_interval &lt;- median(c(50, 150, floor(shapobs[,.N]*0.1)))
-    cat(&quot;Data has N:&quot;, shapobs[,.N],&quot;| zoom in length is&quot;, x_interval, &quot;at location&quot;,x_mid, &quot;\n&quot;)
-    p &lt;- p + 
-      facet_zoom(xlim = c(x_mid, x_mid + x_interval),
-                 ylim = y_zoomin_limit, horizontal = F,
-                 zoom.size = 0.6
-      ) +
-      theme(zoom.y = element_blank(), validate = FALSE) # zoom in using this line
-  } else if (zoom_in){
-    cat(&quot;Data has N:&quot;, shapobs[,.N],&quot;| zoom in at cluster&quot;,zoom_in_group,&quot;with N:&quot;,shapobs[group ==zoom_in_group,.N], &quot;\n&quot;)
-    p &lt;- p + 
-      facet_zoom(x = group == zoom_in_group,
-                 ylim = y_zoomin_limit, horizontal = F,
-                 zoom.size = 0.6
-      ) +
-      theme(zoom.y = element_blank(), validate = FALSE) # zoom in using this line
-  }
-  else{
-    cat(&quot;Data has N:&quot;, shapobs[,.N],&quot;| no zoom in\n&quot;)
-  }
-  return(p)
-}
-
-# use the SHAP value matrix created above and stored in object `shap_result`  
-## Prepare data:
-shap_result &lt;- shap.score.rank(xgb_model = xg_mod, shap_approx = F, 
-                               X_train = X_train)
-shapobs &lt;- shap.stack.data(shap_contrib = shap_result$shap_score, top_n = 7, data_percent = 1, cluster_method = &#39;ward.D&#39;)</code></pre>
 <pre><code>## The SHAP values of the Rest 80 variables were summed into variable &#39;rest_variables&#39;.</code></pre>
-<pre class="r"><code>shap.stack.plot(shapobs = shapobs,
-                zoom_in_location  = 50,
-                y_parent_limit = c(-0.3,0.4),
-                # y_zoomin_limit = c(-0.3, 0.5),
-                zoom_in = T)</code></pre>
 <pre><code>## Data has N: 316 | zoom in length is 50 at location 50</code></pre>
 <p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-6-1.png" width="768" /></p>
 </div>
 <div id="stack-plot-by-clustering-groups" class="section level3">
 <h3>Stack plot by clustering groups</h3>
 <p>Default to show 10 groups, within each group the features present a similar pattern of contribution to prediction</p>
-<pre class="r"><code># zoomed in plot: one plot of each cluster
-shap.stack.plot.by.group &lt;- function(shapobs, id = &#39;id&#39;,
-                                     y_parent_limit = NULL
-){         
-  require(data.table)
-  require(ggplot2)
-  require(ggforce)  
-  # optional: location to zoom in certain part of the plot
-  shapobs_long &lt;- melt.data.table(shapobs, id.vars = c(id,&quot;group&quot;))
-  require(RColorBrewer)
-  p &lt;- ggplot(shapobs_long, aes_string(x = id, y = &quot;value&quot; , fill = &quot;variable&quot;)) + 
-    geom_col(width =1, alpha = 0.9) +
-    # plot by group:
-    facet_wrap(~ group, scales = &quot;free&quot;, ncol = 2) +
-    # geom_area() +
-    labs(fill = &#39;Feature&#39;, x = &#39;Observation&#39;, 
-         y = &quot;&quot;) + 
-    geom_hline(yintercept = 0, col = &quot;gray40&quot;) + 
-    theme_bw() + 
-    # theme(legend.justification = c(1, 1), legend.position = c(1, 1),
-    #       legend.text=element_text(size=rel(0.8)))+
-    coord_cartesian(ylim = y_parent_limit)
-  # theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())
-  # how to apply color
-  if (dim(shapobs)[2]-1&lt;=12){p &lt;- p +    
-    # [notes] yes this discrete palette has a maximum of 12
-    scale_fill_manual(values = brewer.pal(dim(shapobs)[2]-1, &#39;Paired&#39;))
-  } else {
-    p &lt;- p +  scale_fill_viridis_d(option = &quot;D&quot;)  # viridis color scale
-  }
-  return(p)
-}
-
-# default to cluster into 10 groups, here we show 8. Within each cluster, the patterns of how the predictors drive prediction are closer.
-
-shapobs &lt;- shap.stack.data(shap_contrib = shap_result$shap_score, top_n = 7, data_percent = 1, cluster_method = &#39;ward.D&#39;, n_groups = 8)</code></pre>
 <pre><code>## The SHAP values of the Rest 80 variables were summed into variable &#39;rest_variables&#39;.</code></pre>
-<pre class="r"><code>shap.stack.plot.by.group(shapobs = shapobs)</code></pre>
 <p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-7-1.png" width="768" /></p>
 </div>
 </div>
@@ -521,7 +288,7 @@ if (!doNotTrack) {
     
   </ul>
   
-  <div class="copyright">Acknowledgement to Yihui Xie for R Blogdown and hugo-xmag theme</div>
+  <div class="copyright">@2019 Liu. Powered by Github. Blogdown and Hugo Theme by Yihui Xie.</div>
   
 </div>
 </footer>

@@ -6,20 +6,28 @@
     <description>Recent content in SHAP on Welcome to my blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 14 Oct 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 18 Jul 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://liuyanguu.github.io/tags/shap/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>SHAP Visualization for XGBoost</title>
+      <title>SHAP visualization for XGBoost in R</title>
+      <link>https://liuyanguu.github.io/post/2019/07/18/visualization-of-shap-for-xgboost/</link>
+      <pubDate>Thu, 18 Jul 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://liuyanguu.github.io/post/2019/07/18/visualization-of-shap-for-xgboost/</guid>
+      <description>SHAP values: local explanation to global understandingLocal ExplanationSHAP plotsSHAP force plot (stack plot)Summary plotDependence plotInteraction valuesSHAP values: local explanation to global understandingTree-based machine learning models (random forest, gradient boosted trees, XGBoost) are the most popular non-linear models today. SHAP (SHapley Additive exPlnation) values is claimed to be the most advanced method to interpret results from tree-based models.</description>
+    </item>
+    
+    <item>
+      <title>SHAP Visualization in R (First post)</title>
       <link>https://liuyanguu.github.io/post/2018/10/14/shap-visualization-for-xgboost/</link>
       <pubDate>Sun, 14 Oct 2018 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/post/2018/10/14/shap-visualization-for-xgboost/</guid>
-      <description>BackgroundSummary plotFunction to get SHAP value matrixFunctions for summary plotSHAP plot for each featureSHAP stack plot for observationFunction for stack plotStack plot by clustering groups(Under further updating …)
-BackgroundI will illustrate the application of SHAP (SHapley Additive exPlnation) values to visualize the efforts of features on the outcome variable in a XGBoost model.
-The function was developed by Scott Lundberg in Python and explained here.</description>
+      <description>BackgroundSummary plotFunction to get SHAP value matrixFunctions for summary plotSHAP plot for each featureSHAP stack plot for observationFunction for stack plotStack plot by clustering groupsAn updated version has been posted in a later post
+BackgroundI will illustrate the application of SHAP (SHapley Additive exPlnation) values to visualize the efforts of features on the outcome variable in a XGBoost model.</description>
     </item>
     
   </channel>
