@@ -17,8 +17,8 @@
       <pubDate>Thu, 18 Jul 2019 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/post/2019/07/18/visualization-of-shap-for-xgboost/</guid>
-      <description>Why SHAP valuesLocal ExplanationConsistency in Global Feature ImportanceSHAP plotsSHAP force plotSummary plotDependence plotInteraction valuesWhy SHAP valuesSHAP’s main advantages are local explanation and consistency in global model structure.
-Tree-based machine learning models (random forest, gradient boosted trees, XGBoost) are the most popular non-linear models today. SHAP (SHapley Additive exPlnation) values is claimed to be the most advanced method to interpret results from tree-based models.</description>
+      <description>SHAP package in RWhy SHAP valuesLocal ExplanationConsistency in Global Feature ImportanceSHAP plotsSHAP force plotSummary plotDependence plotInteraction valuesSHAP package in RThe R plotting functions used in this blog were combined into R package **SHAPforxgboost&#34;.To install, please download from the github.Still under further revise.
+devtools::install_github(&amp;quot;liuyanguu/SHAPforxgboost&amp;quot;)Why SHAP valuesSHAP’s main advantages are local explanation and consistency in global model structure.</description>
     </item>
     
   </channel>

@@ -17,8 +17,8 @@
       <pubDate>Thu, 18 Jul 2019 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/post/2019/07/18/visualization-of-shap-for-xgboost/</guid>
-      <description>Why SHAP valuesLocal ExplanationConsistency in Global Feature ImportanceSHAP plotsSHAP force plotSummary plotDependence plotInteraction valuesWhy SHAP valuesSHAP’s main advantages are local explanation and consistency in global model structure.
-Tree-based machine learning models (random forest, gradient boosted trees, XGBoost) are the most popular non-linear models today. SHAP (SHapley Additive exPlnation) values is claimed to be the most advanced method to interpret results from tree-based models.</description>
+      <description>SHAP package in RWhy SHAP valuesLocal ExplanationConsistency in Global Feature ImportanceSHAP plotsSHAP force plotSummary plotDependence plotInteraction valuesSHAP package in RThe R plotting functions used in this blog were combined into R package **SHAPforxgboost&#34;.To install, please download from the github.Still under further revise.
+devtools::install_github(&amp;quot;liuyanguu/SHAPforxgboost&amp;quot;)Why SHAP valuesSHAP’s main advantages are local explanation and consistency in global model structure.</description>
     </item>
     
     <item>
@@ -53,12 +53,12 @@ Dataset.seed(123)n0 &amp;lt;- 5X &amp;lt;- data.</description>
     </item>
     
     <item>
-      <title>SHAP Visualization in R (First post)</title>
+      <title>SHAP Visualization in R (first post)</title>
       <link>https://liuyanguu.github.io/post/2018/10/14/shap-visualization-for-xgboost/</link>
       <pubDate>Sun, 14 Oct 2018 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/post/2018/10/14/shap-visualization-for-xgboost/</guid>
-      <description>BackgroundSummary plotFunction to get SHAP value matrixFunctions for summary plotSHAP plot for each featureSHAP stack plot for observationFunction for stack plotStack plot by clustering groupsAn updated version has been posted in a later post
+      <description>BackgroundExample 1SHAP summary plotSHAP dependence plotSHAP force plotExample 2Summary plotDependence plot for each featureForce plotStack plot by clustering groups19/07/21:An updated version of these functions has been posted in a later post. I used a package to wrap them up. Please refer to: SHAP visualization for XGBoost in R
 BackgroundI will illustrate the application of SHAP (SHapley Additive exPlnation) values to visualize the efforts of features on the outcome variable in a XGBoost model.</description>
     </item>
     

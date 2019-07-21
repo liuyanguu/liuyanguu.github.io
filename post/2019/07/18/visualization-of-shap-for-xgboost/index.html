@@ -73,6 +73,7 @@
 
 <div id="TOC">
 <ul>
+<li><a href="#shap-package-in-r">SHAP package in <strong>R</strong></a></li>
 <li><a href="#why-shap-values">Why SHAP values</a><ul>
 <li><a href="#local-explanation">Local Explanation</a></li>
 <li><a href="#consistency-in-global-feature-importance">Consistency in Global Feature Importance</a></li>
@@ -86,6 +87,13 @@
 </ul>
 </div>
 
+<div id="shap-package-in-r" class="section level1">
+<h1>SHAP package in <strong>R</strong></h1>
+<p>The R plotting functions used in this blog were combined into R package **SHAPforxgboost".
+To install, please download from the <a href="https://github.com/liuyanguu/SHAPforxgboost">github</a>.
+Still under further revise.</p>
+<pre class="r"><code>devtools::install_github(&quot;liuyanguu/SHAPforxgboost&quot;)</code></pre>
+</div>
 <div id="why-shap-values" class="section level1">
 <h1>Why SHAP values</h1>
 <p>SHAP’s main advantages are <strong>local explanation</strong> and <strong>consistency</strong> in global model structure.</p>
@@ -146,7 +154,8 @@ Paper 3. 2019 <a href="https://arxiv.org/abs/1905.04610">Explainable AI for Tree
 </tr>
 </tbody>
 </table>
-<pre class="r"><code>X1 = as.matrix(d[,.(Fever, Cough)])
+<pre class="r"><code>library(xgboost)
+X1 = as.matrix(d[,.(Fever, Cough)])
 X2 = as.matrix(d[,.(Cough, Fever)])
 m1 = xgboost(
   data = X1, label = d$y,base_score = 0, gamma = 0, eta = 1, lambda = 0,nrounds = 1,objective = &quot;reg:linear&quot;,  verbose = F)
@@ -226,13 +235,13 @@ xgb.importance(model = m1)</code></pre>
 <p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/Python.stackplot.PNG" /></p>
 <p>Using my function in R:</p>
 <pre><code>## Data has N: 10148 | zoom in length is 150 at location 6088.8</code></pre>
-<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-7-1.png" width="768" /><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-7-2.png" width="768" /></p>
+<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-8-1.png" width="768" /><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-8-2.png" width="768" /></p>
 </div>
 <div id="summary-plot" class="section level2">
 <h2>Summary plot</h2>
 <p>The summary plot shows global feature importance. The sina plots show the distribution of feature contributions to the model output (in this example, the predictions of CWV measurement error) using SHAP values of each feature for every observation. Each dot is an observation (station-day).</p>
 <p>The SHAP values were generated from each fold of cross-validation. As a comparison, I also show the values from final model. Kind of similar.</p>
-<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-8-1.png" width="960" /></p>
+<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-9-1.png" width="960" /></p>
 <p>This function offers visualization improvement compared to its Python counterpart:</p>
 <pre class="python"><code>shap.summary_plot(shap_values, data_X)</code></pre>
 <p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/Python.summaryplot.PNG" style="width:60.0%" /></p>
@@ -240,9 +249,9 @@ xgb.importance(model = m1)</code></pre>
 <div id="dependence-plot" class="section level2">
 <h2>Dependence plot</h2>
 <p>It plots the SHAP values against the feature values for each variable. Again, each dot is a station-day observation.</p>
-<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-10-1.png" width="480" /></p>
+<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-11-1.png" width="480" /></p>
 <p>We can also select another feature for coloring to show some interaction.</p>
-<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-11-1.png" width="960" /></p>
+<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-12-1.png" width="960" /></p>
 <p>(LEFT) SHAP values showing the contribution of the time trend to predictions. The color represents the MAIAC CWV for each observation (purple high, yellow low). The LOESS (locally estimated scatterplot smoothing) curve is overlaid in red.<br />
 (RIGHT) SHAP values showing the contribution of the MAIAC CWV to predictions of CWV measurement error shown across the time period of the study. Note distinct y-axis scales for Terra and Aqua datasets. The color represents the MAIAC CWV for each observation (purple high, yellow low).</p>
 <p>To compare Terra vs. Aqua (As in our paper)
@@ -257,7 +266,7 @@ the SHAP values for feature i when feature j is <strong>absent</strong>.”</p>
 <ul>
 <li>Under work: my version doesn’t seem correct …</li>
 </ul>
-<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-12-1.png" width="960" /></p>
+<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-13-1.png" width="960" /></p>
 <ul>
 <li>The correct interaction plot in Python:</li>
 </ul>
