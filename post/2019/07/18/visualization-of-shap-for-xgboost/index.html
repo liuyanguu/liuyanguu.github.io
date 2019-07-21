@@ -264,8 +264,8 @@ the SHAP values for feature i when feature j is <strong>absent</strong>.”</p>
 <pre class="python"><code>shap_interaction_values = shap.TreeExplainer(model).shap_interaction_values(data_X) 
 shap.dependence_plot((&quot;dayint&quot;, &quot;Column_WV&quot;),
     shap_interaction_values, data_X, dot_size=1)</code></pre>
-<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/int1.PNG" />{width = 60%}</p>
-<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/int2.PNG" />{width = 60%}</p>
+<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/int1.PNG" style="width:50.0%" /></p>
+<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/int2.PNG" style="width:50.0%" /></p>
 <pre class="python"><code>shap.summary_plot(shap_interaction_values, data_X)</code></pre>
 <p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/Python_summary_interaction_values.png" /></p>
 <p>The example in the paper 2: It shows again that the SHAP values = SHAP values without the interaction variable age + Interactive effects by age. In this example the interactive effects are highly visible.</p>
