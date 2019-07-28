@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
-    <title>SHAP visualization for XGBoost in R: SHAPforxgboost | Welcome to my blog</title>
+    <title>SHAP for XGBoost in R: SHAPforxgboost | Welcome to my blog</title>
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="/css/fonts.css" />
     <link href="//cdn.bootcss.com/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -52,7 +52,7 @@
   
   </div>
 
-  <h1><span class="title">SHAP visualization for XGBoost in R: SHAPforxgboost</span></h1>
+  <h1><span class="title">SHAP for XGBoost in R: SHAPforxgboost</span></h1>
 
   
   <h3 class="author">Yang Liu
@@ -81,9 +81,7 @@
 <li><a href="#consistency-in-global-feature-importance">Consistency in Global Feature Importance</a></li>
 </ul></li>
 <li><a href="#shap-plots">SHAP plots</a><ul>
-<li><a href="#summary-plot">Summary plot</a><ul>
-<li><a href="#alternatives-ways-to-make-the-same-plot">Alternatives ways to make the same plot:</a></li>
-</ul></li>
+<li><a href="#summary-plot">Summary plot</a></li>
 <li><a href="#dependence-plot">Dependence plot</a></li>
 <li><a href="#interaction-effects">Interaction effects</a></li>
 <li><a href="#shap-force-plot">SHAP force plot</a></li>
@@ -94,8 +92,8 @@
 
 <div id="shap-package-in-r" class="section level1">
 <h1>SHAP package in <strong>R</strong></h1>
-<p>The R plotting functions used in this blog illustrates the R package **SHAPforxgboost".<br />
-Please install from <a href="https://github.com/liuyanguu/SHAPforxgboost">github</a>.</p>
+<p>I built an R package <strong>SHAPforxgboost</strong> that wraps all the R plotting functions illustrated in this post. It serves for now as the vignette for the package.</p>
+<p>Please install from <a href="https://github.com/liuyanguu/SHAPforxgboost">github</a>.</p>
 <pre class="r"><code>devtools::install_github(&quot;liuyanguu/SHAPforxgboost&quot;)</code></pre>
 </div>
 <div id="why-shap-values" class="section level1">
@@ -271,26 +269,26 @@ shap_long &lt;- shap.prep(shap_contrib = shap_values$shap_score, X_train = dataX
 <pre class="r"><code># **SHAP summary plot**
 shap.plot.summary(shap_long)</code></pre>
 <p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-9-1.png" width="576" /></p>
-<pre class="r"><code>shap.plot.summary(shap_long, x_bound  = 1.2, dilute = 10)</code></pre>
+<pre class="r"><code># diluted points:
+shap.plot.summary(shap_long, x_bound  = 1.2, dilute = 10)</code></pre>
 <p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-9-2.png" width="576" /></p>
-<div id="alternatives-ways-to-make-the-same-plot" class="section level3">
-<h3>Alternatives ways to make the same plot:</h3>
+<p><strong>Alternatives ways to make the same plot:</strong></p>
 <pre class="r"><code># option 1: from the xgboost model
 shap.plot.summary.wrap1(mod, X = as.matrix(dataX))
 
 
 # option 2: supply a self-made SHAP values dataset (e.g. sometimes as output from cross-validation)
 shap.plot.summary.wrap2(shap_values$shap_score, as.matrix(dataX))</code></pre>
-<p>This summary function offers better visualization compared to its Python counterpart using <code>shap.summary_plot(shap_values, dataX)</code>, which looks like:</p>
+<p>The summary function offers better visualization compared to its Python counterpart using <code>shap.summary_plot(shap_values, dataX)</code>:</p>
 <p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/Python.summaryplot.PNG" style="width:60.0%" /></p>
-</div>
 </div>
 <div id="dependence-plot" class="section level2">
 <h2>Dependence plot</h2>
 <p>It plots the SHAP values against the feature values for each variable. Again, each dot is a station-day observation.</p>
-<pre class="r"><code>g1 &lt;- shap.plot.dependence.color(data_long = shap_long, x = &#39;dayint&#39;, y = &#39;dayint&#39;, color_feature = &#39;Column_WV&#39;) + ggtitle(&quot;SHAP of Date vs. Feature values of Date&quot;)
+<pre class="r"><code># for one figure:
+g1 &lt;- shap.plot.dependence.color(data_long = shap_long, x = &#39;dayint&#39;, y = &#39;dayint&#39;, color_feature = &#39;Column_WV&#39;) + ggtitle(&quot;SHAP of Date vs. Feature values of Date&quot;)
 g2 &lt;- shap.plot.dependence.color(data_long = shap_long, x = &#39;dayint&#39;, y = &#39;Column_WV&#39;, color_feature = &#39;Column_WV&#39;) +  ggtitle(&quot;SHAP of CWV vs. Date&quot;)
-gridExtra::grid.arrange(g1, g2, ncol=2)</code></pre>
+gridExtra::grid.arrange(g1, g2, ncol = 2)</code></pre>
 <p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-11-1.png" width="960" /></p>
 <p>(LEFT) SHAP values showing the contribution of the time trend to predictions. The color represents the MAIAC CWV for each observation (purple high, yellow low). The LOESS (locally estimated scatterplot smoothing) curve is overlaid in red.<br />
 (RIGHT) SHAP values showing the contribution of the MAIAC CWV to predictions of CWV measurement error shown across the time period of the study. Note distinct y-axis scales for Terra and Aqua datasets. The color represents the MAIAC CWV for each observation (purple high, yellow low).</p>
@@ -299,7 +297,7 @@ gridExtra::grid.arrange(g1, g2, ncol=2)</code></pre>
 # just plot SHAP value against feature value:
 fig_list &lt;- lapply(names(shap_values$mean_shap_score)[1:4], 
                    shap.plot.dependence, data_long = shap_long)
-gridExtra::grid.arrange(grobs = fig_list, ncol=2)</code></pre>
+gridExtra::grid.arrange(grobs = fig_list, ncol = 2)</code></pre>
 <p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-12-1.png" width="960" /></p>
 </div>
 <div id="interaction-effects" class="section level2">
@@ -323,7 +321,7 @@ g4 &lt;- shap.plot.dependence.color(data_long = shap_long,
                            x= &quot;Column_WV&quot;, y = &quot;AOT_Uncertainty&quot;, 
                            color_feature = &quot;AOT_Uncertainty&quot;)
 gridExtra::grid.arrange(g3, g4, ncol=2)</code></pre>
-<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-15-1.png" width="576" /></p>
+<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-15-1.png" width="960" /></p>
 <p>Here I show the interaction effects between Time trend and CWV (LEFT), and between Blue band uncertainty and CWV (RIGHT).</p>
 </div>
 <div id="shap-force-plot" class="section level2">

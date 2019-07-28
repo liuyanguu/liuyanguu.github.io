@@ -70,7 +70,6 @@
 <main>
 <div id="TOC">
 <ul>
-<li><a href="#background">Background</a></li>
 <li><a href="#example-1">Example 1</a><ul>
 <li><a href="#shap-summary-plot">SHAP summary plot</a></li>
 <li><a href="#alternative-ways">Alternative ways:</a></li>
@@ -88,13 +87,7 @@
 </div>
 
 <p>Update 19/07/21:</p>
-<p>The R Package <strong>SHAPforxgboost</strong> has been released,
-An updated version of these functions has been posted in a later post. I used a package to wrap them up. Please refer to: <a href="https://liuyanguu.github.io/post/2019/07/18/visualization-of-shap-for-xgboost/">SHAP visualization for XGBoost in R</a></p>
-<div id="background" class="section level1">
-<h1>Background</h1>
-<p>I will illustrate the application of SHAP (SHapley Additive exPlnation) values to visualize the efforts of features on the outcome variable in a XGBoost model.<br />
-The function was developed by <a href="https://github.com/slundberg/shap"><em>Scott Lundberg</em> in Python and explained here</a>. SHAP was combined into <em>xgboost</em> with one visualization function <em>xgb.shap.plot</em>. But we can make better summary figures as in the Python package in more flexible ways by extracting the SHAP values.</p>
-</div>
+<p>Since my R Package <strong>SHAPforxgboost</strong> has been released, I updated this post using the new functions and illustrate how to use these functions using two datasets. For more information, please refer to: <a href="https://liuyanguu.github.io/post/2019/07/18/visualization-of-shap-for-xgboost/">SHAP visualization for XGBoost in R</a></p>
 <div id="example-1" class="section level1">
 <h1>Example 1</h1>
 <p>This is the example I used in the package <strong>SHAPforxgboost</strong></p>
@@ -123,10 +116,11 @@ shap_long_iris &lt;- shap.prep(xgb_model = mod1, X_train = X1)
 shap_long_iris &lt;- shap.prep(shap_contrib = shap_values_iris, X_train = X1)</code></pre>
 <div id="shap-summary-plot" class="section level2">
 <h2>SHAP summary plot</h2>
-<pre class="r"><code># ****
-shap.plot.summary(shap_long_iris)</code></pre>
+<pre class="r"><code>shap.plot.summary(shap_long_iris)</code></pre>
 <p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
-<pre class="r"><code>shap.plot.summary(shap_long_iris, x_bound  = 1.5, dilute = 10)</code></pre>
+<pre class="r"><code># option of dilute is offered to make plot faster if there are over thousands of observations
+# please see documentation for details. 
+shap.plot.summary(shap_long_iris, x_bound  = 1.5, dilute = 10)</code></pre>
 <p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-2-2.png" width="672" /></p>
 </div>
 <div id="alternative-ways" class="section level2">
@@ -139,12 +133,12 @@ shap.plot.summary.wrap2(shap_score = shap_values$shap_score, X1, top_n = 3)</cod
 </div>
 <div id="shap-dependence-plot" class="section level2">
 <h2>SHAP dependence plot</h2>
-<pre class="r"><code># **SHAP dependence plot**
-shap.plot.dependence.color(data_long = shap_long_iris, x=&quot;Petal.Length&quot;,
-                           y = &quot;Petal.Width&quot;, color_feature = &quot;Petal.Width&quot;)
-# the without color version, just plot SHAP value against feature value:
-shap.plot.dependence(data_long = shap_long_iris, &quot;Petal.Length&quot;)</code></pre>
+<pre class="r"><code>shap.plot.dependence.color(data_long = shap_long_iris, x=&quot;Petal.Length&quot;,
+                           y = &quot;Petal.Width&quot;, color_feature = &quot;Petal.Width&quot;)</code></pre>
 <p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<pre class="r"><code># the without color version, just plot SHAP value against feature value:
+shap.plot.dependence(data_long = shap_long_iris, &quot;Petal.Length&quot;)</code></pre>
+<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 </div>
 <div id="shap-interaction-effect-plot" class="section level2">
 <h2>SHAP interaction effect plot</h2>
@@ -166,7 +160,7 @@ shap.plot.dependence.color(data_long = shap_long_iris,
                            x=&quot;Petal.Length&quot;,
                            y = &quot;Petal.Width&quot;,
                            color_feature = &quot;Petal.Width&quot;)</code></pre>
-<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 </div>
 <div id="shap-force-plot" class="section level2">
 <h2>SHAP force plot</h2>
@@ -175,13 +169,13 @@ plot_data &lt;- shap.prep.stack.data(shap_contrib = shap_values_iris,
                                   n_groups = 4)
 shap.plot.force_plot(plot_data)</code></pre>
 <pre><code>## Data has N: 150 | zoom in length is 50 at location 90</code></pre>
-<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
 <pre class="r"><code>shap.plot.force_plot(plot_data,  zoom_in_group = 2)</code></pre>
 <pre><code>## Data has N: 150 | zoom in at cluster 2 with N: 28</code></pre>
-<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-6-2.png" width="672" /></p>
+<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-7-2.png" width="672" /></p>
 <pre class="r"><code># plot all the clusters:
 shap.plot.force_plot_bygroup(plot_data)</code></pre>
-<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-6-3.png" width="672" /></p>
+<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-7-3.png" width="672" /></p>
 </div>
 </div>
 <div id="example-2" class="section level1">
@@ -213,7 +207,7 @@ nround &lt;- best_rmse_index
 set.seed(best_seednumber)
 mod1 &lt;- xgboost::xgboost(data = X_train, label = Y_train, params = best_param, nround = nround, verbose = F)</code></pre>
 <pre class="r"><code>shap.plot.summary.wrap1(mod1, X_train, top_n = 10)</code></pre>
-<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
 </div>
 <div id="dependence-plot-for-each-feature" class="section level2">
 <h2>Dependence plot for each feature</h2>
@@ -225,12 +219,12 @@ shap_values &lt;- shap.values(mod1, X_train)
 features_ranked &lt;- names(shap_values$mean_shap_score)[1:4]
 fig_list &lt;- lapply(features_ranked, shap.plot.dependence, data_long = data_long)
 gridExtra::grid.arrange(grobs = fig_list, ncol = 2)</code></pre>
-<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-9-1.png" width="768" /></p>
+<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-10-1.png" width="768" /></p>
 <ul>
 <li>If Use the built-in <code>xgb.shap.plot</code> function</li>
 </ul>
 <pre class="r"><code>xgboost::xgb.plot.shap(data = X_train, model = mod1, top_n = 4, n_col = 2)</code></pre>
-<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-10-1.png" width="768" /></p>
+<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-11-1.png" width="768" /></p>
 </div>
 <div id="force-plot" class="section level2">
 <h2>Force plot</h2>
@@ -246,12 +240,12 @@ gridExtra::grid.arrange(grobs = fig_list, ncol = 2)</code></pre>
 <pre><code>## The SHAP values of the Rest 82 variables were summed into variable &#39;rest_variables&#39;.</code></pre>
 <pre class="r"><code>shap.plot.force_plot(force_plot_data)</code></pre>
 <pre><code>## Data has N: 316 | zoom in length is 50 at location 189.6</code></pre>
-<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
 </div>
 <div id="stack-plot-by-clustering-groups" class="section level2">
 <h2>Stack plot by clustering groups</h2>
 <pre class="r"><code>shap.plot.force_plot_bygroup(force_plot_data)</code></pre>
-<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
 </div>
 </div>
 
