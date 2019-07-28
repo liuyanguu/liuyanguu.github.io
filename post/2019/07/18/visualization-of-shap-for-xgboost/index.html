@@ -327,15 +327,17 @@ gridExtra::grid.arrange(g3, g4, ncol=2)</code></pre>
 <div id="shap-force-plot" class="section level2">
 <h2>SHAP force plot</h2>
 <p>The SHAP force plot basically stacks these SHAP values for each observation, and show how the final output was obtained as a sum of each predictor’s attribution.</p>
-<pre class="r"><code># choose to show top 4 features by setting `top_n = 4`, set 6 clustering groups.  
+<pre class="r"><code># choose to show top 4 features by setting `top_n = 4`, 
+# set 6 clustering groups of observations.  
 plot_data &lt;- shap.prep.stack.data(shap_contrib = shap_values$shap_score, top_n = 4, n_groups = 6)</code></pre>
 <pre><code>## The SHAP values of the Rest 8 variables were summed into variable &#39;rest_variables&#39;.</code></pre>
 <pre class="r"><code># choose to zoom in at location 500, set y-axis limit using `y_parent_limit`  
 # it is also possible to set y-axis limit for zoom-in part alone using `y_zoomin_limit`  
-shap.plot.force_plot(plot_data, zoom_in_location = 500, y_parent_limit = c(-1,1))</code></pre>
+shap.plot.force_plot(plot_data, zoom_in_location = 500, y_parent_limit = c(-1.5,1.5))</code></pre>
 <pre><code>## Data has N: 10148 | zoom in length is 150 at location 500</code></pre>
 <p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-16-1.png" width="768" /></p>
-<pre class="r"><code>shap.plot.force_plot_bygroup(plot_data)</code></pre>
+<pre class="r"><code># plot the 6 clusters
+shap.plot.force_plot_bygroup(plot_data)</code></pre>
 <p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-16-2.png" width="768" /></p>
 </div>
 </div>
