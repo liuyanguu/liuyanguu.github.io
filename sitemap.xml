@@ -129,6 +129,12 @@
   </url>
   
   <url>
+    <loc>https://liuyanguu.github.io/categories/r-package/</loc>
+    <lastmod>2019-07-18T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://liuyanguu.github.io/tags/shap/</loc>
     <lastmod>2019-07-18T00:00:00+00:00</lastmod>
     <priority>0</priority>

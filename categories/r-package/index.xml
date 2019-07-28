@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>SHAPforxgboost on Welcome to my blog</title>
-    <link>https://liuyanguu.github.io/tags/shapforxgboost/</link>
-    <description>Recent content in SHAPforxgboost on Welcome to my blog</description>
+    <title>R package on Welcome to my blog</title>
+    <link>https://liuyanguu.github.io/categories/r-package/</link>
+    <description>Recent content in R package on Welcome to my blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Thu, 18 Jul 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://liuyanguu.github.io/tags/shapforxgboost/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://liuyanguu.github.io/categories/r-package/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>

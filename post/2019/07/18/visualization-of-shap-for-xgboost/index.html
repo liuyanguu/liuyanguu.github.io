@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
-    <title>SHAP visualization for XGBoost in R | Welcome to my blog</title>
+    <title>SHAP visualization for XGBoost in R: SHAPforxgboost | Welcome to my blog</title>
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="/css/fonts.css" />
     <link href="//cdn.bootcss.com/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -48,9 +48,11 @@
   
      &hercon; <a href="/categories/data-visualization">Data Visualization</a>
   
+     &hercon; <a href="/categories/r-package">R package</a>
+  
   </div>
 
-  <h1><span class="title">SHAP visualization for XGBoost in R</span></h1>
+  <h1><span class="title">SHAP visualization for XGBoost in R: SHAPforxgboost</span></h1>
 
   
   <h3 class="author">Yang Liu
@@ -58,7 +60,7 @@
   
 
   
-  <p>Tags: <a href="/tags/xgboost">XGBoost</a>; <a href="/tags/shap">SHAP</a>; <a href="/tags/shapforxgboost">shapforxgboost</a>
+  <p>Tags: <a href="/tags/xgboost">XGBoost</a>; <a href="/tags/shap">SHAP</a>; <a href="/tags/shapforxgboost">SHAPforxgboost</a>
   </p>
   
   
@@ -79,38 +81,69 @@
 <li><a href="#consistency-in-global-feature-importance">Consistency in Global Feature Importance</a></li>
 </ul></li>
 <li><a href="#shap-plots">SHAP plots</a><ul>
-<li><a href="#shap-force-plot">SHAP force plot</a></li>
-<li><a href="#summary-plot">Summary plot</a></li>
-<li><a href="#dependence-plot">Dependence plot</a></li>
-<li><a href="#interaction-values">Interaction values</a></li>
+<li><a href="#summary-plot">Summary plot</a><ul>
+<li><a href="#alternatives-ways-to-make-the-same-plot">Alternatives ways to make the same plot:</a></li>
 </ul></li>
+<li><a href="#dependence-plot">Dependence plot</a></li>
+<li><a href="#interaction-effects">Interaction effects</a></li>
+<li><a href="#shap-force-plot">SHAP force plot</a></li>
+</ul></li>
+<li><a href="#references">References</a></li>
 </ul>
 </div>
 
 <div id="shap-package-in-r" class="section level1">
 <h1>SHAP package in <strong>R</strong></h1>
-<p>The R plotting functions used in this blog were combined into R package **SHAPforxgboost".
-To install, please download from the <a href="https://github.com/liuyanguu/SHAPforxgboost">github</a>.
-Still under further revise.</p>
+<p>The R plotting functions used in this blog illustrates the R package **SHAPforxgboost".<br />
+Please install from <a href="https://github.com/liuyanguu/SHAPforxgboost">github</a>.</p>
 <pre class="r"><code>devtools::install_github(&quot;liuyanguu/SHAPforxgboost&quot;)</code></pre>
 </div>
 <div id="why-shap-values" class="section level1">
 <h1>Why SHAP values</h1>
 <p>SHAP’s main advantages are <strong>local explanation</strong> and <strong>consistency</strong> in global model structure.</p>
 <p>Tree-based machine learning models (random forest, gradient boosted trees, XGBoost) are the most popular non-linear models today. SHAP (SHapley Additive exPlnation) values is claimed to be the most advanced method to interpret results from tree-based models. It was based on Shaply values from game theory.</p>
-<p>The <a href="https://github.com/slundberg/shap">github page</a> that explains the Python package developed by <em>Scott Lundberg</em>. Here we show all the visualizations in R. In r package <em>xgboost</em> there is only one function <em>xgb.plot.shap</em> that can make some simple dependence plots.</p>
-<p>Main references by Slundberg:<br />
-Paper 1. 2017 <a href="https://arxiv.org/abs/1705.07874">A Unified Approach to Interpreting Model Predictions</a><br />
-Paper 2. 2019 <a href="https://arxiv.org/abs/1802.03888">Consistent Individualized Feature Attribution for Tree
-Ensembles</a><br />
-Paper 3. 2019 <a href="https://arxiv.org/abs/1905.04610">Explainable AI for Trees: From Local Explanations to Global Understanding</a></p>
+<p>The <a href="https://github.com/slundberg/shap">github page</a> that explains the Python package developed by <em>Scott Lundberg</em>. Here we show all the visualizations in R. In r package <em>xgboost</em> there is only one function <em>xgb.shap.plot</em> that can make some simple dependence plots.</p>
 <div id="local-explanation" class="section level2">
 <h2>Local Explanation</h2>
+<pre class="r"><code># run the model with built-in data
+library(&quot;SHAPforxgboost&quot;); library(&quot;ggplot2&quot;); library(&quot;xgboost&quot;)
+library(&quot;data.table&quot;); library(&quot;here&quot;)
+
+y_var &lt;-  &quot;diffcwv&quot;
+dataX &lt;- dataXY_df[,-..y_var]
+# hyperparameter tuning results
+param_dart &lt;- list(objective = &quot;reg:linear&quot;,  # For regression
+                   nrounds = 366,
+                   eta = 0.018,
+                   max_depth = 10,
+                   gamma = 0.009,
+                   subsample = 0.98,
+                   colsample_bytree = 0.86)
+
+mod &lt;- xgboost.fit(X = as.matrix(dataX), Y = as.matrix(dataXY_df[[y_var]]), 
+                       xgb_param = param_dart)
+                       
+# To return the SHAP values and ranked features by mean|SHAP|
+shap_values &lt;- shap.values(xgb_model = mod, X_train = dataX)
+# The ranked features by mean |SHAP|
+shap_values$mean_shap_score</code></pre>
+<pre><code>##          dayint       Column_WV AOT_Uncertainty   dist_water_km 
+##      0.07925684      0.05418276      0.04945045      0.02981629 
+##             aod            elev     DevAll_P1km           RelAZ 
+##      0.02854055      0.02148483      0.01318555      0.01163064 
+##  forestProp_1km 
+##      0.01045768</code></pre>
 <p>Shapley values are caculated across the entire dataset. The SHAP values dataset has the same dimention (10148,9) as the dataset of the independent variables (10148,9) fit into the xgboost model.</p>
-<p>The sum of each row’s SHAP values (plus the bias, which is like an intercept) is the predicted model output. As in the following table of SHAP values, <code>rowSum</code> equals the output <code>predict(xgb_mod)</code>. I.e., the explanation’s attribution values sum up to the model output.</p>
+<p>The sum of each row’s SHAP values (plus the <strong>BIAS</strong>, which is like an intercept) is the predicted model output. As in the following table of SHAP values, <code>rowSum</code> equals the output <code>predict(xgb_mod)</code>. I.e., the explanation’s attribution values sum up to the model output (last column in the table below).</p>
+<pre class="r"><code># show that rowSum is the output 
+shap_data &lt;- shap_values$shap_score
+shap_data[, BIAS := shap_values$BIAS0]
+pred_mod &lt;- predict(mod, as.matrix(dataX))
+shap_data[, `:=`(rowSum = round(rowSums(shap_data),6), pred_mod = round(pred_mod,6))]
+rmarkdown::paged_table(shap_data[1:20,])</code></pre>
 <div data-pagedtable="false">
 <script data-pagedtable-source type="application/json">
-{"columns":[{"label":["dayint"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["Column_WV"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["AOT_Uncertainty"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["elev"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["aod"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["RelAZ"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["DevAll_P1km"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["dist_water_km"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["forestProp_1km"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["BIAS"],"name":[10],"type":["dbl"],"align":["right"]},{"label":["rowSum"],"name":[11],"type":["dbl"],"align":["right"]},{"label":["pred_mod"],"name":[12],"type":["dbl"],"align":["right"]}],"data":[{"1":"-0.18715677","2":"-0.031067915","3":"-0.042542458","4":"0.031067742","5":"-0.0815232396","6":"-0.0094383266","7":"0.003468891","8":"0.0166249666","9":"0.004934906","10":"0.04338279","11":"-0.252249","12":"-0.252248"},{"1":"-0.12964958","2":"-0.009885377","3":"-0.043589681","4":"-0.031356119","5":"-0.1450539678","6":"0.0046048006","7":"-0.023994194","8":"-0.0750681460","9":"-0.016985688","10":"0.04338279","11":"-0.427595","12":"-0.427592"},{"1":"-0.25374624","2":"-0.045215413","3":"-0.013490994","4":"-0.038848273","5":"-0.0869967267","6":"-0.0096156942","7":"0.004589455","8":"-0.0288857892","9":"0.003624398","10":"0.04338279","11":"-0.425202","12":"-0.425200"},{"1":"-0.18323998","2":"-0.043409277","3":"-0.106642842","4":"-0.028045641","5":"-0.1206713319","6":"-0.0127560785","7":"-0.021616094","8":"-0.0411532968","9":"0.008067717","10":"0.04338279","11":"-0.506084","12":"-0.506081"},{"1":"-0.11401504","2":"-0.025009969","3":"0.022383327","4":"0.022031108","5":"-0.0006215787","6":"-0.0021892134","7":"0.005889706","8":"0.0054647080","9":"0.004676695","10":"0.04338279","11":"-0.038007","12":"-0.038008"},{"1":"-0.10267494","2":"-0.002558434","3":"0.008135342","4":"-0.013826885","5":"0.0016683409","6":"-0.0054014330","7":"-0.009841926","8":"-0.0029660626","9":"0.006683792","10":"0.04338279","11":"-0.077399","12":"-0.077400"},{"1":"-0.13547783","2":"-0.012119506","3":"0.008484396","4":"-0.024734786","5":"-0.0014629379","6":"-0.0039268318","7":"0.003149311","8":"-0.0170685146","9":"0.002660275","10":"0.04338279","11":"-0.137114","12":"-0.137113"},{"1":"-0.09839460","2":"0.006818605","3":"-0.043481231","4":"0.017092850","5":"0.0229927097","6":"-0.0007108831","7":"0.005390577","8":"0.0088423491","9":"0.003532766","10":"0.04338279","11":"-0.034534","12":"-0.034534"},{"1":"-0.09118569","2":"0.059970852","3":"-0.066366374","4":"-0.013478030","5":"0.0061395997","6":"0.0002563516","7":"-0.003441083","8":"-0.0259610321","9":"-0.008752892","10":"0.04338279","11":"-0.099436","12":"-0.099436"},{"1":"-0.09399413","2":"0.007784905","3":"-0.072339907","4":"-0.011641352","5":"0.0242972262","6":"-0.0059533017","7":"-0.010730079","8":"-0.0086742062","9":"0.004299855","10":"0.04338279","11":"-0.123568","12":"-0.123568"},{"1":"-0.09959194","2":"0.012008791","3":"-0.061421499","4":"-0.009878984","5":"-0.0168019254","6":"-0.0004406802","7":"-0.011182155","8":"-0.0140221165","9":"0.004142347","10":"0.04338279","11":"-0.153805","12":"-0.153805"},{"1":"-0.11740648","2":"0.003290213","3":"-0.045823935","4":"-0.020620992","5":"0.0039394405","6":"-0.0021595182","7":"0.003970480","8":"-0.0121408273","9":"0.001049619","10":"0.04338279","11":"-0.142519","12":"-0.142520"},{"1":"-0.11837890","2":"-0.027577521","3":"0.008354975","4":"0.019331476","5":"0.0112489099","6":"-0.0020722104","7":"0.005616670","8":"0.0057744100","9":"0.004772345","10":"0.04338279","11":"-0.049547","12":"-0.049547"},{"1":"-0.10602196","2":"-0.017489864","3":"0.015197348","4":"-0.012273921","5":"0.0025097895","6":"-0.0021004984","7":"-0.006961844","8":"-0.0008688157","9":"0.008245739","10":"0.04338279","11":"-0.076381","12":"-0.076381"},{"1":"-0.14001110","2":"-0.020041713","3":"0.035514940","4":"-0.024146084","5":"0.0280121844","6":"-0.0009258876","7":"0.001782326","8":"-0.0189278349","9":"0.003199620","10":"0.04338279","11":"-0.092161","12":"-0.092160"},{"1":"-0.07728018","2":"0.074728101","3":"-0.024501290","4":"-0.009976464","5":"-0.0358427614","6":"0.0065780962","7":"-0.007042302","8":"-0.0205744430","9":"-0.004872040","10":"0.04338279","11":"-0.055400","12":"-0.055402"},{"1":"-0.10048369","2":"-0.007221894","3":"-0.032718115","4":"-0.015667135","5":"0.0355319791","6":"-0.0054386123","7":"-0.011140550","8":"-0.0097863171","9":"0.005385204","10":"0.04338279","11":"-0.098156","12":"-0.098156"},{"1":"-0.12534212","2":"-0.010824366","3":"-0.016725406","4":"-0.022520537","5":"0.0332389995","6":"-0.0049382970","7":"0.004164279","8":"-0.0171724353","9":"0.002152309","10":"0.04338279","11":"-0.114585","12":"-0.114584"},{"1":"-0.10409787","2":"-0.016006416","3":"-0.024844673","4":"0.020165309","5":"0.0066079525","6":"-0.0028690661","7":"0.005537408","8":"0.0090354336","9":"0.004151466","10":"0.04338279","11":"-0.058938","12":"-0.058937"},{"1":"-0.11528442","2":"0.004500886","3":"0.042238023","4":"-0.014222793","5":"0.0273922328","6":"-0.0037647171","7":"-0.001990702","8":"-0.0152933709","9":"-0.008244956","10":"0.04338279","11":"-0.041287","12":"-0.041287"},{"1":"-0.11656743","2":"-0.023387292","3":"-0.009356011","4":"-0.009143895","5":"-0.0208226219","6":"-0.0037388646","7":"-0.006980686","8":"-0.0042926460","9":"0.009554730","10":"0.04338279","11":"-0.141352","12":"-0.141351"},{"1":"-0.14012492","2":"-0.014302307","3":"0.015931830","4":"-0.022592893","5":"0.0175349601","6":"-0.0044122408","7":"0.003044810","8":"-0.0180001333","9":"0.003710948","10":"0.04338279","11":"-0.115827","12":"-0.115827"},{"1":"-0.11826131","2":"-0.033812970","3":"0.016363693","4":"0.019668225","5":"-0.0001721819","6":"-0.0035931296","7":"0.004827132","8":"0.0045802798","9":"0.004429853","10":"0.04338279","11":"-0.062588","12":"-0.062588"},{"1":"-0.10903507","2":"-0.036489811","3":"0.006512624","4":"-0.012283617","5":"0.0195753723","6":"-0.0016612468","7":"-0.006123367","8":"0.0003110451","9":"0.008055500","10":"0.04338279","11":"-0.087756","12":"-0.087756"},{"1":"-0.14956295","2":"-0.038630322","3":"0.016869539","4":"-0.022014769","5":"0.0239063706","6":"-0.0004476100","7":"0.002090851","8":"-0.0202623159","9":"0.002958729","10":"0.04338279","11":"-0.141710","12":"-0.141709"},{"1":"-0.12475270","2":"-0.043940909","3":"-0.075587615","4":"0.022011196","5":"0.0029847433","6":"-0.0101475958","7":"0.006893964","8":"0.0139649948","9":"0.004842665","10":"0.04338279","11":"-0.160348","12":"-0.160348"},{"1":"-0.13565357","2":"-0.023931466","3":"-0.058972284","4":"-0.024380034","5":"0.0160689484","6":"-0.0070775207","7":"-0.010869136","8":"-0.0366374552","9":"-0.011445017","10":"0.04338279","11":"-0.249515","12":"-0.249515"},{"1":"-0.25385344","2":"-0.030712744","3":"0.027058763","4":"0.022032510","5":"0.0073433197","6":"-0.0361521132","7":"0.004387179","8":"0.0084044132","9":"0.005609675","10":"0.04338279","11":"-0.202500","12":"-0.202498"},{"1":"-0.14995360","2":"-0.021509238","3":"0.053598445","4":"-0.010622251","5":"-0.0144325672","6":"0.0007373059","7":"-0.003630016","8":"0.0008640449","9":"0.009957199","10":"0.04338279","11":"-0.091608","12":"-0.091606"},{"1":"-0.13132517","2":"-0.037450198","3":"0.042510960","4":"-0.008883680","5":"0.0087455176","6":"-0.0021514141","7":"-0.001365387","8":"0.0102984514","9":"0.013207970","10":"0.04338279","11":"-0.063030","12":"-0.063028"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+{"columns":[{"label":["dayint"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["Column_WV"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["AOT_Uncertainty"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["elev"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["aod"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["RelAZ"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["DevAll_P1km"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["dist_water_km"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["forestProp_1km"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["BIAS"],"name":[10],"type":["dbl"],"align":["right"]},{"label":["rowSum"],"name":[11],"type":["dbl"],"align":["right"]},{"label":["pred_mod"],"name":[12],"type":["dbl"],"align":["right"]}],"data":[{"1":"-0.18715677","2":"-0.031067915","3":"-0.042542458","4":"0.031067742","5":"-0.0815232396","6":"-0.0094383266","7":"0.003468891","8":"0.0166249666","9":"0.004934906","10":"0.04338279","11":"-0.252249","12":"-0.252248"},{"1":"-0.12964958","2":"-0.009885377","3":"-0.043589681","4":"-0.031356119","5":"-0.1450539678","6":"0.0046048006","7":"-0.023994194","8":"-0.0750681460","9":"-0.016985688","10":"0.04338279","11":"-0.427595","12":"-0.427592"},{"1":"-0.25374624","2":"-0.045215413","3":"-0.013490994","4":"-0.038848273","5":"-0.0869967267","6":"-0.0096156942","7":"0.004589455","8":"-0.0288857892","9":"0.003624398","10":"0.04338279","11":"-0.425202","12":"-0.425200"},{"1":"-0.18323998","2":"-0.043409277","3":"-0.106642842","4":"-0.028045641","5":"-0.1206713319","6":"-0.0127560785","7":"-0.021616094","8":"-0.0411532968","9":"0.008067717","10":"0.04338279","11":"-0.506084","12":"-0.506081"},{"1":"-0.11401504","2":"-0.025009969","3":"0.022383327","4":"0.022031108","5":"-0.0006215787","6":"-0.0021892134","7":"0.005889706","8":"0.0054647080","9":"0.004676695","10":"0.04338279","11":"-0.038007","12":"-0.038008"},{"1":"-0.10267494","2":"-0.002558434","3":"0.008135342","4":"-0.013826885","5":"0.0016683409","6":"-0.0054014330","7":"-0.009841926","8":"-0.0029660626","9":"0.006683792","10":"0.04338279","11":"-0.077399","12":"-0.077400"},{"1":"-0.13547783","2":"-0.012119506","3":"0.008484396","4":"-0.024734786","5":"-0.0014629379","6":"-0.0039268318","7":"0.003149311","8":"-0.0170685146","9":"0.002660275","10":"0.04338279","11":"-0.137114","12":"-0.137113"},{"1":"-0.09839460","2":"0.006818605","3":"-0.043481231","4":"0.017092850","5":"0.0229927097","6":"-0.0007108831","7":"0.005390577","8":"0.0088423491","9":"0.003532766","10":"0.04338279","11":"-0.034534","12":"-0.034534"},{"1":"-0.09118569","2":"0.059970852","3":"-0.066366374","4":"-0.013478030","5":"0.0061395997","6":"0.0002563516","7":"-0.003441083","8":"-0.0259610321","9":"-0.008752892","10":"0.04338279","11":"-0.099436","12":"-0.099436"},{"1":"-0.09399413","2":"0.007784905","3":"-0.072339907","4":"-0.011641352","5":"0.0242972262","6":"-0.0059533017","7":"-0.010730079","8":"-0.0086742062","9":"0.004299855","10":"0.04338279","11":"-0.123568","12":"-0.123568"},{"1":"-0.09959194","2":"0.012008791","3":"-0.061421499","4":"-0.009878984","5":"-0.0168019254","6":"-0.0004406802","7":"-0.011182155","8":"-0.0140221165","9":"0.004142347","10":"0.04338279","11":"-0.153805","12":"-0.153805"},{"1":"-0.11740648","2":"0.003290213","3":"-0.045823935","4":"-0.020620992","5":"0.0039394405","6":"-0.0021595182","7":"0.003970480","8":"-0.0121408273","9":"0.001049619","10":"0.04338279","11":"-0.142519","12":"-0.142520"},{"1":"-0.11837890","2":"-0.027577521","3":"0.008354975","4":"0.019331476","5":"0.0112489099","6":"-0.0020722104","7":"0.005616670","8":"0.0057744100","9":"0.004772345","10":"0.04338279","11":"-0.049547","12":"-0.049547"},{"1":"-0.10602196","2":"-0.017489864","3":"0.015197348","4":"-0.012273921","5":"0.0025097895","6":"-0.0021004984","7":"-0.006961844","8":"-0.0008688157","9":"0.008245739","10":"0.04338279","11":"-0.076381","12":"-0.076381"},{"1":"-0.14001110","2":"-0.020041713","3":"0.035514940","4":"-0.024146084","5":"0.0280121844","6":"-0.0009258876","7":"0.001782326","8":"-0.0189278349","9":"0.003199620","10":"0.04338279","11":"-0.092161","12":"-0.092160"},{"1":"-0.07728018","2":"0.074728101","3":"-0.024501290","4":"-0.009976464","5":"-0.0358427614","6":"0.0065780962","7":"-0.007042302","8":"-0.0205744430","9":"-0.004872040","10":"0.04338279","11":"-0.055400","12":"-0.055402"},{"1":"-0.10048369","2":"-0.007221894","3":"-0.032718115","4":"-0.015667135","5":"0.0355319791","6":"-0.0054386123","7":"-0.011140550","8":"-0.0097863171","9":"0.005385204","10":"0.04338279","11":"-0.098156","12":"-0.098156"},{"1":"-0.12534212","2":"-0.010824366","3":"-0.016725406","4":"-0.022520537","5":"0.0332389995","6":"-0.0049382970","7":"0.004164279","8":"-0.0171724353","9":"0.002152309","10":"0.04338279","11":"-0.114585","12":"-0.114584"},{"1":"-0.10409787","2":"-0.016006416","3":"-0.024844673","4":"0.020165309","5":"0.0066079525","6":"-0.0028690661","7":"0.005537408","8":"0.0090354336","9":"0.004151466","10":"0.04338279","11":"-0.058938","12":"-0.058937"},{"1":"-0.11528442","2":"0.004500886","3":"0.042238023","4":"-0.014222793","5":"0.0273922328","6":"-0.0037647171","7":"-0.001990702","8":"-0.0152933709","9":"-0.008244956","10":"0.04338279","11":"-0.041287","12":"-0.041287"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
 <p>This offers model explanation for each observation in the dataset. And offers lots of flexibility when summarizing the whole model.</p>
@@ -121,8 +154,8 @@ Paper 3. 2019 <a href="https://arxiv.org/abs/1905.04610">Explainable AI for Tree
 <p>Consistency means it is legitimate to compare feature importance across different models. When we modify the model to make a feature more important, the feature importance should increase. The paper used the following example:</p>
 <p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/SHAPsuppfig2.JPG" />
 <em>paper 2, <a href="https://arxiv.org/abs/1905.04610">S. Lundberg 2019 arXiv:1905.04610</a></em></p>
-<p>Use the dataset of Model A as a simple example, which feature goes <strong>first</strong> into the dataset generates <strong>opposite</strong> feature importance by Gain: whichever goes later (lower in the tree) gets more credit. Notice the results from <code>xgb.importance</code> were flipped.</p>
-<p>The simple example:</p>
+<p>Use the dataset of Model A as a simple example, which feature goes <strong>first</strong> into the dataset generates <strong>opposite</strong> feature importance by Gain: whichever goes later (lower in the tree) gets more credit. <strong>Notice the results from <code>xgb.importance</code> were flipped.</strong></p>
+<p>The simple example with a dataset like:</p>
 <table>
 <thead>
 <tr class="header">
@@ -170,7 +203,8 @@ xgb.importance(model = m1)</code></pre>
 <pre><code>##    Feature      Gain     Cover Frequency
 ## 1:   Fever 0.6666667 0.3333333       0.5
 ## 2:   Cough 0.3333333 0.6666667       0.5</code></pre>
-<p>The key message is, the order/structure of how the tree is built doesn’t matter for SHAP, but matters for Gain, since the mean absolute SHAP is always the same (20 vs. 20). The explanation in the paper is a little bit confusing.</p>
+<p>So one key message is, the order/structure of how the tree is built doesn’t matter for SHAP, but matters for Gain, since the mean absolute SHAP is always the same (20 vs. 20). The explanation in the paper is a little bit confusing.</p>
+<pre class="r"><code>knitr::kable(output_simple)</code></pre>
 <table>
 <thead>
 <tr class="header">
@@ -180,7 +214,7 @@ xgb.importance(model = m1)</code></pre>
 <th align="right">y.pred</th>
 <th align="right">SHAP.Fever</th>
 <th align="right">SHAP.Cough</th>
-<th align="right">BIAS</th>
+<th align="right">BIAS.BIAS</th>
 </tr>
 </thead>
 <tbody>
@@ -227,59 +261,92 @@ xgb.importance(model = m1)</code></pre>
 </div>
 <div id="shap-plots" class="section level1">
 <h1>SHAP plots</h1>
-<div id="shap-force-plot" class="section level2">
-<h2>SHAP force plot</h2>
-<p>The SHAP force plot basically stacks these SHAP values for each observation, and show how the final output was obtained as a sum of each predictor’s attribution.</p>
-<p>How the plot looks like in python package by running</p>
-<pre class="python"><code>shap.force_plot(explainer.expected_value, shap_values, data_X)</code></pre>
-<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/Python.stackplot.PNG" /></p>
-<p>Using my function in R:</p>
-<pre><code>## Data has N: 10148 | zoom in length is 150 at location 6088.8</code></pre>
-<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-8-1.png" width="768" /><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-8-2.png" width="768" /></p>
-</div>
 <div id="summary-plot" class="section level2">
 <h2>Summary plot</h2>
 <p>The summary plot shows global feature importance. The sina plots show the distribution of feature contributions to the model output (in this example, the predictions of CWV measurement error) using SHAP values of each feature for every observation. Each dot is an observation (station-day).</p>
-<p>The SHAP values were generated from each fold of cross-validation. As a comparison, I also show the values from final model. Kind of similar.</p>
-<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-9-1.png" width="960" /></p>
-<p>This function offers visualization improvement compared to its Python counterpart:</p>
-<pre class="python"><code>shap.summary_plot(shap_values, data_X)</code></pre>
-<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/Python.summaryplot.PNG" style="width:60.0%" /></p>
+<pre class="r"><code># To prepare the long-format data:
+shap_long &lt;- shap.prep(xgb_model = mod, X_train = dataX)
+# is the same as: using given shap_contrib
+shap_long &lt;- shap.prep(shap_contrib = shap_values$shap_score, X_train = dataX)</code></pre>
+<pre class="r"><code># **SHAP summary plot**
+shap.plot.summary(shap_long)</code></pre>
+<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-9-1.png" width="576" /></p>
+<pre class="r"><code>shap.plot.summary(shap_long, x_bound  = 1.2, dilute = 10)</code></pre>
+<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-9-2.png" width="576" /></p>
+<div id="alternatives-ways-to-make-the-same-plot" class="section level3">
+<h3>Alternatives ways to make the same plot:</h3>
+<pre class="r"><code># option 1: from the xgboost model
+shap.plot.summary.wrap1(mod, X = as.matrix(dataX))
+
+
+# option 2: supply a self-made SHAP values dataset (e.g. sometimes as output from cross-validation)
+shap.plot.summary.wrap2(shap_values$shap_score, as.matrix(dataX))</code></pre>
+<p>This function offers better visualization compared to its Python counterpart (in Python): <code>shap.summary_plot(shap_values, dataX)</code>.</p>
+<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/Python.summaryplot.PNG" style="width:50.0%" /></p>
+</div>
 </div>
 <div id="dependence-plot" class="section level2">
 <h2>Dependence plot</h2>
 <p>It plots the SHAP values against the feature values for each variable. Again, each dot is a station-day observation.</p>
-<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-11-1.png" width="480" /></p>
-<p>We can also select another feature for coloring to show some interaction.</p>
-<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-12-1.png" width="960" /></p>
+<pre class="r"><code>g3 &lt;- shap.plot.dependence.color(data_long = shap_long, x = &#39;dayint&#39;, y = &#39;dayint&#39;, color_feature = &#39;Column_WV&#39;) + ggtitle(&quot;SHAP of Date vs. Feature values of Date&quot;)
+
+g4 &lt;- shap.plot.dependence.color(data_long = shap_long, x = &#39;dayint&#39;, y = &#39;Column_WV&#39;, color_feature = &#39;Column_WV&#39;) +  ggtitle(&quot;SHAP of CWV vs. Date&quot;)
+
+gridExtra::grid.arrange(g3, g4, ncol=2)</code></pre>
+<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-11-1.png" width="960" /></p>
 <p>(LEFT) SHAP values showing the contribution of the time trend to predictions. The color represents the MAIAC CWV for each observation (purple high, yellow low). The LOESS (locally estimated scatterplot smoothing) curve is overlaid in red.<br />
 (RIGHT) SHAP values showing the contribution of the MAIAC CWV to predictions of CWV measurement error shown across the time period of the study. Note distinct y-axis scales for Terra and Aqua datasets. The color represents the MAIAC CWV for each observation (purple high, yellow low).</p>
-<p>To compare Terra vs. Aqua (As in our paper)
-<img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/Figure_6a_2019_06_14_SHAP_interaction.png" />
-<img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/Figure_6b_2019_06_14_SHAP_interaction.png" /></p>
+<p>Here I choose to plot top 4 features using function <code>shap.plot.dependence</code>:</p>
+<pre class="r"><code># without color version but has marginal distribution, 
+# just plot SHAP value against feature value:
+fig_list &lt;- lapply(names(shap_values$mean_shap_score)[1:4], 
+                   shap.plot.dependence, data_long = shap_long)
+gridExtra::grid.arrange(grobs = fig_list, ncol=2)</code></pre>
+<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-12-1.png" width="960" /></p>
 </div>
-<div id="interaction-values" class="section level2">
-<h2>Interaction values</h2>
+<div id="interaction-effects" class="section level2">
+<h2>Interaction effects</h2>
 <p>SHAP interaction values separate the impact of variable into main effects and interaction effects. They add up roughly to the dependence plot.</p>
 <p>Quote paper 2: “SHAP <strong>interaction values</strong> can be interpreted as the difference between the SHAP values for feature i when feature j is <strong>present</strong> and
 the SHAP values for feature i when feature j is <strong>absent</strong>.”</p>
-<ul>
-<li>Under work: my version doesn’t seem correct …</li>
-</ul>
-<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-13-1.png" width="960" /></p>
-<ul>
-<li>The correct interaction plot in Python:</li>
-</ul>
+<p>The SHAP interaction values take time since it calculates all the combinations.</p>
+<pre class="r"><code># prepare the data using either: 
+# (this step is slow since it calculates all the combinations of features.)
+shap_int &lt;- shap.prep.interaction(xgb_mod = mod, X_train = as.matrix(dataX))
+# or the same as:
+shap_int &lt;- predict(mod, as.matrix(dataX), predinteraction = TRUE)</code></pre>
+<pre class="r"><code># **SHAP interaction effect plot **
+int1 &lt;- shap.plot.dependence.color(data_long = shap_long,
+                           data_int = shap_int,
+                           x= &quot;Column_WV&quot;,
+                           y = &quot;AOT_Uncertainty&quot;, 
+                           color_feature = &quot;AOT_Uncertainty&quot;)</code></pre>
+<p>The corresponding interaction plot using Python code:</p>
 <pre class="python"><code>shap_interaction_values = shap.TreeExplainer(model).shap_interaction_values(data_X) 
 shap.dependence_plot((&quot;dayint&quot;, &quot;Column_WV&quot;),
     shap_interaction_values, data_X, dot_size=1)</code></pre>
 <p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/int1.PNG" style="width:50.0%" /></p>
-<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/int2.PNG" style="width:50.0%" /></p>
-<pre class="python"><code>shap.summary_plot(shap_interaction_values, data_X)</code></pre>
-<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/Python_summary_interaction_values.png" /></p>
-<p>The example in the paper 2: It shows again that the SHAP values = SHAP values without the interaction variable age + Interactive effects by age. In this example the interactive effects are highly visible.</p>
-<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/interactionSHAPplot.JPG" /></p>
 </div>
+<div id="shap-force-plot" class="section level2">
+<h2>SHAP force plot</h2>
+<p>The SHAP force plot basically stacks these SHAP values for each observation, and show how the final output was obtained as a sum of each predictor’s attribution.</p>
+<pre class="r"><code>plot_data &lt;- shap.prep.stack.data(shap_contrib = shap_values$shap_score, top_n = 4, n_groups = 6)</code></pre>
+<pre><code>## The SHAP values of the Rest 8 variables were summed into variable &#39;rest_variables&#39;.</code></pre>
+<pre class="r"><code>shap.plot.force_plot(plot_data)</code></pre>
+<pre><code>## Data has N: 10148 | zoom in length is 150 at location 6088.8</code></pre>
+<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-17-1.png" width="768" /></p>
+<pre class="r"><code>shap.plot.force_plot_bygroup(plot_data)</code></pre>
+<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-17-2.png" width="768" /></p>
+</div>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<p>Recent submitted paper from my lab that applies these figures:
+<a href="http://doi.org/10.5281/zenodo.3334713">Gradient Boosting Machine Learning to Improve Satellite-Derived Column Water Vapor Measurement Error</a></p>
+<p>Paper 1. 2017 <a href="https://arxiv.org/abs/1705.07874">A Unified Approach to Interpreting Model Predictions</a><br />
+Paper 2. 2019 <a href="https://arxiv.org/abs/1802.03888">Consistent Individualized Feature Attribution for Tree
+Ensembles</a><br />
+Paper 3. 2019 <a href="https://arxiv.org/abs/1905.04610">Explainable AI for Trees: From Local Explanations to Global Understanding</a></p>
 </div>
 
 </main>
