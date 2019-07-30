@@ -17,9 +17,10 @@
       <pubDate>Sun, 28 Jul 2019 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/post/2019/07/28/some-experience-on-writing-r-package/</guid>
-      <description>Namespace:Files locations:Although SHAPforxgboost is not a complicated package, it took me some time to get the package pass all the cran check.
-I started with usethis package https://usethis.r-lib.org/ to initiate the package.
-Namespace:It is unnecessary to add Depends in the DESCRIPTION except R (&amp;gt;= 3.3.0). And the Imports part in DESCRIPTION is irrelevant to what you import into NAMESPACE in the code (although they are both import).</description>
+      <description>DescriptionNamespace:Files locations:Although ‘SHAPforxgboost’ is not a complicated package, it took me some time to get the package pass all the cran check.
+I started with using ‘usethis’ package https://usethis.r-lib.org/ to initiate the package.
+DescriptionSingle quote packages in both Title and Description fields.For example, this package uses the SHAP values output from ‘xgboost’.
+Namespace:It is unnecessary to add Depends in the DESCRIPTION except R (&amp;gt;= 3.</description>
     </item>
     
     <item>

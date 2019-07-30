@@ -65,23 +65,28 @@
 <main>
 <div id="TOC">
 <ul>
+<li><a href="#description">Description</a></li>
 <li><a href="#namespace">Namespace:</a></li>
 <li><a href="#files-locations">Files locations:</a></li>
 </ul>
 </div>
 
-<p>Although <a href="https://github.com/liuyanguu/SHAPforxgboost"><strong>SHAPforxgboost</strong></a> is not a complicated package, it took me some time to get the package pass all the cran check.</p>
-<p>I started with <strong>usethis</strong> package <a href="https://usethis.r-lib.org/">https://usethis.r-lib.org/</a> to initiate the package.</p>
+<p>Although <a href="https://github.com/liuyanguu/SHAPforxgboost"><strong>‘SHAPforxgboost’</strong></a> is not a complicated package, it took me some time to get the package pass all the cran check.</p>
+<p>I started with using ‘usethis’ package <a href="https://usethis.r-lib.org/">https://usethis.r-lib.org/</a> to initiate the package.</p>
+<div id="description" class="section level2">
+<h2>Description</h2>
+<p>Single quote packages in both Title and Description fields.For example, this package uses the SHAP values output from ‘xgboost’.</p>
+</div>
 <div id="namespace" class="section level2">
 <h2>Namespace:</h2>
 <ul>
-<li><p>It is unnecessary to add <strong>Depends</strong> in the <strong>DESCRIPTION</strong> except <code>R (&gt;= 3.3.0)</code>. And the <strong>Imports</strong> part in <strong>DESCRIPTION</strong> is irrelevant to what you import into NAMESPACE in the code (although they are both <em>import</em>). The NAMESPACE is defined by using <code>@import</code> to import packages and functions in the R code.</p>
+<li><p>It is unnecessary to add <strong>Depends</strong> in the <strong>DESCRIPTION</strong> except <code>R (&gt;= 3.3.0)</code>. And the <strong>Imports</strong> part in <strong>DESCRIPTION</strong> is irrelevant to what you import into NAMESPACE in the code (although they are both named <em>import</em>). The NAMESPACE is defined by using <code>@import</code> to import packages and functions in the R code.</p>
 <ul>
-<li><p>If you have <code>@import ggplot2</code> anywhere in the R code. Your function can use ggplot as long as your package is loaded. Your function knows to search in the namespace of <code>ggplot2::</code>, but the ggplot2 package is not <strong>attached</strong>. If someone loads your package, he still needs <code>library(ggplot2)</code> if he wants to use ggplot2 in his code. This is about the difference between <strong>attach</strong> and <strong>load</strong> as discussed in Hadley’s R package book.</p></li>
+<li><p>If you have <code>@import ggplot2</code> anywhere in the R code. Your function can use ggplot as long as your package is loaded. Your function knows to search in the namespace of <code>ggplot2::</code>, but the ggplot2 package is not <strong>attached</strong>. If someone loads your package, he would needs <code>library(ggplot2)</code> if to use ggplot2 in his code. This is the difference between <strong>attach</strong> and <strong>load</strong> as discussed in Hadley’s R package book.</p></li>
 <li><p>By the way, if you put <code>ggplot2</code> in <strong>Depends</strong> in the <strong>DESCRIPTION</strong>, <code>library(yourPackage)</code> would really attach <code>ggplot2</code>. But basically, you don’t have to do that for others, since your function can run as long you have included <code>ggplot2</code> in the namespace (which you have to do anyway).</p></li>
 </ul></li>
 <li><p>If you name a function like <code>plot.shap.summary</code> it would be documented as S3 method even if you <code>@export plot.shap.summary</code> (Yes, you have to export the full function name, otherwise, it would be an S3 method in the namespace.). Don’t name function this way to avoid confusion with S3method. For example, I changed the name to <code>shap.plot.summary</code>.</p></li>
-<li><p>Each dataset that you created using <code>use_data</code> need a document as well. Document it in a way similar to the function.</p></li>
+<li><p>Each dataset that you attached using <code>use_data</code> need a document as well. Document it in a way similar to the function.</p></li>
 <li><p>All the function parameters should be documented using <code>@param</code>.</p></li>
 <li><p>When <strong>devtools</strong> check the program, there will be notes that “no visible binding for global variable”. This is how to please the cran:</p></li>
 </ul>
