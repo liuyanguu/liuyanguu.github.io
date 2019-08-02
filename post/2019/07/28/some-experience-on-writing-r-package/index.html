@@ -65,14 +65,33 @@
 <main>
 <div id="TOC">
 <ul>
+<li><a href="#comments-from-cran-editors">Comments from cran editors</a></li>
+<li><a href="#some-of-my-own-experience">Some of my own experience</a><ul>
 <li><a href="#description">Description</a></li>
 <li><a href="#namespace">Namespace:</a></li>
 <li><a href="#files-locations">Files locations:</a></li>
+</ul></li>
 </ul>
 </div>
 
 <p>Although <a href="https://github.com/liuyanguu/SHAPforxgboost"><strong>‘SHAPforxgboost’</strong></a> is not a complicated package, it took me some time to get the package pass all the cran check.</p>
-<p>I started with using ‘usethis’ package <a href="https://usethis.r-lib.org/">https://usethis.r-lib.org/</a> to initiate the package.</p>
+<p>I started with using ‘usethis’ package <a href="https://usethis.r-lib.org/">https://usethis.r-lib.org/</a> to set up the structure of the package.</p>
+<div id="comments-from-cran-editors" class="section level1">
+<h1>Comments from cran editors</h1>
+<p>Lots of thanks to Dr. Ligges and Dr. Herbrandt for their kind advice.</p>
+<ul>
+<li><p>please write package names, software names and API names in single quotes (e.g. ‘Python’) in your Description.</p></li>
+<li><p>Please ensure that you do not use more than 2 cores in your examples.
+Is there any reason why the number of core to use is not an argument of
+e.g. xgboost.fit()?
+# This function was for my own convenience, actually it is not necessary. I have removed the function.</p></li>
+<li><p>Please replace cat() by message() or warning() in your functions (except
+for print() and summary() functions). Messages and warnings can be
+suppressed if needed.</p></li>
+</ul>
+</div>
+<div id="some-of-my-own-experience" class="section level1">
+<h1>Some of my own experience</h1>
 <div id="description" class="section level2">
 <h2>Description</h2>
 <p>Single quote packages in both Title and Description fields.For example, this package uses the SHAP values output from ‘xgboost’.</p>
@@ -100,6 +119,7 @@
 <li><p>All the codes go into the <strong>R/</strong> folder</p></li>
 <li><p><code>@example R/example/sample1.R</code> will attach <strong>sample1.R</strong> in the folder “R/example/” to the documentation of the function. If you write them directly in the function, you use <span class="citation">@example</span><strong>s</strong> instead of <span class="citation">@example</span>.</p></li>
 </ul>
+</div>
 </div>
 
 </main>

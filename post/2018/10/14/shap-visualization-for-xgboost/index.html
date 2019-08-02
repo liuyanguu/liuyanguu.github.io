@@ -92,10 +92,12 @@
 <h1>Example 1</h1>
 <p>This is the example I used in the package <strong>SHAPforxgboost</strong></p>
 <pre class="r"><code># Example use iris
+suppressPackageStartupMessages({
 library(SHAPforxgboost)
 library(xgboost)
 library(data.table)
 library(ggplot2)
+})
 
 X1 = as.matrix(iris[,-5])
 mod1 = xgboost::xgboost(
@@ -168,10 +170,8 @@ shap.plot.dependence.color(data_long = shap_long_iris,
 plot_data &lt;- shap.prep.stack.data(shap_contrib = shap_values_iris,
                                   n_groups = 4)
 shap.plot.force_plot(plot_data)</code></pre>
-<pre><code>## Data has N: 150 | zoom in length is 50 at location 90</code></pre>
 <p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
-<pre class="r"><code>shap.plot.force_plot(plot_data,  zoom_in_group = 2)</code></pre>
-<pre><code>## Data has N: 150 | zoom in at cluster 2 with N: 28</code></pre>
+<pre class="r"><code>shap.plot.force_plot(plot_data, zoom_in_group = 2)</code></pre>
 <p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-7-2.png" width="672" /></p>
 <pre class="r"><code># plot all the clusters:
 shap.plot.force_plot_bygroup(plot_data)</code></pre>
@@ -236,10 +236,8 @@ gridExtra::grid.arrange(grobs = fig_list, ncol = 2)</code></pre>
 </li>
 <li>apply the order of clustering to group observations under similar influences closer.</li>
 </ul>
-<pre class="r"><code>force_plot_data &lt;- shap.prep.stack.data(shap_contrib = shap_values$shap_score, top_n  = 5, n_groups = 4)</code></pre>
-<pre><code>## The SHAP values of the Rest 82 variables were summed into variable &#39;rest_variables&#39;.</code></pre>
-<pre class="r"><code>shap.plot.force_plot(force_plot_data)</code></pre>
-<pre><code>## Data has N: 316 | zoom in length is 50 at location 189.6</code></pre>
+<pre class="r"><code>force_plot_data &lt;- shap.prep.stack.data(shap_contrib = shap_values$shap_score, top_n  = 5, n_groups = 4)
+shap.plot.force_plot(force_plot_data)</code></pre>
 <p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
 </div>
 <div id="stack-plot-by-clustering-groups" class="section level2">
