@@ -74,8 +74,11 @@
 </ul>
 </div>
 
-<p>Although <a href="https://github.com/liuyanguu/SHAPforxgboost"><strong>‘SHAPforxgboost’</strong></a> is not a complicated package, it took me some time to get the package pass all the cran check.</p>
-<p>I started with using ‘usethis’ package <a href="https://usethis.r-lib.org/">https://usethis.r-lib.org/</a> to set up the structure of the package.</p>
+<p>Although <a href="https://github.com/liuyanguu/SHAPforxgboost"><strong>‘SHAPforxgboost’</strong></a> is not a complicated package, it took me some time to get the package pass all the cran check. Now (Aug.03,2019) it is available on <a href="https://cran.r-project.org/web/packages/SHAPforxgboost/index.html"><strong>cran</strong></a>. Install by either</p>
+<pre class="r"><code>install.packages(&quot;SHAPforxgboost&quot;)</code></pre>
+<p>or</p>
+<pre class="r"><code>devtools::install_github(&quot;liuyanguu/SHAPforxgboost&quot;)</code></pre>
+<p>I used ‘usethis’ package <a href="https://usethis.r-lib.org/">https://usethis.r-lib.org/</a> to set up the structure of the package.</p>
 <div id="comments-from-cran-editors" class="section level1">
 <h1>Comments from cran editors</h1>
 <p>Lots of thanks to Dr. Ligges and Dr. Herbrandt for their kind advice.</p>
@@ -83,11 +86,13 @@
 <li><p>please write package names, software names and API names in single quotes (e.g. ‘Python’) in your Description.</p></li>
 <li><p>Please ensure that you do not use more than 2 cores in your examples.
 Is there any reason why the number of core to use is not an argument of
-e.g. xgboost.fit()?
-# This function was for my own convenience, actually it is not necessary. I have removed the function.</p></li>
-<li><p>Please replace cat() by message() or warning() in your functions (except
-for print() and summary() functions). Messages and warnings can be
-suppressed if needed.</p></li>
+e.g. <code>xgboost.fit()</code>?</p></li>
+</ul>
+<p>(# The function was for my own convenience, actually it is not necessary to be included in the package. I have removed that function.)</p>
+<ul>
+<li>Please replace <code>cat()</code> by <code>message()</code> or <code>warning()</code> in your functions (except
+for <code>print()</code> and <code>summary()</code> functions). Messages and warnings can be
+suppressed if needed.</li>
 </ul>
 </div>
 <div id="some-of-my-own-experience" class="section level1">
@@ -99,11 +104,12 @@ suppressed if needed.</p></li>
 <div id="namespace" class="section level2">
 <h2>Namespace:</h2>
 <ul>
-<li><p>It is unnecessary to add <strong>Depends</strong> in the <strong>DESCRIPTION</strong> except <code>R (&gt;= 3.3.0)</code>. And the <strong>Imports</strong> part in <strong>DESCRIPTION</strong> is irrelevant to what you import into NAMESPACE in the code (although they are both named <em>import</em>). The NAMESPACE is defined by using <code>@import</code> to import packages and functions in the R code.</p>
+<li>It is unnecessary to add <strong>Depends</strong> in the <strong>DESCRIPTION</strong> except <code>R (&gt;= 3.3.0)</code>. And the <strong>Imports</strong> part in <strong>DESCRIPTION</strong> is irrelevant to what you import into NAMESPACE in the code (although they are both named <em>import</em>). The NAMESPACE is defined by using <code>@import</code> to import packages and functions in the R code. For now the only thing to depend on is “R”.</li>
+</ul>
+<p><img src="/post/2019-07-28-some-experience-on-writing-r-package_files/the%20cran%20page.PNG" style="width:60.0%" /></p>
 <ul>
-<li><p>If you have <code>@import ggplot2</code> anywhere in the R code. Your function can use ggplot as long as your package is loaded. Your function knows to search in the namespace of <code>ggplot2::</code>, but the ggplot2 package is not <strong>attached</strong>. If someone loads your package, he would needs <code>library(ggplot2)</code> if to use ggplot2 in his code. This is the difference between <strong>attach</strong> and <strong>load</strong> as discussed in Hadley’s R package book.</p></li>
+<li><p>If you have <code>@import ggplot2</code> anywhere in the R code. Your function can use ggplot as long as your package is loaded. Your function knows to search in the namespace of <code>ggplot2::</code>, but the ggplot2 package is not <strong>attached</strong>. If someone loads your package, he would needs <code>library(ggplot2)</code> if to use ggplot2 in his code. This is the difference between <strong>attach</strong> and <strong>load</strong> as discussed in Hadley’s “R” package book.</p></li>
 <li><p>By the way, if you put <code>ggplot2</code> in <strong>Depends</strong> in the <strong>DESCRIPTION</strong>, <code>library(yourPackage)</code> would really attach <code>ggplot2</code>. But basically, you don’t have to do that for others, since your function can run as long you have included <code>ggplot2</code> in the namespace (which you have to do anyway).</p></li>
-</ul></li>
 <li><p>If you name a function like <code>plot.shap.summary</code> it would be documented as S3 method even if you <code>@export plot.shap.summary</code> (Yes, you have to export the full function name, otherwise, it would be an S3 method in the namespace.). Don’t name function this way to avoid confusion with S3method. For example, I changed the name to <code>shap.plot.summary</code>.</p></li>
 <li><p>Each dataset that you attached using <code>use_data</code> need a document as well. Document it in a way similar to the function.</p></li>
 <li><p>All the function parameters should be documented using <code>@param</code>.</p></li>
@@ -119,6 +125,7 @@ suppressed if needed.</p></li>
 <li><p>All the codes go into the <strong>R/</strong> folder</p></li>
 <li><p><code>@example R/example/sample1.R</code> will attach <strong>sample1.R</strong> in the folder “R/example/” to the documentation of the function. If you write them directly in the function, you use <span class="citation">@example</span><strong>s</strong> instead of <span class="citation">@example</span>.</p></li>
 </ul>
+<p>On cran:</p>
 </div>
 </div>
 
@@ -141,7 +148,7 @@ suppressed if needed.</p></li>
 <section class="article-meta article-footer">
   <h3>About the Author</h3>
   
-    <p>Yang Liu is a (Bio)Statistician working in New York City. Website: <a href="https://liuyanguu.github.io">https://liuyanguu.github.io</a></p>
+    <p>Yang Liu (刘杨) is a Statistician working in New York City. Website: <a href="https://liuyanguu.github.io">https://liuyanguu.github.io</a></p>
   
 </section>
 

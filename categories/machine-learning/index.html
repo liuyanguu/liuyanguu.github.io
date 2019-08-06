@@ -23,7 +23,7 @@
       <div class="head-meta">
       
         <span>Machine Learning</span>
-        <span>2019-08-02</span>
+        <span>2019-08-05</span>
         
         <span>1 / 1</span>
       
@@ -62,7 +62,8 @@
     
     I built an R package SHAPforxgboost that wraps all the R plotting functions illustrated in this post. It serves for now as the vignette for the package.
 Please install from github.
-devtools::install_github(&quot;liuyanguu/SHAPforxgboost&quot;)Why SHAP valuesSHAP’s main advantages are local&hellip;
+devtools::install_github(&quot;liuyanguu/SHAPforxgboost&quot;)Why SHAP valuesSHAP’s main advantages are local explanation and consistency in global model structure.
+Tree-based machine learning models (random forest,&hellip;
     </a>
   </div>
 </section>
@@ -91,7 +92,7 @@ devtools::install_github(&quot;liuyanguu/SHAPforxgboost&quot;)Why SHAP values
       
     
     It is always a good idea to study the packaged algorithm with a simple example. Inspired by my colleague Kodi’s excellent work showing how xgboost handles missing values, I tried a simple 5x2 dataset to show how shrinkage and DART influence the growth of trees in the model.
-[&hellip;] set.seed(123)&hellip;
+[&hellip;] set.seed(123)n0 &lt;- 5X &lt;- data.frame(x1 = runif(n0), x2 = runif(n0))Y &lt;- c(1, 5, 20, 50, 100)cbind(X,&hellip;
     </a>
   </div>
 </section>
@@ -123,7 +124,8 @@ devtools::install_github(&quot;liuyanguu/SHAPforxgboost&quot;)Why SHAP values
     
     Update 19/07/21:
 Since my R Package SHAPforxgboost has been released, I updated this post using the new functions and illustrate how to use these functions using two datasets. For more information, please refer to: SHAP visualization for XGBoost in R
-[&hellip;] This is the example I used in the&hellip;
+[&hellip;] This is the example I used in the package SHAPforxgboost
+# Example use irissuppressPackageStartupMessages({library(SHAPforxgboost)&hellip;
     </a>
   </div>
 </section>
@@ -152,7 +154,7 @@ Since my R Package SHAPforxgboost has been released, I updated this post using t
       
     
     (updated on Oct 14)
-[&hellip;] It has been a while since my last update. I have been working on lots of interesting projects since I joined Mount Sinai in August. We have a great team here and obviously I can learn a lot from everyone around me. Most of my job so far focuses on applying machine&hellip;
+[&hellip;] It has been a while since my last update. I have been working on lots of interesting projects since I joined Mount Sinai in August. We have a great team here and obviously I can learn a lot from everyone around me. Most of my job so far focuses on applying machine learning techniques, mainly extreme gradient boosting and the visualization of results. Parameter tuning&hellip;
     </a>
   </div>
 </section>
@@ -182,7 +184,7 @@ Since my R Package SHAPforxgboost has been released, I updated this post using t
     
       
     
-    I recently had the great pleasure to meet with Professor Allan Just and he introduced me to eXtreme Gradient Boosting (XGBoost). I have extended the earlier work on my old blog by comparing the results across XGBoost, Gradient Boosting (GBM), Random Forest, Lasso, and Best Subset.The ensemble&hellip;
+    I recently had the great pleasure to meet with Professor Allan Just and he introduced me to eXtreme Gradient Boosting (XGBoost). I have extended the earlier work on my old blog by comparing the results across XGBoost, Gradient Boosting (GBM), Random Forest, Lasso, and Best Subset.The ensemble method is powerful as it combines the predictions from multiple machine learning algorithms together to&hellip;
     </a>
   </div>
 </section>

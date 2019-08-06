@@ -23,7 +23,7 @@
       <div class="head-meta">
       
         <span>Data Visualization</span>
-        <span>2019-08-02</span>
+        <span>2019-08-05</span>
         
         <span>1 / 1</span>
       
@@ -62,7 +62,8 @@
     
     I built an R package SHAPforxgboost that wraps all the R plotting functions illustrated in this post. It serves for now as the vignette for the package.
 Please install from github.
-devtools::install_github(&quot;liuyanguu/SHAPforxgboost&quot;)Why SHAP valuesSHAP’s main advantages are local&hellip;
+devtools::install_github(&quot;liuyanguu/SHAPforxgboost&quot;)Why SHAP valuesSHAP’s main advantages are local explanation and consistency in global model structure.
+Tree-based machine learning models (random forest,&hellip;
     </a>
   </div>
 </section>
@@ -94,7 +95,8 @@ devtools::install_github(&quot;liuyanguu/SHAPforxgboost&quot;)Why SHAP values
     
     It sounds easy and straight-forward but turned out not as simple as I expected.I will show
 [&hellip;] 50-state (including Alaska and Hawaii) United States thematic map, with map scale, with state abbreviations
-[&hellip;] China thematic map, with map scale, with names of provinces in either English&hellip;
+[&hellip;] China thematic map, with map scale, with names of provinces in either English or Chinese
+[&hellip;] The easiest way is by using usmap, in which adding abbraviation or not is&hellip;
     </a>
   </div>
 </section>
@@ -124,7 +126,8 @@ devtools::install_github(&quot;liuyanguu/SHAPforxgboost&quot;)Why SHAP values
     
     Since Blogdown is for static websites, it cannot run Shiny in rmarkdown directly. According to discussion here and document here.
 The only way to do it is using iframe and write outside the chunk:
-&lt;iframe src=&#34;https://liuyanguu.shinyapps.io/bcl_app/&#34; width=1000 height=800&#34;&gt;&lt;/iframe&gt;&hellip;
+&lt;iframe src=&#34;https://liuyanguu.shinyapps.io/bcl_app/&#34; width=1000 height=800&#34;&gt;&lt;/iframe&gt;
+There is also a built-in function in knitr to do the same thing and write in the chunk. The only&hellip;
     </a>
   </div>
 </section>
@@ -156,7 +159,8 @@ The only way to do it is using iframe and write outside the chunk:
     
     Update 19/07/21:
 Since my R Package SHAPforxgboost has been released, I updated this post using the new functions and illustrate how to use these functions using two datasets. For more information, please refer to: SHAP visualization for XGBoost in R
-[&hellip;] This is the example I used in the&hellip;
+[&hellip;] This is the example I used in the package SHAPforxgboost
+# Example use irissuppressPackageStartupMessages({library(SHAPforxgboost)&hellip;
     </a>
   </div>
 </section>
@@ -192,7 +196,8 @@ Since my R Package SHAPforxgboost has been released, I updated this post using t
 * Dividing the points into 100 equal-area rings
 * Calculate Built-up Area/Urban Extent for each ring
 * Turn dataframe into raster
-* Plot multiple figures on the&hellip;
+* Plot multiple figures on the same color scale
+[&hellip;] [&hellip;] list.of.packages &lt;- c(&quot;raster&quot;,&hellip;
     </a>
   </div>
 </section>
@@ -225,7 +230,8 @@ Since my R Package SHAPforxgboost has been released, I updated this post using t
     This data visualization example include:
 * Hierarchical clustering, dendrogram and heat map based on normalized odds ratios
 * The dendrogram was built separately to give color to dendrogram’s branches/labels based on cluster using dendextend
-* Heatmap is made by heatmap.2 from gplots using the built&hellip;
+* Heatmap is made by heatmap.2 from gplots using the built dendrogram
+* The rows are sorted by means from highest to lowest, it can be done in either the&hellip;
     </a>
   </div>
 </section>
