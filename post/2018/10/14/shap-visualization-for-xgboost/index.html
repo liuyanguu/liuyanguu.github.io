@@ -135,7 +135,7 @@ shap.plot.summary.wrap2(shap_score = shap_values$shap_score, X1, top_n = 3)</cod
 </div>
 <div id="shap-dependence-plot" class="section level2">
 <h2>SHAP dependence plot</h2>
-<pre class="r"><code>shap.plot.dependence.color(data_long = shap_long_iris, x=&quot;Petal.Length&quot;,
+<pre class="r"><code>shap.plot.dependence(data_long = shap_long_iris, x=&quot;Petal.Length&quot;,
                            y = &quot;Petal.Width&quot;, color_feature = &quot;Petal.Width&quot;)</code></pre>
 <p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 <p>The without color version, just plot SHAP value against feature value:</p>
@@ -157,7 +157,7 @@ shap_int &lt;- predict(mod1, as.matrix(iris[,-5]),
                     predinteraction = TRUE)
 
 # **SHAP interaction effect plot **
-shap.plot.dependence.color(data_long = shap_long_iris,
+shap.plot.dependence(data_long = shap_long_iris,
                            data_int = shap_int_iris,
                            x=&quot;Petal.Length&quot;,
                            y = &quot;Petal.Width&quot;,

@@ -17,10 +17,10 @@
       <pubDate>Sun, 28 Jul 2019 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/post/2019/07/28/some-experience-on-writing-r-package/</guid>
-      <description>Comments from cran editorsSome of my own experienceDescriptionNamespace:Files locations:Although ‘SHAPforxgboost’ is not a complicated package, it took me some time to get the package pass all the cran check. Now (Aug.03,2019) it is available on cran. Install by either
+      <description>Requirements from cran editorsSome of my own experienceDescriptionNamespace:Files locations:Although ‘SHAPforxgboost’ is not a complicated package, it took me some time to get the package pass all the cran check. Now (Aug.03,2019) it is available on cran. Install by either
 install.packages(&amp;quot;SHAPforxgboost&amp;quot;)or
 devtools::install_github(&amp;quot;liuyanguu/SHAPforxgboost&amp;quot;)I used ‘usethis’ package https://usethis.r-lib.org/ to set up the structure of the package.
-Comments from cran editorsLots of thanks to Dr.</description>
+Requirements from cran editorsLots of thanks to Dr.</description>
     </item>
     
     <item>

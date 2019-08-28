@@ -65,7 +65,7 @@
 <main>
 <div id="TOC">
 <ul>
-<li><a href="#comments-from-cran-editors">Comments from cran editors</a></li>
+<li><a href="#requirements-from-cran-editors">Requirements from cran editors</a></li>
 <li><a href="#some-of-my-own-experience">Some of my own experience</a><ul>
 <li><a href="#description">Description</a></li>
 <li><a href="#namespace">Namespace:</a></li>
@@ -79,11 +79,11 @@
 <p>or</p>
 <pre class="r"><code>devtools::install_github(&quot;liuyanguu/SHAPforxgboost&quot;)</code></pre>
 <p>I used ‘usethis’ package <a href="https://usethis.r-lib.org/">https://usethis.r-lib.org/</a> to set up the structure of the package.</p>
-<div id="comments-from-cran-editors" class="section level1">
-<h1>Comments from cran editors</h1>
+<div id="requirements-from-cran-editors" class="section level1">
+<h1>Requirements from cran editors</h1>
 <p>Lots of thanks to Dr. Ligges and Dr. Herbrandt for their kind advice.</p>
 <ul>
-<li><p>please write package names, software names and API names in single quotes (e.g. ‘Python’) in your Description.</p></li>
+<li><p>In the description, write package names, software names and API names in single quotes (e.g. ‘Python’). The Title field should be in title case. The description should not start with package name or “This package”.</p></li>
 <li><p>Please ensure that you do not use more than 2 cores in your examples.
 Is there any reason why the number of core to use is not an argument of
 e.g. <code>xgboost.fit()</code>?</p></li>
@@ -104,9 +104,9 @@ suppressed if needed.</li>
 <div id="namespace" class="section level2">
 <h2>Namespace:</h2>
 <ul>
-<li>It is unnecessary to add <strong>Depends</strong> in the <strong>DESCRIPTION</strong> except <code>R (&gt;= 3.3.0)</code>. And the <strong>Imports</strong> part in <strong>DESCRIPTION</strong> is irrelevant to what you import into NAMESPACE in the code (although they are both named <em>import</em>). The NAMESPACE is defined by using <code>@import</code> to import packages and functions in the R code. For now the only thing to depend on is “R”.</li>
+<li>It is unnecessary to add <strong>Depends</strong> in the <strong>DESCRIPTION</strong> except <code>R (&gt;= 3.3.0)</code>. And the <strong>Imports</strong> part in <strong>DESCRIPTION</strong> is irrelevant to what you import into NAMESPACE in the code (although they are both named <em>import</em>). The NAMESPACE is defined by using <code>@import</code> to import packages and functions in the R code.</li>
 </ul>
-<p><img src="/post/2019-07-28-some-experience-on-writing-r-package_files/the%20cran%20page.PNG" style="width:60.0%" /></p>
+<p><img src="/post/2019-07-28-some-experience-on-writing-r-package_files/the%20cran%20page.PNG" style="width:70.0%" /></p>
 <ul>
 <li><p>If you have <code>@import ggplot2</code> anywhere in the R code. Your function can use ggplot as long as your package is loaded. Your function knows to search in the namespace of <code>ggplot2::</code>, but the ggplot2 package is not <strong>attached</strong>. If someone loads your package, he would needs <code>library(ggplot2)</code> if to use ggplot2 in his code. This is the difference between <strong>attach</strong> and <strong>load</strong> as discussed in Hadley’s “R” package book.</p></li>
 <li><p>By the way, if you put <code>ggplot2</code> in <strong>Depends</strong> in the <strong>DESCRIPTION</strong>, <code>library(yourPackage)</code> would really attach <code>ggplot2</code>. But basically, you don’t have to do that for others, since your function can run as long you have included <code>ggplot2</code> in the namespace (which you have to do anyway).</p></li>

@@ -290,13 +290,16 @@ shap.plot.summary.wrap2(shap_values$shap_score, as.matrix(dataX))</code></pre>
 <div id="dependence-plot" class="section level2">
 <h2>Dependence plot</h2>
 <p>It plots the SHAP values against the feature values for each variable. Again, each dot is a station-day observation.</p>
-<pre class="r"><code># for one figure:
-g1 &lt;- shap.plot.dependence.color(data_long = shap_long, x = &#39;dayint&#39;, y = &#39;dayint&#39;, color_feature = &#39;Column_WV&#39;) + ggtitle(&quot;SHAP of Date vs. Feature values of Date&quot;)
-g2 &lt;- shap.plot.dependence.color(data_long = shap_long, x = &#39;dayint&#39;, y = &#39;Column_WV&#39;, color_feature = &#39;Column_WV&#39;) +  ggtitle(&quot;SHAP of CWV vs. Date&quot;)
+<pre class="r"><code>g1 &lt;- shap.plot.dependence(data_long = shap_long, x = &#39;dayint&#39;, y = &#39;dayint&#39;, color_feature = &#39;Column_WV&#39;) + ggtitle(&quot;(A) SHAP values of Time trend vs. Time trend&quot;)
+g2 &lt;- shap.plot.dependence(data_long = shap_long, x = &#39;dayint&#39;, y = &#39;Column_WV&#39;, color_feature = &#39;Column_WV&#39;) +  ggtitle(&quot;(B) SHAP values of CWV vs. Time trend&quot;)
+
 gridExtra::grid.arrange(g1, g2, ncol = 2)</code></pre>
 <p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-11-1.png" width="960" /></p>
-<p>(LEFT) SHAP values showing the contribution of the time trend to predictions. The color represents the MAIAC CWV for each observation (purple high, yellow low). The LOESS (locally estimated scatterplot smoothing) curve is overlaid in red.<br />
-(RIGHT) SHAP values showing the contribution of the MAIAC CWV to predictions of CWV measurement error shown across the time period of the study. Note distinct y-axis scales for Terra and Aqua datasets. The color represents the MAIAC CWV for each observation (purple high, yellow low).</p>
+<ol style="list-style-type: upper-alpha">
+<li>SHAP values showing the contribution of the time trend to predictions. The color represents the MAIAC CWV for each observation (purple high, yellow low). The LOESS (locally estimated scatterplot smoothing) curve is overlaid in red.<br />
+</li>
+<li>SHAP values showing the contribution of the MAIAC CWV to predictions of CWV measurement error shown across the time period of the study. Note distinct y-axis scales for Terra and Aqua datasets. The color represents the MAIAC CWV for each observation (purple high, yellow low).</li>
+</ol>
 <p>Here I choose to plot top 4 features using function <code>shap.plot.dependence</code>:</p>
 <pre class="r"><code># without color version but has marginal distribution, 
 # just plot SHAP value against feature value:
@@ -317,11 +320,11 @@ shap_int &lt;- shap.prep.interaction(xgb_mod = mod, X_train = as.matrix(dataX))
 # or the same as:
 shap_int &lt;- predict(mod, as.matrix(dataX), predinteraction = TRUE)</code></pre>
 <pre class="r"><code># **SHAP interaction effect plot **
-g3 &lt;- shap.plot.dependence.color(data_long = shap_long,
+g3 &lt;- shap.plot.dependence(data_long = shap_long,
                            data_int = shap_int,
                            x= &quot;dayint&quot;, y = &quot;Column_WV&quot;, 
                            color_feature = &quot;Column_WV&quot;)
-g4 &lt;- shap.plot.dependence.color(data_long = shap_long,
+g4 &lt;- shap.plot.dependence(data_long = shap_long,
                            data_int = shap_int,
                            x= &quot;Column_WV&quot;, y = &quot;AOT_Uncertainty&quot;, 
                            color_feature = &quot;AOT_Uncertainty&quot;)
