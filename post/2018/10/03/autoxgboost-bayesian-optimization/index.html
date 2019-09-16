@@ -142,7 +142,7 @@ system.time(reg_auto &lt;- autoxgboost(reg_task))
 <ul>
 <li>Testing mse: 0.047 (rmse is: 0.2168) is quite close to the 0.043 from previous post. But it is much faster using only 57 rounds. Notice that the cross-valiation tuning mse is almost the same: 0.044.</li>
 </ul>
-<pre><code>## [08:01:46] WARNING: amalgamation/../src/objective/regression_obj.cu:152: reg:linear is now deprecated in favor of reg:squarederror.</code></pre>
+<pre><code>## [10:24:27] WARNING: amalgamation/../src/objective/regression_obj.cu:152: reg:linear is now deprecated in favor of reg:squarederror.</code></pre>
 <pre><code>## [1] 0.022044</code></pre>
 <div id="compared-to-old-result" class="section level2">
 <h2>Compared to old Result</h2>
@@ -218,7 +218,7 @@ system.time(reg_auto_dart &lt;- autoxgboost(reg_task, par.set = autoxgbparset.mi
 ## dropconst(rel.tol = 1e-08, abs.tol = 1e-08, ignore.na = FALSE)
 ## 
 ## With tuning result: mse = 0.044</code></pre>
-<pre><code>## [08:01:46] WARNING: amalgamation/../src/objective/regression_obj.cu:152: reg:linear is now deprecated in favor of reg:squarederror.</code></pre>
+<pre><code>## [10:24:27] WARNING: amalgamation/../src/objective/regression_obj.cu:152: reg:linear is now deprecated in favor of reg:squarederror.</code></pre>
 <pre><code>## testing mse:</code></pre>
 <pre><code>## [1] 0.0203543</code></pre>
 </div>

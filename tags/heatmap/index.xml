@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Heatmap on Welcome to my blog</title>
-    <link>https://liuyanguu.github.io/tags/heatmap/</link>
+    <link>/tags/heatmap/</link>
     <description>Recent content in Heatmap on Welcome to my blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Wed, 17 Apr 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://liuyanguu.github.io/tags/heatmap/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/tags/heatmap/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>ggplot heatmap US 50-state map and China province map</title>
-      <link>https://liuyanguu.github.io/post/2019/04/17/ggplot-heatmap-us-50-states-map-and-china-province-map/</link>
+      <link>/post/2019/04/17/ggplot-heatmap-us-50-states-map-and-china-province-map/</link>
       <pubDate>Wed, 17 Apr 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/post/2019/04/17/ggplot-heatmap-us-50-states-map-and-china-province-map/</guid>
+      <guid>/post/2019/04/17/ggplot-heatmap-us-50-states-map-and-china-province-map/</guid>
       <description>1.1. US Map (50 states) using usmap 1.2. Using map_data and build from scratch 2.1. China map by province using downloaded shapfiles 2.2. Using geojsonMap (leaflet) It sounds easy and straight-forward but turned out not as simple as I expected. I will show 50-state (including Alaska and Hawaii) United States thematic map, with map scale, with state abbreviations China thematic map, with map scale, with names of provinces in either</description>
     </item>
     

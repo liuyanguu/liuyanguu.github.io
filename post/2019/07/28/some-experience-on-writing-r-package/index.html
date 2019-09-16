@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
-    <title>Notes on writing R package | Welcome to my blog</title>
+    <title>Notes on writing an R package | Welcome to my blog</title>
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="/css/fonts.css" />
     <link href="//cdn.bootcss.com/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -48,7 +48,7 @@
   
   </div>
 
-  <h1><span class="title">Notes on writing R package</span></h1>
+  <h1><span class="title">Notes on writing an R package</span></h1>
 
   
   <h3 class="author">Yang Liu
@@ -74,10 +74,11 @@
 </ul>
 </div>
 
-<p>Although <a href="https://github.com/liuyanguu/SHAPforxgboost"><strong>‘SHAPforxgboost’</strong></a> is not a complicated package, it took me some time to get the package pass all the cran check. Now (Aug.03,2019) it is available on <a href="https://cran.r-project.org/web/packages/SHAPforxgboost/index.html"><strong>cran</strong></a>. Install by either</p>
+<p>Although <a href="https://github.com/liuyanguu/SHAPforxgboost"><strong>‘SHAPforxgboost’</strong></a> is not a package too complicated, it took me some time to get the package pass all the cran check. Now (Aug.03,2019) it is available on <a href="https://cran.r-project.org/web/packages/SHAPforxgboost/index.html"><strong>cran</strong></a>. Install by either</p>
 <pre class="r"><code>install.packages(&quot;SHAPforxgboost&quot;)</code></pre>
 <p>or</p>
 <pre class="r"><code>devtools::install_github(&quot;liuyanguu/SHAPforxgboost&quot;)</code></pre>
+<p>The most recent version is 0.0.2.</p>
 <p>I used ‘usethis’ package <a href="https://usethis.r-lib.org/">https://usethis.r-lib.org/</a> to set up the structure of the package.</p>
 <div id="requirements-from-cran-editors" class="section level1">
 <h1>Requirements from cran editors</h1>
@@ -86,30 +87,29 @@
 <li><p>In the description, write package names, software names and API names in single quotes (e.g. ‘Python’). The Title field should be in title case. The description should not start with package name or “This package”.</p></li>
 <li><p>Please ensure that you do not use more than 2 cores in your examples.
 Is there any reason why the number of core to use is not an argument of
-e.g. <code>xgboost.fit()</code>?</p></li>
-</ul>
-<p>(# The function was for my own convenience, actually it is not necessary to be included in the package. I have removed that function.)</p>
-<ul>
-<li>Please replace <code>cat()</code> by <code>message()</code> or <code>warning()</code> in your functions (except
+e.g. <code>xgboost.fit()</code>? &gt;&gt;&gt; (# The function was for my own convenience, actually it is not necessary to be included in the package. I removed that function.)</p></li>
+<li><p>Please replace <code>cat()</code> by <code>message()</code> or <code>warning()</code> in your functions (except
 for <code>print()</code> and <code>summary()</code> functions). Messages and warnings can be
-suppressed if needed.</li>
+suppressed if needed.</p></li>
 </ul>
 </div>
 <div id="some-of-my-own-experience" class="section level1">
 <h1>Some of my own experience</h1>
 <div id="description" class="section level2">
 <h2>Description</h2>
-<p>Single quote packages in both Title and Description fields.For example, this package uses the SHAP values output from ‘xgboost’.</p>
+<p>Single quote packages in both Title and Description fields. For example: “This package uses the SHAP values output from <strong>‘xgboost’</strong>”.</p>
 </div>
 <div id="namespace" class="section level2">
 <h2>Namespace:</h2>
 <ul>
-<li>It is unnecessary to add <strong>Depends</strong> in the <strong>DESCRIPTION</strong> except <code>R (&gt;= 3.3.0)</code>. And the <strong>Imports</strong> part in <strong>DESCRIPTION</strong> is irrelevant to what you import into NAMESPACE in the code (although they are both named <em>import</em>). The NAMESPACE is defined by using <code>@import</code> to import packages and functions in the R code.</li>
+<li><p>It would be unnecessary to add any <strong>Depends</strong> in the <strong>DESCRIPTION</strong> besides <code>R (&gt;= 3.3.0)</code>.</p></li>
+<li><p>The <strong>Imports</strong> part in the <strong>DESCRIPTION</strong> won’t impact what you import into NAMESPACE in the code (although they are both named <em>import</em>). The NAMESPACE is defined by using <code>@import</code> to import packages and functions in the R code. What you import into NAMESPACE are what really matters. But you should also keep the record aligned in the <strong>DESCRIPTION</strong> as cran will check it.</p></li>
 </ul>
-<p><img src="/post/2019-07-28-some-experience-on-writing-r-package_files/the%20cran%20page.PNG" style="width:70.0%" /></p>
+<p><em>How the DESCRIPTION looks like on cran:</em><br />
+<img src="/post/2019-07-28-some-experience-on-writing-r-package_files/the%20cran%20page.PNG" style="width:80.0%" /></p>
 <ul>
-<li><p>If you have <code>@import ggplot2</code> anywhere in the R code. Your function can use ggplot as long as your package is loaded. Your function knows to search in the namespace of <code>ggplot2::</code>, but the ggplot2 package is not <strong>attached</strong>. If someone loads your package, he would needs <code>library(ggplot2)</code> if to use ggplot2 in his code. This is the difference between <strong>attach</strong> and <strong>load</strong> as discussed in Hadley’s “R” package book.</p></li>
-<li><p>By the way, if you put <code>ggplot2</code> in <strong>Depends</strong> in the <strong>DESCRIPTION</strong>, <code>library(yourPackage)</code> would really attach <code>ggplot2</code>. But basically, you don’t have to do that for others, since your function can run as long you have included <code>ggplot2</code> in the namespace (which you have to do anyway).</p></li>
+<li><p>If you have <code>@import ggplot2</code> anywhere in the R code. Your function can use ggplot2 as long as your package is loaded. Your function knows to search in the namespace of “<code>ggplot2::</code>”, but the ggplot2 package is not <strong>attached</strong>. Although someone loads your package, he needs <code>library(ggplot2)</code> in order to use ggplot2 for himself. This is the difference between <strong>attach</strong> and <strong>load</strong> as discussed in Hadley’s “R” package book.</p></li>
+<li><p>By the way, if you put <code>ggplot2</code> in <strong>Depends</strong> in the <strong>DESCRIPTION</strong>, <code>library(yourPackage)</code> would really attach <code>ggplot2</code>. But generally speaking, you don’t have to do that for others.</p></li>
 <li><p>If you name a function like <code>plot.shap.summary</code> it would be documented as S3 method even if you <code>@export plot.shap.summary</code> (Yes, you have to export the full function name, otherwise, it would be an S3 method in the namespace.). Don’t name function this way to avoid confusion with S3method. For example, I changed the name to <code>shap.plot.summary</code>.</p></li>
 <li><p>Each dataset that you attached using <code>use_data</code> need a document as well. Document it in a way similar to the function.</p></li>
 <li><p>All the function parameters should be documented using <code>@param</code>.</p></li>
@@ -123,9 +123,8 @@ suppressed if needed.</li>
 <h2>Files locations:</h2>
 <ul>
 <li><p>All the codes go into the <strong>R/</strong> folder</p></li>
-<li><p><code>@example R/example/sample1.R</code> will attach <strong>sample1.R</strong> in the folder “R/example/” to the documentation of the function. If you write them directly in the function, you use <span class="citation">@example</span><strong>s</strong> instead of <span class="citation">@example</span>.</p></li>
+<li><p><code>@example R/example/sample1.R</code> will attach <strong>sample1.R</strong> in the folder “R/example/” to the documentation of the function. If you write out the samples directly in the function code, you use <span class="citation">@example</span><strong>s</strong> instead of <span class="citation">@example</span>.</p></li>
 </ul>
-<p>On cran:</p>
 </div>
 </div>
 
@@ -158,7 +157,7 @@ suppressed if needed.</li>
 
 
 <nav class="post-nav">
-  <span class="nav-prev"></span>
+  <span class="nav-prev"><a href="/post/2019/09/15/drake-powerful-tool-for-automatic-reproducible-workflow/">&larr; Drake: powerful tool for automatic reproducible workflow</a></span>
   <span class="nav-next"><a href="/post/2019/07/18/visualization-of-shap-for-xgboost/">SHAP for XGBoost in R: SHAPforxgboost &rarr;</a></span>
 </nav>
 

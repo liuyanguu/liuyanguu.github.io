@@ -279,7 +279,7 @@ shap.plot.summary(shap_long, x_bound  = 1.2, dilute = 10)</code></pre>
 <p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-9-2.png" width="576" /></p>
 <p><strong>Alternatives ways to make the same plot:</strong></p>
 <pre class="r"><code># option 1: from the xgboost model
-shap.plot.summary.wrap1(mod, X = as.matrix(dataX))
+shap.plot.summary.wrap1(mod, X = dataX)
 
 
 # option 2: supply a self-made SHAP values dataset (e.g. sometimes as output from cross-validation)
@@ -317,9 +317,10 @@ the SHAP values for feature i when feature j is <strong>absent</strong>.”</p>
 <pre class="r"><code># prepare the data using either: 
 # (this step is slow since it calculates all the combinations of features.)
 shap_int &lt;- shap.prep.interaction(xgb_mod = mod, X_train = as.matrix(dataX))
-# or the same as:
-shap_int &lt;- predict(mod, as.matrix(dataX), predinteraction = TRUE)</code></pre>
+# or:
+shap_int &lt;- predict(mod, as.matrix(dataX), predinteraction = TRUE) # (the same)</code></pre>
 <pre class="r"><code># **SHAP interaction effect plot **
+# if `data_int` is supplied, the same function will plot the interaction effect:
 g3 &lt;- shap.plot.dependence(data_long = shap_long,
                            data_int = shap_int,
                            x= &quot;dayint&quot;, y = &quot;Column_WV&quot;, 
@@ -386,7 +387,7 @@ Paper 3. 2019 <a href="https://arxiv.org/abs/1905.04610">Explainable AI for Tree
 
 
 <nav class="post-nav">
-  <span class="nav-prev"><a href="/post/2019/07/28/some-experience-on-writing-r-package/">&larr; Notes on writing R package</a></span>
+  <span class="nav-prev"><a href="/post/2019/07/28/some-experience-on-writing-r-package/">&larr; Notes on writing an R package</a></span>
   <span class="nav-next"><a href="/post/2019/04/17/ggplot-heatmap-us-50-states-map-and-china-province-map/">ggplot heatmap US 50-state map and China province map &rarr;</a></span>
 </nav>
 

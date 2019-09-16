@@ -24,7 +24,7 @@
       <div class="head-meta">
       
         <span>Welcome to my blog</span>
-        <span>2019-08-28</span>
+        <span>2019-09-16</span>
         
         <span>1 / 2</span>
       
@@ -39,12 +39,40 @@
 <section class="article-list">
   <div class="categories">
   
+    <a>Uncategorized</a>
+  
+  </div>
+  <h1><a href="/post/2019/09/15/drake-powerful-tool-for-automatic-reproducible-workflow/">Drake: powerful tool for automatic reproducible workflow</a></h1>
+  <div class="date-author">
+    <span class="author">Yang Liu
+</span> / 
+    <span class="date">2019-09-15</span>
+  </div>
+  <div class="summary">
+    <a href="/post/2019/09/15/drake-powerful-tool-for-automatic-reproducible-workflow/">
+    
+    
+    
+    <div class="thumbnail"><img src="/post/2019-09-15-drake-powerful-tool-for-automatic-reproducible-workflow_files/dependency%20plot.PNG" alt="Thumbnail" /></div>
+    
+    
+    
+      
+    
+    Drake is a powerful tool for automatic reproducible workflow. Drake has great documentations online thus here I only show a simple example working with Rmarkdown. Rmarkdown file could be very slow to generate due to the calculations involved. And every small revise make you wait a long time if you re-render the file. When we use drake we can do all the calculations in advance thus the file&hellip;
+    </a>
+  </div>
+</section>
+
+<section class="article-list">
+  <div class="categories">
+  
   
     <a href="/categories/r-package">R package</a>
   
   
   </div>
-  <h1><a href="/post/2019/07/28/some-experience-on-writing-r-package/">Notes on writing R package</a></h1>
+  <h1><a href="/post/2019/07/28/some-experience-on-writing-r-package/">Notes on writing an R package</a></h1>
   <div class="date-author">
     <span class="author">Yang Liu
 </span> / 
@@ -61,10 +89,10 @@
     
       
     
-    Although ‘SHAPforxgboost’ is not a complicated package, it took me some time to get the package pass all the cran check. Now (Aug.03,2019) it is available on cran. Install by either
+    Although ‘SHAPforxgboost’ is not a package too complicated, it took me some time to get the package pass all the cran check. Now (Aug.03,2019) it is available on cran. Install by either
 install.packages(&quot;SHAPforxgboost&quot;)or
-devtools::install_github(&quot;liuyanguu/SHAPforxgboost&quot;)I used ‘usethis’ package https://usethis.r-lib.org/ to set up the structure of the package.
-[&hellip;] Lots&hellip;
+devtools::install_github(&quot;liuyanguu/SHAPforxgboost&quot;)The most recent version is 0.0.2.
+I used ‘usethis’ package https://usethis.r-lib.org/ to set up the&hellip;
     </a>
   </div>
 </section>
@@ -191,39 +219,6 @@ There is also a built-in function in knitr to do the same thing and write in the
     
     It is always a good idea to study the packaged algorithm with a simple example. Inspired by my colleague Kodi’s excellent work showing how xgboost handles missing values, I tried a simple 5x2 dataset to show how shrinkage and DART influence the growth of trees in the model.
 [&hellip;] set.seed(123)n0 &lt;- 5X &lt;- data.frame(x1 = runif(n0), x2 = runif(n0))Y &lt;- c(1, 5, 20, 50, 100)cbind(X,&hellip;
-    </a>
-  </div>
-</section>
-
-<section class="article-list">
-  <div class="categories">
-  
-  
-    <a href="/categories/machine-learning">Machine Learning</a>
-  
-  
-  </div>
-  <h1><a href="/post/2018/10/14/shap-visualization-for-xgboost/">SHAP Visualization in R (first post)</a></h1>
-  <div class="date-author">
-    <span class="author">Yang Liu
-</span> / 
-    <span class="date">2018-10-14</span>
-  </div>
-  <div class="summary">
-    <a href="/post/2018/10/14/shap-visualization-for-xgboost/">
-    
-    
-    
-    <div class="thumbnail"><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-2-1.png" alt="Thumbnail" /></div>
-    
-    
-    
-      
-    
-    Update 19/07/21:
-Since my R Package SHAPforxgboost has been released, I updated this post using the new functions and illustrate how to use these functions using two datasets. For more information, please refer to: SHAP visualization for XGBoost in R
-[&hellip;] This is the example I used in the package SHAPforxgboost
-# Example use irissuppressPackageStartupMessages({library(SHAPforxgboost)&hellip;
     </a>
   </div>
 </section>
