@@ -111,7 +111,7 @@ cache &lt;- drake_cache(path = cache_path)</code></pre>
   # make a diluted (faster) summary plot showing only top 4 variables:
   fig1 = shap.plot.summary(shap_long, dilute = 10),
   fig2 = shap.plot.dependence(data_long = shap_long, x = &#39;dayint&#39;, y = &#39;dayint&#39;, color_feature = &#39;Column_WV&#39;),
-  # fig3 = shap.plot.dependence(data_long = shap_long, x = &#39;dayint&#39;, y = &#39;Column_WV&#39;, color_feature = &#39;Column_WV&#39;),
+  fig3 = shap.plot.dependence(data_long = shap_long, x = &#39;dayint&#39;, y = &#39;Column_WV&#39;, color_feature = &#39;Column_WV&#39;),
   
   report = rmarkdown::render(
     knitr_in(&quot;Code/drake_md_report.Rmd&quot;),
@@ -128,11 +128,10 @@ make(my_plan, cache = cache)</code></pre>
 Drake workflow should be an R script that uses Rmarkdown as the output tool.
 So I cannot really render this post as it is.</p>
 <p>Here is how the dependency graph looks like:
-<img src="/post/2019-09-15-drake-powerful-tool-for-automatic-reproducible-workflow_files/dependency%20plot.PNG" style="width:80.0%" /></p>
+<img src="/post/2019-09-15-drake-powerful-tool-for-automatic-reproducible-workflow_files/dependency%20plot.PNG" /></p>
 <p>If we add an extra figure, only this figure needs to made:
-<img src="/post/2019-09-15-drake-powerful-tool-for-automatic-reproducible-workflow_files/dependency%20plot2.PNG" style="width:80.0%" /></p>
-<p>Here is how the md file looks like on github<br />
-Here is the md html file on github</p>
+<img src="/post/2019-09-15-drake-powerful-tool-for-automatic-reproducible-workflow_files/dependency%20plot2.PNG" /></p>
+<p>Here is <a href="https://github.com/liuyanguu/Blogdown/blob/master/hugo-xmag/Code/drake_md_report.Rmd">how the md file looks like on github</a></p>
 
 </main>
 

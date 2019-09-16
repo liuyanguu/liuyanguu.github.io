@@ -2,30 +2,30 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Markdown on Welcome to my blog</title>
-    <link>/tags/markdown/</link>
+    <link>https://liuyanguu.github.io/tags/markdown/</link>
     <description>Recent content in Markdown on Welcome to my blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Sun, 15 Sep 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/tags/markdown/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://liuyanguu.github.io/tags/markdown/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Drake: powerful tool for automatic reproducible workflow</title>
-      <link>/post/2019/09/15/drake-powerful-tool-for-automatic-reproducible-workflow/</link>
+      <link>https://liuyanguu.github.io/post/2019/09/15/drake-powerful-tool-for-automatic-reproducible-workflow/</link>
       <pubDate>Sun, 15 Sep 2019 00:00:00 +0000</pubDate>
       
-      <guid>/post/2019/09/15/drake-powerful-tool-for-automatic-reproducible-workflow/</guid>
+      <guid>https://liuyanguu.github.io/post/2019/09/15/drake-powerful-tool-for-automatic-reproducible-workflow/</guid>
       <description>Drake is a powerful tool for automatic reproducible workflow. Drake has great documentations online thus here I only show a simple example working with Rmarkdown. Rmarkdown file could be very slow to generate due to the calculations involved. And every small revise make you wait a long time if you re-render the file. When we use drake we can do all the calculations in advance thus the file rendering is super fast since we only need to re-calculate the revised object.</description>
     </item>
     
     <item>
       <title>How to Draw Heatmap with Colorful Dendrogram</title>
-      <link>/post/2018/07/16/how-to-draw-heatmap-with-colorful-dendrogram/</link>
+      <link>https://liuyanguu.github.io/post/2018/07/16/how-to-draw-heatmap-with-colorful-dendrogram/</link>
       <pubDate>Mon, 16 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>/post/2018/07/16/how-to-draw-heatmap-with-colorful-dendrogram/</guid>
+      <guid>https://liuyanguu.github.io/post/2018/07/16/how-to-draw-heatmap-with-colorful-dendrogram/</guid>
       <description>DataVersion 1: Color both the branches and labelsVersion 2: color only the labels.Version 3: If there is no color, and we do not reorder the branchesThis data visualization example include:
 * Hierarchical clustering, dendrogram and heat map based on normalized odds ratios
 * The dendrogram was built separately to give color to dendrogram’s branches/labels based on cluster using dendextend
