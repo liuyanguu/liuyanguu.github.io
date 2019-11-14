@@ -29,7 +29,7 @@ devtools::install_github(&amp;quot;liuyanguu/SHAPforxgboost&amp;quot;)Why SHAP
       
       <guid>https://liuyanguu.github.io/post/2018/10/14/shap-visualization-for-xgboost/</guid>
       <description>Example 1SHAP summary plotAlternative ways:SHAP dependence plotSHAP interaction effect plotSHAP force plotExample 2Summary plotDependence plot for each featureForce plotStack plot by clustering groupsUpdate 19/07/21:
-Since my R Package SHAPforxgboost has been released, I updated this post using the new functions and illustrate how to use these functions using two datasets. For more information, please refer to: SHAP visualization for XGBoost in R</description>
+Since my R Package SHAPforxgboost has been released on CRAN, I updated this post using the new functions and illustrate how to use these functions using two datasets. For more information, please refer to: SHAP visualization for XGBoost in R</description>
     </item>
     
   </channel>

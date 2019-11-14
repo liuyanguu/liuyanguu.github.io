@@ -118,6 +118,9 @@ suppressed if needed.</p></li>
 <pre class="r"><code>if(getRversion() &gt;= &quot;2.15.1&quot;)  {
   utils::globalVariables(c(&quot;.&quot;, &quot;rfvalue&quot;, &quot;value&quot;, ... )) # all the variables complained
   }</code></pre>
+<ul>
+<li>You cannot have things like line break <strong><code>"\n"</code></strong> in the documentation. It will give a warning of “unknown macro”, and will actually cause error when you try to download and build the package from github.</li>
+</ul>
 </div>
 <div id="files-locations" class="section level2">
 <h2>Files locations:</h2>
@@ -234,6 +237,9 @@ if (!doNotTrack) {
 </div>
 </footer>
 
+
+<script src="//yihui.name/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
 
 
 

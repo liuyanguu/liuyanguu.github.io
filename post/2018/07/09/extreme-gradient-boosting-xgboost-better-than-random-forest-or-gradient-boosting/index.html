@@ -263,7 +263,7 @@ gbm_caret &lt;- train(Share_Temporary ~ ., mydata[train_idx,],
                    tuneGrid = para_grid, metric = &quot;RMSE&quot;, bag.fraction = 0.75)  
 
 Sys.time() - time_now </code></pre>
-<pre><code>## Time difference of 2.259 mins</code></pre>
+<pre><code>## Time difference of 2.308 mins</code></pre>
 <ul>
 <li>The tuning parameters that give the lowest MSE in training set CV.</li>
 </ul>
@@ -302,8 +302,8 @@ yhat_bag &lt;- predict(rf.fit, newdata = mydata2[-train_idx,])</code></pre>
 <ul>
 <li><p>Use library <code>glmnet</code>.<br />
 Lasso is a shrinkage approach for feature selection. The tuning parameter <em>lambda</em> is the magnitudes of penalty. A increasing penalty shrinks coefficients towards zero. The advantage of a linear model is that the result is highly interpretable.</p></li>
-<li>We use cross-validation to choose the lambda and corresponding features<br />
-</li>
+<li><p>We use cross-validation to choose the lambda and corresponding features<br />
+</p></li>
 <li><p>The dotted line on the left is lambda.min, the lambda that generates the lowest MSE in the testing dataset. The dotted line on the right is lambda.1se, its corresponding MSE is not the lowest but acceptable, and it has even fewer features in the model. We use <code>lambda.1se</code> in our case.</p></li>
 </ul>
 <pre class="r"><code># Use cross-validation to select the lambda
@@ -322,8 +322,8 @@ lasso_pred &lt;- predict(lasso_mod, s = best_lam, newx = X_test)
 (MSE_Lasso &lt;- mean((lasso_pred - Y_test)^2))</code></pre>
 <pre><code>## [1] 0.06992</code></pre>
 <ul>
-<li>The regression model for the selected lambda (lasso).
-We extract the coefficients from the selected model and run a linear regression.</li>
+<li><p>The regression model for the selected lambda (lasso).
+We extract the coefficients from the selected model and run a linear regression.</p></li>
 <li><p>The model has used 17 variables.</p></li>
 <li><p>The most useful predictors selected by lasso include <code>Water_MonthlyCost</code>, <code>Water_Sources: shared_taps</code>, <code>Resettled Housing</code> and <code>Eviction Threats</code>. For these variables, higher values or binary variables being <em>Yes</em> are associated with fewer temporary structures in slums.</p></li>
 <li><p>Relative importance of coefficients by showing standardized regression coefficients in decreasing order of their absolute values.</p></li>
