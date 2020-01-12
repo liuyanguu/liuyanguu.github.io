@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://liuyanguu.github.io/post/2020/01/11/working-with-3d-array-as-long-format-data-in-r/</loc>
+    <lastmod>2020-01-11T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://liuyanguu.github.io/post/2019/09/15/drake-powerful-tool-for-automatic-reproducible-workflow/</loc>
     <lastmod>2019-09-15T00:00:00+00:00</lastmod>
   </url>
@@ -67,6 +72,12 @@
   </url>
   
   <url>
+    <loc>https://liuyanguu.github.io/tags/array/</loc>
+    <lastmod>2020-01-11T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://liuyanguu.github.io/tags/catalog/</loc>
     <lastmod>2018-07-01T00:00:00+00:00</lastmod>
     <priority>0</priority>
@@ -87,6 +98,12 @@
   <url>
     <loc>https://liuyanguu.github.io/tags/dart/</loc>
     <lastmod>2018-11-15T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://liuyanguu.github.io/categories/data-engineering/</loc>
+    <lastmod>2020-01-11T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -134,7 +151,7 @@
   
   <url>
     <loc>https://liuyanguu.github.io/post/</loc>
-    <lastmod>2019-09-15T00:00:00+00:00</lastmod>
+    <lastmod>2020-01-11T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -188,13 +205,13 @@
   
   <url>
     <loc>https://liuyanguu.github.io/tags/</loc>
-    <lastmod>2018-07-01T00:00:00+00:00</lastmod>
+    <lastmod>2020-01-11T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>https://liuyanguu.github.io/</loc>
-    <lastmod>2019-09-15T00:00:00+00:00</lastmod>
+    <lastmod>2020-01-11T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
