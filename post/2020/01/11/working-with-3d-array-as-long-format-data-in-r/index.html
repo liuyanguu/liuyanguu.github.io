@@ -73,7 +73,7 @@
 <ul>
 <li><a href="#example-a-3-d-array-with-dimension-4x3x2">Example: a 3-D array with dimension <strong>4x3x2</strong></a></li>
 <li><a href="#melt-into-long">Melt into long</a></li>
-<li><a href="#cast-back-into-array">cast back into array</a></li>
+<li><a href="#recover-the-array">Recover the array</a></li>
 </ul>
 </div>
 
@@ -88,7 +88,7 @@ check.and.install.pkgs(c(&quot;data.table&quot;, &quot;reshape2&quot;, &quot;sca
 I believe it is a bad idea to work with array using <code>for</code> loop, which is both slow and error-prone. We can just melt it into a long data, do the work, and arrange back into array in the end if needed.</p>
 <div id="example-a-3-d-array-with-dimension-4x3x2" class="section level2">
 <h2>Example: a 3-D array with dimension <strong>4x3x2</strong></h2>
-<p>Pay attention to how the values (<code>1:24</code>) fill into the three dimentions, the 1st 4x3 matrix is filled first by column, then the 2nd 4x3 matrix.</p>
+<p>Notice how the values (<code>1:24</code>) fill into the three dimentions, The values <code>1:12</code> go into the 1st 4x3 matrix by column, then the rest go into the 2nd 4x3 matrix.</p>
 <pre class="r"><code>arr = array(1:24, dim=c(4,3,2), dimnames = list(group = LETTERS[1:4],  year = 2001:2003, sex = c(&quot;F&quot;, &quot;M&quot;)))
 arr</code></pre>
 <pre><code>## , , sex = F
@@ -125,8 +125,8 @@ rmarkdown::paged_table(arr_long)</code></pre>
 identical(unname(arr), arr2) # since I did not set dimnames for arr2, I need `unname`</code></pre>
 <pre><code>## [1] TRUE</code></pre>
 </div>
-<div id="cast-back-into-array" class="section level2">
-<h2>cast back into array</h2>
+<div id="recover-the-array" class="section level2">
+<h2>Recover the array</h2>
 <p>But the problem is we usually need to work on the data and the row orders will change.<br />
 For example, to add another year of data. And in many other cases, it is just easier to work with the long-format data.</p>
 <pre class="r"><code>arr_long_extra &lt;- expand.grid(group = LETTERS[1:4], year = 2004, sex = c(&quot;F&quot;, &quot;M&quot;))
@@ -142,8 +142,8 @@ arr_long_extra</code></pre>
 ## 7     C 2004   M   107
 ## 8     D 2004   M   108</code></pre>
 <pre class="r"><code>arr_long_new &lt;- rbind(arr_long, arr_long_extra)</code></pre>
-<p><strong>Set the right order is the key to produce right array</strong></p>
-<p>Since the original dimention <strong>4x3x2</strong> correspond to <em>group</em> x <em>year</em> x <em>sex</em>, the array should be ordered by <em>sex</em>, <em>year</em>, and <em>group</em> if we want to recover the original array. (Thus the arr_long is in the right order if we don’t resort it during calculation.)</p>
+<p><strong>Set the rows in the right order is the key to produce the right array</strong></p>
+<p>Since the original dimension <strong>4x3x2</strong> corresponds to <em>group</em> x <em>year</em> x <em>sex</em>, the array should be ordered by <em>sex</em>, <em>year</em>, and <em>group</em> if we want to recover the original array. (Thus the arr_long is in the right order if we don’t resort it.)</p>
 <pre class="r"><code># order by sex, year, group
 arr_long_new &lt;- arr_long_new[with(arr_long_new, order(sex, year, group)),]
 
@@ -173,7 +173,7 @@ arr_long_new$value</code></pre>
 <p>Notice that the extra values from <code>arr_long_extra</code> have been added correctly into the array.</p>
 <pre class="r"><code># Alternatively, if you use data.table, this does the same thing:
 data.table::setorder(arr_long_new, sex, year, group)</code></pre>
-<p>Similarly, we can <strong>set one dimension of the array by a specific order /another vector</strong><br />
+<p>Similarly, we can <strong>set one dimension of the array by a specific order or using another vector.</strong><br />
 Suppose I want to reorder the <code>year</code> variable as <code>year_order</code>:</p>
 <pre class="r"><code>year_order &lt;- c(&quot;2003&quot;, &quot;2001&quot;, &quot;2002&quot;)
 arr_long2 &lt;- arr_long[with(arr_long, order(sex, match(year, year_order), group)),]
@@ -198,7 +198,7 @@ arr3</code></pre>
 ##     B   22   14   18
 ##     C   23   15   19
 ##     D   24   16   20</code></pre>
-<p>It is the same as reorder the 2nd dimension of array:</p>
+<p>It is the same as reordering the 2nd dimension of array:</p>
 <pre class="r"><code>identical(arr3,
           arr[, order(match(dimnames(arr)[[2]], year_order)),]
           )</code></pre>
