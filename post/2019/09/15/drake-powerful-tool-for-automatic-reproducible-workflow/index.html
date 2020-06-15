@@ -44,6 +44,8 @@
 
   <div class="categories">
   
+    <a href="/categories/reproducible-workflow">Reproducible Workflow</a>
+  
   </div>
 
   <h1><span class="title">Drake: powerful tool for automatic reproducible workflow</span></h1>
@@ -64,7 +66,8 @@
 
 
 <main>
-<p>Drake is a powerful tool for automatic reproducible workflow. Drake has great documentations online thus here I only show a simple example working with Rmarkdown. Rmarkdown file could be very slow to generate due to the calculations involved. And every small revise make you wait a long time if you re-render the file. When we use drake we can do all the calculations in advance thus the file rendering is super fast since we only need to re-calculate the revised object.</p>
+<p><strong><code>Drake</code></strong> is a powerful tool for automatic reproducible workflow. I found it a perfect match when used together with <code>RMarkdown</code>. There are great documentations online for <code>Drake</code> thus here I only show a simple example working with <code>RMarkdown</code>.</p>
+<p><code>RMarkdown</code> file could be very slow to generate if lots of calculations are involved. Any small revise makes you rerun everything. When we use <code>drake</code> we can do all the calculations in advance thus the rendering is super fast since we only need to re-do the revised object.</p>
 <p>Using <code>SHAPforxgboost</code> as an example:</p>
 <pre class="r"><code># if needed, update drake
 if(packageVersion(&quot;drake&quot;) &lt; &quot;7.4&quot;) install.packages(&quot;drake&quot;)
@@ -113,9 +116,9 @@ cache &lt;- drake_cache(path = cache_path)</code></pre>
   fig2 = shap.plot.dependence(data_long = shap_long, x = &#39;dayint&#39;, y = &#39;dayint&#39;, color_feature = &#39;Column_WV&#39;),
   fig3 = shap.plot.dependence(data_long = shap_long, x = &#39;dayint&#39;, y = &#39;Column_WV&#39;, color_feature = &#39;Column_WV&#39;),
   
-  report = rmarkdown::render(
+  report = `RMarkdown`::render(
     knitr_in(&quot;Code/drake_md_report.Rmd&quot;),
-    output_format = rmarkdown::html_document(toc = TRUE))
+    output_format = `RMarkdown`::html_document(toc = TRUE))
 )
 
 nemia_config &lt;- drake_config(my_plan, cache = cache) # show the dependency
@@ -124,8 +127,8 @@ vis_drake_graph(nemia_config)
 
 # run the plan
 make(my_plan, cache = cache)</code></pre>
-<p>Notice that it is not a good idea to run drake within a rmarkdown file, which is how I write this post.
-Drake workflow should be an R script that uses Rmarkdown as the output tool.
+<p>Notice that it is not a good idea to run drake within a <code>RMarkdown</code> file, which is how I write this post.
+Drake workflow should be an R script that uses <code>RMarkdown</code> as the output tool.
 So I cannot really render this post as it is.</p>
 <p>Here is how the dependency graph looks like:
 <img src="/post/2019-09-15-drake-powerful-tool-for-automatic-reproducible-workflow_files/dependency%20plot.PNG" /></p>
@@ -152,7 +155,7 @@ So I cannot really render this post as it is.</p>
 <section class="article-meta article-footer">
   <h3>About the Author</h3>
   
-    <p>Yang Liu (刘杨) is a Statistician working in New York City. Website: <a href="https://liuyanguu.github.io">https://liuyanguu.github.io</a></p>
+    <p>Yang Liu (刘杨) is a Statistician working in New York City.</p>
   
 </section>
 
@@ -234,7 +237,7 @@ if (!doNotTrack) {
     
   </ul>
   
-  <div class="copyright">@2019 Yang Liu <em>liuyanguu</em>. Powered by Github. Blogdown and Hugo Theme by Yihui Xie.</div>
+  <div class="copyright">@2020 Yang Liu <em>liuyanguu</em>. Powered by Github. Blogdown and Hugo Theme made by Yihui Xie.</div>
   
 </div>
 </footer>

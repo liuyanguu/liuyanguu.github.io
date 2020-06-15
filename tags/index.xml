@@ -2,129 +2,129 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on Welcome to my blog</title>
-    <link>https://liuyanguu.github.io/tags/</link>
+    <link>/tags/</link>
     <description>Recent content in Tags on Welcome to my blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Sat, 11 Jan 2020 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://liuyanguu.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Array</title>
-      <link>https://liuyanguu.github.io/tags/array/</link>
+      <link>/tags/array/</link>
       <pubDate>Sat, 11 Jan 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/tags/array/</guid>
+      <guid>/tags/array/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Catalog</title>
-      <link>https://liuyanguu.github.io/tags/catalog/</link>
+      <link>/tags/catalog/</link>
       <pubDate>Sun, 01 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/tags/catalog/</guid>
+      <guid>/tags/catalog/</guid>
       <description></description>
     </item>
     
     <item>
       <title>DART</title>
-      <link>https://liuyanguu.github.io/tags/dart/</link>
+      <link>/tags/dart/</link>
       <pubDate>Thu, 15 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/tags/dart/</guid>
+      <guid>/tags/dart/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Drake</title>
-      <link>https://liuyanguu.github.io/tags/drake/</link>
+      <link>/tags/drake/</link>
       <pubDate>Sun, 15 Sep 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/tags/drake/</guid>
+      <guid>/tags/drake/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Geographic</title>
-      <link>https://liuyanguu.github.io/tags/geographic/</link>
+      <link>/tags/geographic/</link>
       <pubDate>Fri, 20 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/tags/geographic/</guid>
+      <guid>/tags/geographic/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Heatmap</title>
-      <link>https://liuyanguu.github.io/tags/heatmap/</link>
-      <pubDate>Wed, 17 Apr 2019 00:00:00 +0000</pubDate>
+      <link>/tags/heatmap/</link>
+      <pubDate>Sun, 14 Jun 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/tags/heatmap/</guid>
+      <guid>/tags/heatmap/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Markdown</title>
-      <link>https://liuyanguu.github.io/tags/markdown/</link>
+      <link>/tags/markdown/</link>
       <pubDate>Sun, 15 Sep 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/tags/markdown/</guid>
+      <guid>/tags/markdown/</guid>
       <description></description>
     </item>
     
     <item>
       <title>R</title>
-      <link>https://liuyanguu.github.io/tags/r/</link>
+      <link>/tags/r/</link>
       <pubDate>Fri, 20 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/tags/r/</guid>
+      <guid>/tags/r/</guid>
       <description></description>
     </item>
     
     <item>
       <title>SHAP</title>
-      <link>https://liuyanguu.github.io/tags/shap/</link>
+      <link>/tags/shap/</link>
       <pubDate>Thu, 18 Jul 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/tags/shap/</guid>
+      <guid>/tags/shap/</guid>
       <description></description>
     </item>
     
     <item>
       <title>SHAPforxgboost</title>
-      <link>https://liuyanguu.github.io/tags/shapforxgboost/</link>
+      <link>/tags/shapforxgboost/</link>
       <pubDate>Thu, 18 Jul 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/tags/shapforxgboost/</guid>
+      <guid>/tags/shapforxgboost/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Shiny</title>
-      <link>https://liuyanguu.github.io/tags/shiny/</link>
+      <link>/tags/shiny/</link>
       <pubDate>Sun, 24 Feb 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/tags/shiny/</guid>
+      <guid>/tags/shiny/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Spatial</title>
-      <link>https://liuyanguu.github.io/tags/spatial/</link>
+      <link>/tags/spatial/</link>
       <pubDate>Fri, 20 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/tags/spatial/</guid>
+      <guid>/tags/spatial/</guid>
       <description></description>
     </item>
     
     <item>
       <title>XGBoost</title>
-      <link>https://liuyanguu.github.io/tags/xgboost/</link>
+      <link>/tags/xgboost/</link>
       <pubDate>Thu, 18 Jul 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/tags/xgboost/</guid>
+      <guid>/tags/xgboost/</guid>
       <description></description>
     </item>
     

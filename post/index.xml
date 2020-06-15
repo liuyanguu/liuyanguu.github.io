@@ -2,21 +2,30 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Posts on Welcome to my blog</title>
-    <link>https://liuyanguu.github.io/post/</link>
+    <link>/post/</link>
     <description>Recent content in Posts on Welcome to my blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 11 Jan 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 14 Jun 2020 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://liuyanguu.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
+      <title>ggplot US state and China province heatmap</title>
+      <link>/post/2020/06/14/ggplot-us-state-and-china-province-heatmap/</link>
+      <pubDate>Sun, 14 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/post/2020/06/14/ggplot-us-state-and-china-province-heatmap/</guid>
+      <description>1. US Map by state Method 1. Use usmap Method 2. Use map_data and build from shape files 2. China map by province Method 1. China map by province using downloaded shap files Method 2. Using geojsonMap (leaflet) (Updated on 2020-06-12, First posted on 2019-04-17) It sounds easy but turned out not as straight-forward as I thought. I will show: 50-state (including Alaska and Hawaii) United States thematic map, with</description>
+    </item>
+    
+    <item>
       <title>Working with 3D array as long-format data in R</title>
-      <link>https://liuyanguu.github.io/post/2020/01/11/working-with-3d-array-as-long-format-data-in-r/</link>
+      <link>/post/2020/01/11/working-with-3d-array-as-long-format-data-in-r/</link>
       <pubDate>Sat, 11 Jan 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/post/2020/01/11/working-with-3d-array-as-long-format-data-in-r/</guid>
+      <guid>/post/2020/01/11/working-with-3d-array-as-long-format-data-in-r/</guid>
       <description>Example: a 3-D array with dimension 4x3x2Melt into longRecover the arraycheck.and.install.pkgs &amp;lt;- function(pkgs){new.packages &amp;lt;- pkgs[!pkgs %in% installed.packages()[,&amp;quot;Package&amp;quot;]]if(length(new.packages)) install.packages(new.packages, dependencies = TRUE)suppressPackageStartupMessages(invisible(lapply(pkgs, library, character.only = TRUE)))}check.and.install.pkgs(c(&amp;quot;data.table&amp;quot;, &amp;quot;reshape2&amp;quot;, &amp;quot;scatterplot3d&amp;quot;))Happy New Year!
 Recently I spent some time working with array in R.
 I believe it is a bad idea to work with array using for loop, which is both slow and error-prone.</description>
@@ -24,19 +33,20 @@ I believe it is a bad idea to work with array using for loop, which is both slow
     
     <item>
       <title>Drake: powerful tool for automatic reproducible workflow</title>
-      <link>https://liuyanguu.github.io/post/2019/09/15/drake-powerful-tool-for-automatic-reproducible-workflow/</link>
+      <link>/post/2019/09/15/drake-powerful-tool-for-automatic-reproducible-workflow/</link>
       <pubDate>Sun, 15 Sep 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/post/2019/09/15/drake-powerful-tool-for-automatic-reproducible-workflow/</guid>
-      <description>Drake is a powerful tool for automatic reproducible workflow. Drake has great documentations online thus here I only show a simple example working with Rmarkdown. Rmarkdown file could be very slow to generate due to the calculations involved. And every small revise make you wait a long time if you re-render the file. When we use drake we can do all the calculations in advance thus the file rendering is super fast since we only need to re-calculate the revised object.</description>
+      <guid>/post/2019/09/15/drake-powerful-tool-for-automatic-reproducible-workflow/</guid>
+      <description>Drake is a powerful tool for automatic reproducible workflow. I found it a perfect match when used together with RMarkdown. There are great documentations online for Drake thus here I only show a simple example working with RMarkdown.
+RMarkdown file could be very slow to generate if lots of calculations are involved. Any small revise makes you rerun everything. When we use drake we can do all the calculations in advance thus the rendering is super fast since we only need to re-do the revised object.</description>
     </item>
     
     <item>
       <title>Notes on writing an R package</title>
-      <link>https://liuyanguu.github.io/post/2019/07/28/some-experience-on-writing-r-package/</link>
+      <link>/post/2019/07/28/some-experience-on-writing-r-package/</link>
       <pubDate>Sun, 28 Jul 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/post/2019/07/28/some-experience-on-writing-r-package/</guid>
+      <guid>/post/2019/07/28/some-experience-on-writing-r-package/</guid>
       <description>Requirements from cran editorsSome of my own experienceDescriptionNamespace:Files locations:Although ‘SHAPforxgboost’ is not a package too complicated, it took me some time to get the package pass all the cran check. Now (Aug.03,2019) it is available on cran. Install by either
 install.packages(&amp;quot;SHAPforxgboost&amp;quot;)or
 devtools::install_github(&amp;quot;liuyanguu/SHAPforxgboost&amp;quot;)The most recent version is 0.0.2.
@@ -45,30 +55,21 @@ I used ‘usethis’ package https://usethis.r-lib.org/ to set up the structure 
     
     <item>
       <title>SHAP for XGBoost in R: SHAPforxgboost</title>
-      <link>https://liuyanguu.github.io/post/2019/07/18/visualization-of-shap-for-xgboost/</link>
+      <link>/post/2019/07/18/visualization-of-shap-for-xgboost/</link>
       <pubDate>Thu, 18 Jul 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/post/2019/07/18/visualization-of-shap-for-xgboost/</guid>
+      <guid>/post/2019/07/18/visualization-of-shap-for-xgboost/</guid>
       <description>SHAP package in RWhy SHAP valuesLocal ExplanationConsistency in Global Feature ImportanceSHAP plotsSummary plotDependence plotInteraction effectsSHAP force plotReferencesSHAP package in RI built an R package SHAPforxgboost that wraps all the R plotting functions illustrated in this post. It serves for now as the vignette for the package.
 Please install from github.
 devtools::install_github(&amp;quot;liuyanguu/SHAPforxgboost&amp;quot;)Why SHAP valuesSHAP’s main advantages are local explanation and consistency in global model structure.</description>
     </item>
     
     <item>
-      <title>ggplot heatmap US 50-state map and China province map</title>
-      <link>https://liuyanguu.github.io/post/2019/04/17/ggplot-heatmap-us-50-states-map-and-china-province-map/</link>
-      <pubDate>Wed, 17 Apr 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://liuyanguu.github.io/post/2019/04/17/ggplot-heatmap-us-50-states-map-and-china-province-map/</guid>
-      <description>1.1. US Map (50 states) using usmap 1.2. Using map_data and build from scratch 2.1. China map by province using downloaded shapfiles 2.2. Using geojsonMap (leaflet) It sounds easy and straight-forward but turned out not as simple as I expected. I will show 50-state (including Alaska and Hawaii) United States thematic map, with map scale, with state abbreviations China thematic map, with map scale, with names of provinces in either</description>
-    </item>
-    
-    <item>
       <title>Shiny in Blogdown</title>
-      <link>https://liuyanguu.github.io/post/2019/02/24/shiny-in-blogdown/</link>
+      <link>/post/2019/02/24/shiny-in-blogdown/</link>
       <pubDate>Sun, 24 Feb 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/post/2019/02/24/shiny-in-blogdown/</guid>
+      <guid>/post/2019/02/24/shiny-in-blogdown/</guid>
       <description>How to embed ShinyMy Shiny app exampleHow to embed ShinySince Blogdown is for static websites, it cannot run Shiny in rmarkdown directly. According to discussion here and document here.
 The only way to do it is using iframe and write outside the chunk:
 &amp;lt;iframe src=&#34;https://liuyanguu.shinyapps.io/bcl_app/&#34; width=1000 height=800&#34;&amp;gt;&amp;lt;/iframe&amp;gt;
@@ -77,40 +78,30 @@ There is also a built-in function in knitr to do the same thing and write in the
     
     <item>
       <title>Study shrinkage and DART in xgboost modeling using a simple dataset</title>
-      <link>https://liuyanguu.github.io/post/2018/11/15/xgboost-dart-example/</link>
+      <link>/post/2018/11/15/xgboost-dart-example/</link>
       <pubDate>Thu, 15 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/post/2018/11/15/xgboost-dart-example/</guid>
+      <guid>/post/2018/11/15/xgboost-dart-example/</guid>
       <description>DataShrinkageDART: Dropout - MARTskip_droprate_dropone_dropIt is always a good idea to study the packaged algorithm with a simple example. Inspired by my colleague Kodi’s excellent work showing how xgboost handles missing values, I tried a simple 5x2 dataset to show how shrinkage and DART influence the growth of trees in the model.
 Dataset.seed(123)n0 &amp;lt;- 5X &amp;lt;- data.</description>
     </item>
     
     <item>
       <title>SHAP Visualization in R (first post)</title>
-      <link>https://liuyanguu.github.io/post/2018/10/14/shap-visualization-for-xgboost/</link>
+      <link>/post/2018/10/14/shap-visualization-for-xgboost/</link>
       <pubDate>Sun, 14 Oct 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/post/2018/10/14/shap-visualization-for-xgboost/</guid>
+      <guid>/post/2018/10/14/shap-visualization-for-xgboost/</guid>
       <description>Example 1SHAP summary plotAlternative ways:SHAP dependence plotSHAP interaction effect plotSHAP force plotExample 2Summary plotDependence plot for each featureForce plotStack plot by clustering groupsUpdate 19/07/21:
 Since my R Package SHAPforxgboost has been released on CRAN, I updated this post using the new functions and illustrate how to use these functions using two datasets. For more information, please refer to: SHAP visualization for XGBoost in R</description>
     </item>
     
     <item>
-      <title>autoxgboost: Automatic XGBoost using Bayesian Optimization</title>
-      <link>https://liuyanguu.github.io/post/2018/10/03/autoxgboost-bayesian-optimization/</link>
-      <pubDate>Wed, 03 Oct 2018 00:00:00 +0000</pubDate>
-      
-      <guid>https://liuyanguu.github.io/post/2018/10/03/autoxgboost-bayesian-optimization/</guid>
-      <description>BackgroundUsing autoxgboostNew ResultCompared to old ResultTuning over Different BoostersReturn the recommended/chosen parameters(updated on Oct 14)
-BackgroundIt has been a while since my last update. I have been working on lots of interesting projects since I joined Mount Sinai in August. We have a great team here and obviously I can learn a lot from everyone around me. Most of my job so far focuses on applying machine learning techniques, mainly extreme gradient boosting and the visualization of results.</description>
-    </item>
-    
-    <item>
       <title>Spatial data in R: Dividing raster layers into equal-area rings</title>
-      <link>https://liuyanguu.github.io/post/2018/07/20/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/</link>
+      <link>/post/2018/07/20/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/</link>
       <pubDate>Fri, 20 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/post/2018/07/20/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/</guid>
+      <guid>/post/2018/07/20/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/</guid>
       <description>Saturation in ten cities with equal-area ringsR Code for one cityResults for the ring saturationsAverage saturation in each ringMethodologyOriginal CodeThis data visualization example include:
 * Import .img file as a raster
 * Turn raster into a data.frame of points (coordinates) and values
@@ -121,10 +112,10 @@ BackgroundIt has been a while since my last update. I have been working on lots
     
     <item>
       <title>How to Draw Heatmap with Colorful Dendrogram</title>
-      <link>https://liuyanguu.github.io/post/2018/07/16/how-to-draw-heatmap-with-colorful-dendrogram/</link>
+      <link>/post/2018/07/16/how-to-draw-heatmap-with-colorful-dendrogram/</link>
       <pubDate>Mon, 16 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/post/2018/07/16/how-to-draw-heatmap-with-colorful-dendrogram/</guid>
+      <guid>/post/2018/07/16/how-to-draw-heatmap-with-colorful-dendrogram/</guid>
       <description>DataVersion 1: Color both the branches and labelsVersion 2: color only the labels.Version 3: If there is no color, and we do not reorder the branchesThis data visualization example include:
 * Hierarchical clustering, dendrogram and heat map based on normalized odds ratios
 * The dendrogram was built separately to give color to dendrogram’s branches/labels based on cluster using dendextend
@@ -133,19 +124,19 @@ BackgroundIt has been a while since my last update. I have been working on lots
     
     <item>
       <title>eXtreme Gradient Boosting (XGBoost): Better than random forest or gradient boosting</title>
-      <link>https://liuyanguu.github.io/post/2018/07/09/extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting/</link>
+      <link>/post/2018/07/09/extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting/</link>
       <pubDate>Mon, 09 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/post/2018/07/09/extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting/</guid>
+      <guid>/post/2018/07/09/extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting/</guid>
       <description>OverviewAbout the Data1. Extreme Gradient Boosting2. Gradient boosting3. Random Forest4. Lasso5. Best SubsetCompare MSEsOriginal Code are stored on githubOverviewI recently had the great pleasure to meet with Professor Allan Just and he introduced me to eXtreme Gradient Boosting (XGBoost). I have extended the earlier work on my old blog by comparing the results across XGBoost, Gradient Boosting (GBM), Random Forest, Lasso, and Best Subset.</description>
     </item>
     
     <item>
       <title>Catalog of my old blog</title>
-      <link>https://liuyanguu.github.io/post/2018/07/01/catalogue-of-my-old-blog/</link>
+      <link>/post/2018/07/01/catalogue-of-my-old-blog/</link>
       <pubDate>Sun, 01 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/post/2018/07/01/catalogue-of-my-old-blog/</guid>
+      <guid>/post/2018/07/01/catalogue-of-my-old-blog/</guid>
       <description>Introducing my new blog written solely in R MarkdownWhen I realized it was so convenient to write blog directly using R Markdown, I searched if there is a specific tool for it. And I found Blogdown, an R package developed by Yihui Xie, who also developed R Markdown.
 CatalogAs a summary, I would like to create a catalog for the main topics I wrote on google blogger before July 2018.</description>
     </item>

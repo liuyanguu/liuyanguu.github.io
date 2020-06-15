@@ -150,8 +150,8 @@ arr_long_new &lt;- arr_long_new[with(arr_long_new, order(sex, year, group)),]
 # create new array with 4 groups x 4 years x 2 sex categories
 # The order of the values will fill into the dimensions correctly:
 arr_long_new$value</code></pre>
-<pre><code>##  [1]   1   2   3   4   5   6   7   8   9  10  11  12 101 102 103 104  13
-## [18]  14  15  16  17  18  19  20  21  22  23  24 105 106 107 108</code></pre>
+<pre><code>##  [1]   1   2   3   4   5   6   7   8   9  10  11  12 101 102 103 104  13  14  15
+## [20]  16  17  18  19  20  21  22  23  24 105 106 107 108</code></pre>
 <pre class="r"><code>array(arr_long_new$value, dim=c(4,4,2), dimnames = list(group = LETTERS[1:4],  year = 2001:2004, sex = c(&quot;F&quot;, &quot;M&quot;)))</code></pre>
 <pre><code>## , , sex = F
 ## 
@@ -233,7 +233,7 @@ scatterplot3d(arr_long, pch = shapes, cex.symbols = 2,
 <section class="article-meta article-footer">
   <h3>About the Author</h3>
   
-    <p>Yang Liu (刘杨) is a Statistician working in New York City. Website: <a href="https://liuyanguu.github.io">https://liuyanguu.github.io</a></p>
+    <p>Yang Liu (刘杨) is a Statistician working in New York City.</p>
   
 </section>
 
@@ -243,7 +243,7 @@ scatterplot3d(arr_long, pch = shapes, cex.symbols = 2,
 
 
 <nav class="post-nav">
-  <span class="nav-prev"></span>
+  <span class="nav-prev"><a href="/post/2020/06/14/ggplot-us-state-and-china-province-heatmap/">&larr; ggplot US state and China province heatmap</a></span>
   <span class="nav-next"><a href="/post/2019/09/15/drake-powerful-tool-for-automatic-reproducible-workflow/">Drake: powerful tool for automatic reproducible workflow &rarr;</a></span>
 </nav>
 
@@ -315,7 +315,7 @@ if (!doNotTrack) {
     
   </ul>
   
-  <div class="copyright">@2019 Yang Liu <em>liuyanguu</em>. Powered by Github. Blogdown and Hugo Theme by Yihui Xie.</div>
+  <div class="copyright">@2020 Yang Liu <em>liuyanguu</em>. Powered by Github. Blogdown and Hugo Theme made by Yihui Xie.</div>
   
 </div>
 </footer>

@@ -2,84 +2,84 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Categories on Welcome to my blog</title>
-    <link>https://liuyanguu.github.io/categories/</link>
+    <link>/categories/</link>
     <description>Recent content in Categories on Welcome to my blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Sun, 01 Jul 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://liuyanguu.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/categories/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Catalog</title>
-      <link>https://liuyanguu.github.io/categories/catalog/</link>
+      <link>/categories/catalog/</link>
       <pubDate>Sun, 01 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/categories/catalog/</guid>
+      <guid>/categories/catalog/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Data Engineering</title>
-      <link>https://liuyanguu.github.io/categories/data-engineering/</link>
+      <link>/categories/data-engineering/</link>
       <pubDate>Sat, 11 Jan 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/categories/data-engineering/</guid>
+      <guid>/categories/data-engineering/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Data Visualization</title>
-      <link>https://liuyanguu.github.io/categories/data-visualization/</link>
-      <pubDate>Thu, 18 Jul 2019 00:00:00 +0000</pubDate>
+      <link>/categories/data-visualization/</link>
+      <pubDate>Sun, 14 Jun 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/categories/data-visualization/</guid>
+      <guid>/categories/data-visualization/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Machine Learning</title>
-      <link>https://liuyanguu.github.io/categories/machine-learning/</link>
+      <link>/categories/machine-learning/</link>
       <pubDate>Thu, 18 Jul 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/categories/machine-learning/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Parameter Tuning</title>
-      <link>https://liuyanguu.github.io/categories/parameter-tuning/</link>
-      <pubDate>Wed, 03 Oct 2018 00:00:00 +0000</pubDate>
-      
-      <guid>https://liuyanguu.github.io/categories/parameter-tuning/</guid>
+      <guid>/categories/machine-learning/</guid>
       <description></description>
     </item>
     
     <item>
       <title>R package</title>
-      <link>https://liuyanguu.github.io/categories/r-package/</link>
+      <link>/categories/r-package/</link>
       <pubDate>Sun, 28 Jul 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/categories/r-package/</guid>
+      <guid>/categories/r-package/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Reproducible Workflow</title>
+      <link>/categories/reproducible-workflow/</link>
+      <pubDate>Sun, 15 Sep 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/reproducible-workflow/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Shiny</title>
-      <link>https://liuyanguu.github.io/categories/shiny/</link>
+      <link>/categories/shiny/</link>
       <pubDate>Sun, 24 Feb 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/categories/shiny/</guid>
+      <guid>/categories/shiny/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Spatial Data</title>
-      <link>https://liuyanguu.github.io/categories/spatial-data/</link>
+      <link>/categories/spatial-data/</link>
       <pubDate>Fri, 20 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/categories/spatial-data/</guid>
+      <guid>/categories/spatial-data/</guid>
       <description></description>
     </item>
     

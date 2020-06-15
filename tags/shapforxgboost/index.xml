@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>SHAPforxgboost on Welcome to my blog</title>
-    <link>https://liuyanguu.github.io/tags/shapforxgboost/</link>
+    <link>/tags/shapforxgboost/</link>
     <description>Recent content in SHAPforxgboost on Welcome to my blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Thu, 18 Jul 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://liuyanguu.github.io/tags/shapforxgboost/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/tags/shapforxgboost/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>SHAP for XGBoost in R: SHAPforxgboost</title>
-      <link>https://liuyanguu.github.io/post/2019/07/18/visualization-of-shap-for-xgboost/</link>
+      <link>/post/2019/07/18/visualization-of-shap-for-xgboost/</link>
       <pubDate>Thu, 18 Jul 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/post/2019/07/18/visualization-of-shap-for-xgboost/</guid>
+      <guid>/post/2019/07/18/visualization-of-shap-for-xgboost/</guid>
       <description>SHAP package in RWhy SHAP valuesLocal ExplanationConsistency in Global Feature ImportanceSHAP plotsSummary plotDependence plotInteraction effectsSHAP force plotReferencesSHAP package in RI built an R package SHAPforxgboost that wraps all the R plotting functions illustrated in this post. It serves for now as the vignette for the package.
 Please install from github.
 devtools::install_github(&amp;quot;liuyanguu/SHAPforxgboost&amp;quot;)Why SHAP valuesSHAP’s main advantages are local explanation and consistency in global model structure.</description>
