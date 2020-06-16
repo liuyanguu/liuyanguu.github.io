@@ -78,13 +78,13 @@
   </url>
   
   <url>
-    <loc>/tags/catalog/</loc>
+    <loc>/categories/catalog/</loc>
     <lastmod>2018-07-01T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/categories/catalog/</loc>
+    <loc>/tags/catalog/</loc>
     <lastmod>2018-07-01T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
@@ -186,13 +186,13 @@
   </url>
   
   <url>
-    <loc>/tags/shiny/</loc>
+    <loc>/categories/shiny/</loc>
     <lastmod>2019-02-24T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/categories/shiny/</loc>
+    <loc>/tags/shiny/</loc>
     <lastmod>2019-02-24T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
