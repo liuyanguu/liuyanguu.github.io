@@ -17,7 +17,7 @@
       <pubDate>Sun, 15 Sep 2019 00:00:00 +0000</pubDate>
       
       <guid>/post/2019/09/15/drake-powerful-tool-for-automatic-reproducible-workflow/</guid>
-      <description>Drake is a powerful tool for automatic reproducible workflow. I found it a perfect match when used together with RMarkdown. There are great documentations online for Drake thus here I only show a simple example working with RMarkdown.
+      <description>drake is a powerful tool for automatic reproducible workflow. I found it a perfect match when used together with RMarkdown. There are great documentations online for drake thus here I only show a simple example working with RMarkdown.
 RMarkdown file could be very slow to generate if lots of calculations are involved. Any small revise makes you rerun everything. When we use drake we can do all the calculations in advance thus the rendering is super fast since we only need to re-do the revised object.</description>
     </item>
     

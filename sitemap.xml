@@ -3,8 +3,13 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>/post/2020/06/14/ggplot-us-state-and-china-province-heatmap/</loc>
+    <loc>/post/2020/06/14/us-and-china-admin1-covid19-mortality-and-incidence-rate/</loc>
     <lastmod>2020-06-14T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/2020/06/12/ggplot-us-state-and-china-province-heatmap/</loc>
+    <lastmod>2020-06-12T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -115,6 +120,12 @@
   </url>
   
   <url>
+    <loc>/tags/geodata/</loc>
+    <lastmod>2020-06-14T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/tags/geographic/</loc>
     <lastmod>2018-07-20T00:00:00+00:00</lastmod>
     <priority>0</priority>
@@ -122,7 +133,7 @@
   
   <url>
     <loc>/tags/heatmap/</loc>
-    <lastmod>2020-06-14T00:00:00+00:00</lastmod>
+    <lastmod>2020-06-12T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   

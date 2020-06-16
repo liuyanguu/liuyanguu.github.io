@@ -12,11 +12,22 @@
     
     
     <item>
-      <title>ggplot US state and China province heatmap</title>
-      <link>/post/2020/06/14/ggplot-us-state-and-china-province-heatmap/</link>
+      <title>US and China Admin1 COVID19 mortality and incidence rate</title>
+      <link>/post/2020/06/14/us-and-china-admin1-covid19-mortality-and-incidence-rate/</link>
       <pubDate>Sun, 14 Jun 2020 00:00:00 +0000</pubDate>
       
-      <guid>/post/2020/06/14/ggplot-us-state-and-china-province-heatmap/</guid>
+      <guid>/post/2020/06/14/us-and-china-admin1-covid19-mortality-and-incidence-rate/</guid>
+      <description>USChinaCompared to lung cancer mortalitySimilar to the last heatmap post I just revised, here I wrapped up the function and showing COVID-19 data just downloaded from JHU CSSE Github page. The function can take a given dataset and plot designated variable.
+Code hosted on my Github repo.
+US# major function, can download from Github repo Blogdown/hugo-xmag/Codesource(here::here(&amp;quot;Code/COVID_make_map.R&amp;quot;))# USdt_JUH_US &amp;lt;- get.JHU.us.state()make_heatmap(data = dt_JUH_US, geo_data = get_state_name(),state_var = &amp;quot;Province_State&amp;quot;, fill_var = &amp;quot;Mortality_Rate&amp;quot;, label_var = &amp;quot;abb&amp;quot;)us_maps &amp;lt;- lapply(c(&amp;quot;Mortality_Rate&amp;quot;, &amp;quot;Incident_Rate&amp;quot;, &amp;quot;Testing_Rate&amp;quot;, &amp;quot;Hospitalization_Rate&amp;quot;),make_heatmap, data = dt_JUH_US, geo_data = get_state_name(),state_var = &amp;quot;Province_State&amp;quot;, label_var = &amp;quot;abb&amp;quot;)plot_grid &amp;lt;- gridExtra::grid.</description>
+    </item>
+    
+    <item>
+      <title>ggplot US state and China province heatmap</title>
+      <link>/post/2020/06/12/ggplot-us-state-and-china-province-heatmap/</link>
+      <pubDate>Fri, 12 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/post/2020/06/12/ggplot-us-state-and-china-province-heatmap/</guid>
       <description>1. US Map by state Method 1. Use usmap Method 2. Use map_data and build from shape files 2. China map by province Method 1. China map by province using downloaded shap files Method 2. Using geojsonMap (leaflet) (Updated on 2020-06-12, First posted on 2019-04-17) It sounds easy but turned out not as straight-forward as I thought. I will show: 50-state (including Alaska and Hawaii) United States thematic map, with</description>
     </item>
     

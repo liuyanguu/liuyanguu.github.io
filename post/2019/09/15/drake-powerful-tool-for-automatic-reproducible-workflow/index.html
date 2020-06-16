@@ -66,17 +66,17 @@
 
 
 <main>
-<p><strong><code>Drake</code></strong> is a powerful tool for automatic reproducible workflow. I found it a perfect match when used together with <code>RMarkdown</code>. There are great documentations online for <code>Drake</code> thus here I only show a simple example working with <code>RMarkdown</code>.</p>
+<p><strong><code>drake</code></strong> is a powerful tool for automatic reproducible workflow. I found it a perfect match when used together with <code>RMarkdown</code>. There are great documentations online for <code>drake</code> thus here I only show a simple example working with <code>RMarkdown</code>.</p>
 <p><code>RMarkdown</code> file could be very slow to generate if lots of calculations are involved. Any small revise makes you rerun everything. When we use <code>drake</code> we can do all the calculations in advance thus the rendering is super fast since we only need to re-do the revised object.</p>
 <p>Using <code>SHAPforxgboost</code> as an example:</p>
 <pre class="r"><code># if needed, update drake
 if(packageVersion(&quot;drake&quot;) &lt; &quot;7.4&quot;) install.packages(&quot;drake&quot;)
-if(packageVersion(&quot;SHAPforxgboost&quot;) &lt; &quot;0.0.2&quot;) devtools::install_github(&quot;liuyanguu/SHAPforxgboost&quot;)
+if(packageVersion(&quot;SHAPforxgboost&quot;) &lt; &quot;0.0.3&quot;) install.packages(&quot;SHAPforxgboost&quot;)
 
 suppressPackageStartupMessages({
-library(&quot;drake&quot;)
-library(&quot;SHAPforxgboost&quot;)
-library(&quot;here&quot;)
+  library(&quot;drake&quot;)
+  library(&quot;SHAPforxgboost&quot;)
+  library(&quot;here&quot;)
 })
 
 # assign a place to store intermediate objects
@@ -127,14 +127,14 @@ vis_drake_graph(nemia_config)
 
 # run the plan
 make(my_plan, cache = cache)</code></pre>
-<p>Notice that it is not a good idea to run drake within a <code>RMarkdown</code> file, which is how I write this post.
-Drake workflow should be an R script that uses <code>RMarkdown</code> as the output tool.
-So I cannot really render this post as it is.</p>
+<p>Notice that it is not a good idea to run <code>drake</code> within a <code>RMarkdown</code> file as <code>drake</code> workflow should be an R script that uses <code>RMarkdown</code> as the output tool. So I cannot really render this post as it is. But these code can run as</p>
 <p>Here is how the dependency graph looks like:
 <img src="/post/2019-09-15-drake-powerful-tool-for-automatic-reproducible-workflow_files/dependency%20plot.PNG" /></p>
-<p>If we add an extra figure, only this figure needs to made:
+<p>If we add an extra figure, only this figure (the black <em>fig3</em>) needs to made:
 <img src="/post/2019-09-15-drake-powerful-tool-for-automatic-reproducible-workflow_files/dependency%20plot2.PNG" /></p>
-<p>Here is <a href="https://github.com/liuyanguu/Blogdown/blob/master/hugo-xmag/Code/drake_md_report.Rmd">how the md file looks like on github</a></p>
+<p>Here is <a href="https://github.com/liuyanguu/Blogdown/blob/master/hugo-xmag/Code/drake_md_report.Rmd">how the md file looks like on Github</a></p>
+<p>And the <code>drake</code> work plan generates a markdown results automatcially (“drake_md_report.html”) which looks like this:
+<img src="/post/2019-09-15-drake-powerful-tool-for-automatic-reproducible-workflow_files/md_report.PNG" /></p>
 
 </main>
 
