@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <title>Shiny in Blogdown | Welcome to my blog</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    <link href="//cdn.bootcss.com/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+
+  </head>
+
+  <body class="page">
+    <nav class="header">
+      <div class="banner">
+<a href="/">
+
+<img src="/ocean%202.jpg" alt="Text on Image" />
+</a>
+</div>
+
+      <div class="head-meta">
+      
+        <span><a href="/">&larr; Back to Home</a></span>
+        <span class="date">2019-02-24</span>
+        
+        
+        
+          
+        
+        
+        
+        <span><a href="https://github.com/liuyanguu/Blogdown/edit/master/hugo-xmag/content/post/2019-02-24-shiny-in-blogdown.Rmd">Edit this page &rarr;</a></span>
+        
+        
+      
+      </div>
+    </nav>
+
+<div class="container">
+<article>
+<div class="article-meta">
+
+  <div class="categories">
+  
+    <a href="/categories/data-visualization">Data Visualization</a>
+  
+     &hercon; <a href="/categories/shiny">Shiny</a>
+  
+  </div>
+
+  <h1><span class="title">Shiny in Blogdown</span></h1>
+
+  
+  <h3 class="author">Yang Liu
+</h3>
+  
+
+  
+  <p>Tags: <a href="/tags/shiny">Shiny</a>
+  </p>
+  
+  
+
+</div>
+
+
+
+<main>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#how-to-embed-shiny">How to embed <em>Shiny</em></a></li>
+<li><a href="#my-shiny-app-example">My <em>Shiny</em> app example</a></li>
+</ul>
+</div>
+
+<div id="how-to-embed-shiny" class="section level2">
+<h2>How to embed <em>Shiny</em></h2>
+<p>Since <em>Blogdown</em> is for static websites, it cannot run <em>Shiny</em> in rmarkdown directly. According to discussion <a href="https://github.com/rstudio/blogdown/issues/166">here</a> and document <a href="https://bookdown.org/yihui/blogdown/html-widgets.html">here</a>.</p>
+<p>The only way to do it is using <code>iframe</code> and write outside the chunk:<br />
+<code>&lt;iframe src="https://liuyanguu.shinyapps.io/bcl_app/" width=1000 height=800"&gt;&lt;/iframe&gt;</code></p>
+<p>There is also a built-in function in <em>knitr</em> to do the same thing and write in the chunk. The only difference is that we can only set <code>height</code>, and the shiny app would appear slightly different with the <strong>siderbarPanel</strong> at the top and the <strong>mainPanel</strong> beneath it.</p>
+<pre class="r"><code>knitr::include_app(&quot;https://liuyanguu.shinyapps.io/bcl_app/&quot;, height = &quot;100%&quot;)
+# by the way, you can also embed your slides in a similar way, for example:
+knitr::include_url(&#39;https://timmastny.rbind.io/slides/first_presentation#2&#39;)</code></pre>
+</div>
+<div id="my-shiny-app-example" class="section level2">
+<h2>My <em>Shiny</em> app example</h2>
+<p>I modified based on the <a href="https://deanattali.com/blog/building-shiny-apps-tutorial/">great example and tutorial</a> by Dean Attali, whom I found is also the author of <em>ggExtra</em>’s marginal plot. It is definitely better than Shiny’s own training materials.<br />
+Thanks a lot. Yes, I donated.</p>
+<p>If this embedment doesn’t appear well on your screen, here is <a href="https://liuyanguu.shinyapps.io/bcl_app/">the link to the app</a>.
+<iframe src="https://liuyanguu.shinyapps.io/bcl_app/" width=1000 height=800"></iframe></p>
+<p><strong>The code for the app</strong><br />
+All the code is in one file. I did not split ui with server.<br />
+The code are hosted <a href="https://github.com/liuyanguu/shiny_app/blob/master/bcl_app.R">on github</a>.</p>
+</div>
+
+</main>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section class="article-meta article-footer">
+  <h3>About the Author</h3>
+  
+    <p>Yang Liu (刘杨) is a Statistician working in New York City.</p>
+  
+</section>
+
+
+
+
+
+
+<nav class="post-nav">
+  <span class="nav-prev"><a href="/2019/07/18/visualization-of-shap-for-xgboost/">&larr; SHAP for XGBoost in R: SHAPforxgboost</a></span>
+  <span class="nav-next"><a href="/2018/11/15/xgboost-dart-example/">Study shrinkage and DART in xgboost modeling using a simple dataset &rarr;</a></span>
+</nav>
+
+
+<div id="disqus_thread"></div>
+<script>
+(function() {
+var d = document, s = d.createElement('script');
+s.src = 'https://liuyanguu.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</article>
+</div>
+
+<script async src="//yihui.name/js/center-img.js"></script>
+
+<footer>
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-122668586-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+
+  <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "liuyanguu" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+<div class="footer">
+  <ul class="menu">
+    
+    <li><a href="/"><span data-hover="Home">Home</span></a></li>
+    
+    <li><a href="/tags/"><span data-hover="Tags">Tags</span></a></li>
+    
+    <li><a href="/categories/"><span data-hover="Categories">Categories</span></a></li>
+    
+    <li><a href="/about-me/"><span data-hover="About Me">About Me</span></a></li>
+    
+  </ul>
+  
+  <div class="copyright">@2020 Yang Liu <em>liuyanguu</em>. Powered by Github. Blogdown and Hugo Theme made by Yihui Xie.</div>
+  
+</div>
+</footer>
+
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.12.0/languages/r.min.js"></script>
+<script>
+hljs.configure({languages: []});
+hljs.initHighlightingOnLoad();
+</script>
+
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-122668586-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+
+</body>
+</html>
+

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <title>Drake: powerful tool for automatic reproducible workflow | Welcome to my blog</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    <link href="//cdn.bootcss.com/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+
+  </head>
+
+  <body class="page">
+    <nav class="header">
+      <div class="banner">
+<a href="/">
+
+<img src="/ocean%202.jpg" alt="Text on Image" />
+</a>
+</div>
+
+      <div class="head-meta">
+      
+        <span><a href="/">&larr; Back to Home</a></span>
+        <span class="date">2019-09-15</span>
+        
+        
+        
+          
+        
+        
+        
+        <span><a href="https://github.com/liuyanguu/Blogdown/edit/master/hugo-xmag/content/post/2019-09-15-drake-powerful-tool-for-automatic-reproducible-workflow.Rmd">Edit this page &rarr;</a></span>
+        
+        
+      
+      </div>
+    </nav>
+
+<div class="container">
+<article>
+<div class="article-meta">
+
+  <div class="categories">
+  
+    <a href="/categories/reproducible-workflow">Reproducible Workflow</a>
+  
+  </div>
+
+  <h1><span class="title">Drake: powerful tool for automatic reproducible workflow</span></h1>
+
+  
+  <h3 class="author">Yang Liu
+</h3>
+  
+
+  
+  <p>Tags: <a href="/tags/drake">Drake</a>; <a href="/tags/markdown">Markdown</a>
+  </p>
+  
+  
+
+</div>
+
+
+
+<main>
+
+
+
+<p><strong><code>drake</code></strong> is a powerful tool for automatic reproducible workflow. I found it a perfect match when used together with <code>RMarkdown</code>. There are great documentations online for <code>drake</code> thus here I only show a simple example working with <code>RMarkdown</code>.</p>
+<p><code>RMarkdown</code> file could be very slow to generate if lots of calculations are involved. Any small revise makes you rerun everything. When we use <code>drake</code> we can do all the calculations in advance thus the rendering is super fast since we only need to re-do the revised object.</p>
+<p>Using <code>SHAPforxgboost</code> as an example:</p>
+<pre class="r"><code># if needed, update drake
+if(packageVersion(&quot;drake&quot;) &lt; &quot;7.4&quot;) install.packages(&quot;drake&quot;)
+if(packageVersion(&quot;SHAPforxgboost&quot;) &lt; &quot;0.0.3&quot;) install.packages(&quot;SHAPforxgboost&quot;)
+
+suppressPackageStartupMessages({
+  library(&quot;drake&quot;)
+  library(&quot;SHAPforxgboost&quot;)
+  library(&quot;here&quot;)
+})
+
+# assign a place to store intermediate objects
+cache_path &lt;- here(&quot;Drake_Cache&quot;)
+if(!dir.exists(cache_path))dir.create(cache_path)
+cache &lt;- drake_cache(path = cache_path)</code></pre>
+<p>The <strong>drake_plan</strong> takes self-defined functions to create each target. All the functions are usually written in a seperate script.</p>
+<pre class="r"><code>get.xgb.mod &lt;- function(dataX){
+  y_var &lt;- &quot;diffcwv&quot; 
+  # hyperparameter tuning results
+  param_dart &lt;- list(objective = &quot;reg:linear&quot;,  # For regression
+                   nrounds = 366,
+                   eta = 0.018,
+                   max_depth = 10,
+                   gamma = 0.009,
+                   subsample = 0.98,
+                   colsample_bytree = 0.86)
+
+  mod &lt;- xgboost::xgboost(data = as.matrix(dataX), 
+                        label = as.matrix(dataXY_df[[y_var]]), 
+                       xgb_param = param_dart, nrounds = param_dart$nrounds,
+                       verbose = FALSE, nthread = parallel::detectCores() - 2,
+                       early_stopping_rounds = 8)
+  return(mod)
+}
+
+# ...
+# define more functions if needed
+# ...</code></pre>
+<p>Markdown all the results to the final report. The great advantage is that since all the figures were done and stored before the markdown process, if you modify a figure, only that figure needs to be rerun.</p>
+<pre class="r"><code>my_plan &lt;- drake_plan(
+  dataX = data.table::copy(dataXY_df[,-&quot;diffcwv&quot;]),
+  xgb_mod = get.xgb.mod(dataX),
+  shap_long = shap.prep(xgb_model = xgb_mod, X_train = dataX, top_n = 4),
+  # make a diluted (faster) summary plot showing only top 4 variables:
+  fig1 = shap.plot.summary(shap_long, dilute = 10),
+  fig2 = shap.plot.dependence(data_long = shap_long, x = &#39;dayint&#39;, y = &#39;dayint&#39;, color_feature = &#39;Column_WV&#39;),
+  fig3 = shap.plot.dependence(data_long = shap_long, x = &#39;dayint&#39;, y = &#39;Column_WV&#39;, color_feature = &#39;Column_WV&#39;),
+  
+  report = `RMarkdown`::render(
+    knitr_in(&quot;Code/drake_md_report.Rmd&quot;),
+    output_format = `RMarkdown`::html_document(toc = TRUE))
+)
+
+nemia_config &lt;- drake_config(my_plan, cache = cache) # show the dependency
+# vis_drake_graph(nemia_config, from = names(nemia_config$layout))
+vis_drake_graph(nemia_config)
+
+# run the plan
+make(my_plan, cache = cache)</code></pre>
+<p>Notice that it is not a good idea to run <code>drake</code> within a <code>RMarkdown</code> file as <code>drake</code> workflow should be an R script that uses <code>RMarkdown</code> as the output tool. So I cannot really render this post as it is. But these code can run as</p>
+<p>Here is how the dependency graph looks like:
+<img src="/post/2019-09-15-drake-powerful-tool-for-automatic-reproducible-workflow_files/dependency%20plot.PNG" /></p>
+<p>If we add an extra figure, only this figure (the black <em>fig3</em>) needs to made:
+<img src="/post/2019-09-15-drake-powerful-tool-for-automatic-reproducible-workflow_files/dependency%20plot2.PNG" /></p>
+<p>Here is <a href="https://github.com/liuyanguu/Blogdown/blob/master/hugo-xmag/Code/drake_md_report.Rmd">how the md file looks like on Github</a></p>
+<p>And the <code>drake</code> work plan generates a markdown results automatcially (“drake_md_report.html”) which looks like this:
+<img src="/post/2019-09-15-drake-powerful-tool-for-automatic-reproducible-workflow_files/md_report.PNG" /></p>
+
+</main>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section class="article-meta article-footer">
+  <h3>About the Author</h3>
+  
+    <p>Yang Liu (刘杨) is a Statistician working in New York City.</p>
+  
+</section>
+
+
+
+
+
+
+<nav class="post-nav">
+  <span class="nav-prev"><a href="/2020/01/11/working-with-3d-array-as-long-format-data-in-r/">&larr; Working with 3D array as long-format data in R</a></span>
+  <span class="nav-next"><a href="/2019/07/28/some-experience-on-writing-r-package/">Notes on writing an R package &rarr;</a></span>
+</nav>
+
+
+<div id="disqus_thread"></div>
+<script>
+(function() {
+var d = document, s = d.createElement('script');
+s.src = 'https://liuyanguu.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</article>
+</div>
+
+<script async src="//yihui.name/js/center-img.js"></script>
+
+<footer>
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-122668586-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+
+  <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "liuyanguu" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+<div class="footer">
+  <ul class="menu">
+    
+    <li><a href="/"><span data-hover="Home">Home</span></a></li>
+    
+    <li><a href="/tags/"><span data-hover="Tags">Tags</span></a></li>
+    
+    <li><a href="/categories/"><span data-hover="Categories">Categories</span></a></li>
+    
+    <li><a href="/about-me/"><span data-hover="About Me">About Me</span></a></li>
+    
+  </ul>
+  
+  <div class="copyright">@2020 Yang Liu <em>liuyanguu</em>. Powered by Github. Blogdown and Hugo Theme made by Yihui Xie.</div>
+  
+</div>
+</footer>
+
+
+<script src="//yihui.name/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.12.0/languages/r.min.js"></script>
+<script>
+hljs.configure({languages: []});
+hljs.initHighlightingOnLoad();
+</script>
+
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-122668586-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+
+</body>
+</html>
+

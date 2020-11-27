@@ -1,22 +1,18 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Reproducible Workflow on Welcome to my blog</title>
-    <link>/categories/reproducible-workflow/</link>
+    <link>https://liuyanguu.github.io/categories/reproducible-workflow/</link>
     <description>Recent content in Reproducible Workflow on Welcome to my blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 15 Sep 2019 00:00:00 +0000</lastBuildDate>
-    
-	<atom:link href="/categories/reproducible-workflow/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Sun, 15 Sep 2019 00:00:00 +0000</lastBuildDate><atom:link href="https://liuyanguu.github.io/categories/reproducible-workflow/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Drake: powerful tool for automatic reproducible workflow</title>
-      <link>/post/2019/09/15/drake-powerful-tool-for-automatic-reproducible-workflow/</link>
+      <link>https://liuyanguu.github.io/post/2019/09/15/drake-powerful-tool-for-automatic-reproducible-workflow/</link>
       <pubDate>Sun, 15 Sep 2019 00:00:00 +0000</pubDate>
       
-      <guid>/post/2019/09/15/drake-powerful-tool-for-automatic-reproducible-workflow/</guid>
+      <guid>https://liuyanguu.github.io/post/2019/09/15/drake-powerful-tool-for-automatic-reproducible-workflow/</guid>
       <description>drake is a powerful tool for automatic reproducible workflow. I found it a perfect match when used together with RMarkdown. There are great documentations online for drake thus here I only show a simple example working with RMarkdown.
 RMarkdown file could be very slow to generate if lots of calculations are involved. Any small revise makes you rerun everything. When we use drake we can do all the calculations in advance thus the rendering is super fast since we only need to re-do the revised object.</description>
     </item>

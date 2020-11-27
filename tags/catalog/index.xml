@@ -1,22 +1,18 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Catalog on Welcome to my blog</title>
-    <link>/tags/catalog/</link>
+    <link>https://liuyanguu.github.io/tags/catalog/</link>
     <description>Recent content in Catalog on Welcome to my blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 01 Jul 2018 00:00:00 +0000</lastBuildDate>
-    
-	<atom:link href="/tags/catalog/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Sun, 01 Jul 2018 00:00:00 +0000</lastBuildDate><atom:link href="https://liuyanguu.github.io/tags/catalog/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Catalog of my old blog</title>
-      <link>/post/2018/07/01/catalogue-of-my-old-blog/</link>
+      <link>https://liuyanguu.github.io/post/2018/07/01/catalogue-of-my-old-blog/</link>
       <pubDate>Sun, 01 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>/post/2018/07/01/catalogue-of-my-old-blog/</guid>
+      <guid>https://liuyanguu.github.io/post/2018/07/01/catalogue-of-my-old-blog/</guid>
       <description>Introducing my new blog written solely in R MarkdownWhen I realized it was so convenient to write blog directly using R Markdown, I searched if there is a specific tool for it. And I found Blogdown, an R package developed by Yihui Xie, who also developed R Markdown.
 CatalogAs a summary, I would like to create a catalog for the main topics I wrote on google blogger before July 2018.</description>
     </item>

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <title>SHAP Visualization in R (first post) | Welcome to my blog</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    <link href="//cdn.bootcss.com/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+
+  </head>
+
+  <body class="page">
+    <nav class="header">
+      <div class="banner">
+<a href="/">
+
+<img src="/ocean%202.jpg" alt="Text on Image" />
+</a>
+</div>
+
+      <div class="head-meta">
+      
+        <span><a href="/">&larr; Back to Home</a></span>
+        <span class="date">2018-10-14</span>
+        
+        
+        
+          
+        
+        
+        
+        <span><a href="https://github.com/liuyanguu/Blogdown/edit/master/hugo-xmag/content/post/2018-10-05-shap-visualization-for-xgboost.Rmd">Edit this page &rarr;</a></span>
+        
+        
+      
+      </div>
+    </nav>
+
+<div class="container">
+<article>
+<div class="article-meta">
+
+  <div class="categories">
+  
+    <a href="/categories/machine-learning">Machine Learning</a>
+  
+     &hercon; <a href="/categories/data-visualization">Data Visualization</a>
+  
+  </div>
+
+  <h1><span class="title">SHAP Visualization in R (first post)</span></h1>
+
+  
+  <h3 class="author">Yang Liu
+</h3>
+  
+
+  
+  <p>Tags: <a href="/tags/xgboost">XGBoost</a>; <a href="/tags/shap">SHAP</a>
+  </p>
+  
+  
+
+</div>
+
+
+
+<main>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#example-1">Example 1</a><ul>
+<li><a href="#shap-summary-plot">SHAP summary plot</a></li>
+<li><a href="#alternative-ways">Alternative ways:</a></li>
+<li><a href="#shap-dependence-plot">SHAP dependence plot</a></li>
+<li><a href="#shap-interaction-effect-plot">SHAP interaction effect plot</a></li>
+<li><a href="#shap-force-plot">SHAP force plot</a></li>
+</ul></li>
+<li><a href="#example-2">Example 2</a><ul>
+<li><a href="#summary-plot">Summary plot</a></li>
+<li><a href="#dependence-plot-for-each-feature">Dependence plot for each feature</a></li>
+<li><a href="#force-plot">Force plot</a></li>
+<li><a href="#stack-plot-by-clustering-groups">Stack plot by clustering groups</a></li>
+</ul></li>
+</ul>
+</div>
+
+<p>Update 19/07/21:</p>
+<p>Since my R Package <strong>SHAPforxgboost</strong> has been released on CRAN, I updated this post using the new functions and illustrate how to use these functions using two datasets. For more information, please refer to: <a href="https://liuyanguu.github.io/post/2019/07/18/visualization-of-shap-for-xgboost/">SHAP visualization for XGBoost in R</a></p>
+<div id="example-1" class="section level1">
+<h1>Example 1</h1>
+<p>This is the example I used in the package <strong>SHAPforxgboost</strong></p>
+<pre class="r"><code># Example use iris
+suppressPackageStartupMessages({
+library(SHAPforxgboost)
+library(xgboost)
+library(data.table)
+library(ggplot2)
+})
+
+X1 = as.matrix(iris[,-5])
+mod1 = xgboost::xgboost(
+  data = X1, label = iris$Species, gamma = 0, eta = 1, 
+  lambda = 0,nrounds = 1, verbose = F)
+
+# shap.values(model, X_dataset) returns the SHAP
+# data matrix and ranked features by mean|SHAP|
+shap_values &lt;- shap.values(xgb_model = mod1, X_train = X1)
+shap_values$mean_shap_score</code></pre>
+<pre><code>## Petal.Length  Petal.Width Sepal.Length  Sepal.Width 
+##   0.62935975   0.21664035   0.02910357   0.00000000</code></pre>
+<pre class="r"><code>shap_values_iris &lt;- shap_values$shap_score
+
+# shap.prep() returns the long-format SHAP data from either model or
+shap_long_iris &lt;- shap.prep(xgb_model = mod1, X_train = X1)
+# is the same as: using given shap_contrib
+shap_long_iris &lt;- shap.prep(shap_contrib = shap_values_iris, X_train = X1)</code></pre>
+<div id="shap-summary-plot" class="section level2">
+<h2>SHAP summary plot</h2>
+<pre class="r"><code>shap.plot.summary(shap_long_iris)</code></pre>
+<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<pre class="r"><code># option of dilute is offered to make plot faster if there are over thousands of observations
+# please see documentation for details. 
+shap.plot.summary(shap_long_iris, x_bound  = 1.5, dilute = 10)</code></pre>
+<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-2-2.png" width="672" /></p>
+</div>
+<div id="alternative-ways" class="section level2">
+<h2>Alternative ways:</h2>
+<pre class="r"><code># option 1: from the xgboost model
+shap.plot.summary.wrap1(mod1, X1, top_n = 3)
+
+# option 2: supply a self-made SHAP values dataset (e.g. sometimes as output from cross-validation)
+shap.plot.summary.wrap2(shap_score = shap_values$shap_score, X1, top_n = 3)</code></pre>
+</div>
+<div id="shap-dependence-plot" class="section level2">
+<h2>SHAP dependence plot</h2>
+<pre class="r"><code>shap.plot.dependence(data_long = shap_long_iris, x=&quot;Petal.Length&quot;,
+                           y = &quot;Petal.Width&quot;, color_feature = &quot;Petal.Width&quot;)</code></pre>
+<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>The without color version, just plot SHAP value against feature value:</p>
+<pre class="r"><code>shap.plot.dependence(data_long = shap_long_iris, &quot;Petal.Length&quot;)</code></pre>
+<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+</div>
+<div id="shap-interaction-effect-plot" class="section level2">
+<h2>SHAP interaction effect plot</h2>
+<pre class="r"><code># To get the interaction SHAP dataset for plotting:
+# fit the xgboost model
+mod1 = xgboost::xgboost(
+  data = as.matrix(iris[,-5]), label = iris$Species,
+  gamma = 0, eta = 1, lambda = 0,nrounds = 1, verbose = FALSE)
+# Use either:
+data_int &lt;- shap.prep.interaction(xgb_mod = mod1,
+                                  X_train = as.matrix(iris[,-5]))
+# or:
+shap_int &lt;- predict(mod1, as.matrix(iris[,-5]),
+                    predinteraction = TRUE)
+
+# **SHAP interaction effect plot **
+shap.plot.dependence(data_long = shap_long_iris,
+                           data_int = shap_int_iris,
+                           x=&quot;Petal.Length&quot;,
+                           y = &quot;Petal.Width&quot;,
+                           color_feature = &quot;Petal.Width&quot;)</code></pre>
+<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+</div>
+<div id="shap-force-plot" class="section level2">
+<h2>SHAP force plot</h2>
+<pre class="r"><code># **SHAP force plot**
+plot_data &lt;- shap.prep.stack.data(shap_contrib = shap_values_iris,
+                                  n_groups = 4)
+shap.plot.force_plot(plot_data)</code></pre>
+<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<pre class="r"><code>shap.plot.force_plot(plot_data, zoom_in_group = 2)</code></pre>
+<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-7-2.png" width="672" /></p>
+<pre class="r"><code># plot all the clusters:
+shap.plot.force_plot_bygroup(plot_data)</code></pre>
+<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-7-3.png" width="672" /></p>
+</div>
+</div>
+<div id="example-2" class="section level1">
+<h1>Example 2</h1>
+<p>This example is based on the slum data I used in the earilier post.</p>
+<div id="summary-plot" class="section level2">
+<h2>Summary plot</h2>
+<ul>
+<li>Using <code>geom_sina</code> from <code>ggforce</code> to make the sina plot<br />
+</li>
+<li>We can see clearly for the most influential variable on the top: Monthly water cost. A Higher cost is associated with the declined share of temporary housing. But a very low cost has a strong impact on the increased share of temporary housing<br />
+</li>
+<li>The effects of binary variables are highly distinctive. The second variable shows that Resettled housing is highly unlikely to be temporary, so does being close to wells as water sources.</li>
+</ul>
+<p><strong>Load the xgboost model</strong></p>
+<pre class="r"><code>best_rmse_index &lt;- 56
+best_rmse &lt;- 0.2102
+best_seednumber &lt;- 3660
+best_param &lt;- list(objective = &quot;reg:linear&quot;,  # For regression
+                eval_metric = &quot;rmse&quot;,      # rmse is used for regression
+                max_depth = 9,
+                eta = 0.09822,   # Learning rate, default: 0.3
+                subsample = 0.64,
+                colsample_bytree = 0.6853, 
+                min_child_weight = 6, # These two are important
+                max_delta_step = 8)
+# The best index (min_rmse_index) is the best &quot;nround&quot; in the model
+nround &lt;- best_rmse_index
+set.seed(best_seednumber)
+mod1 &lt;- xgboost::xgboost(data = X_train, label = Y_train, params = best_param, nround = nround, verbose = F)</code></pre>
+<pre class="r"><code>shap.plot.summary.wrap1(mod1, X_train, top_n = 10)</code></pre>
+<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+</div>
+<div id="dependence-plot-for-each-feature" class="section level2">
+<h2>Dependence plot for each feature</h2>
+<ul>
+<li>Here we choose to show top 6 features ranked by mean|SHAP|</li>
+</ul>
+<pre class="r"><code>data_long &lt;-  shap.prep(mod1, X_train = X_train)
+shap_values &lt;- shap.values(mod1, X_train)
+features_ranked &lt;- names(shap_values$mean_shap_score)[1:4]
+fig_list &lt;- lapply(features_ranked, shap.plot.dependence, data_long = data_long)
+gridExtra::grid.arrange(grobs = fig_list, ncol = 2)</code></pre>
+<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-10-1.png" width="768" /></p>
+<ul>
+<li>If Use the built-in <code>xgb.shap.plot</code> function</li>
+</ul>
+<pre class="r"><code>xgboost::xgb.plot.shap(data = X_train, model = mod1, top_n = 4, n_col = 2)</code></pre>
+<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-11-1.png" width="768" /></p>
+</div>
+<div id="force-plot" class="section level2">
+<h2>Force plot</h2>
+<p>Since there are so many features in this dataset, we pick only top 6 and merge the rest.</p>
+<ul>
+<li>Use <code>geom_col</code> to show features each contributing to push the model output from the base value (the average model output) to the model output.<br />
+</li>
+<li>Have tried geom_area but dones’t work very well due to gaps in the plot caused by fluctuation of positive and negative values.<br />
+</li>
+<li>apply the order of clustering to group observations under similar influences closer.</li>
+</ul>
+<pre class="r"><code>force_plot_data &lt;- shap.prep.stack.data(shap_contrib = shap_values$shap_score, top_n  = 5, n_groups = 4)
+shap.plot.force_plot(force_plot_data)</code></pre>
+<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+</div>
+<div id="stack-plot-by-clustering-groups" class="section level2">
+<h2>Stack plot by clustering groups</h2>
+<pre class="r"><code>shap.plot.force_plot_bygroup(force_plot_data)</code></pre>
+<p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+</div>
+</div>
+
+</main>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section class="article-meta article-footer">
+  <h3>About the Author</h3>
+  
+    <p>Yang Liu (刘杨) is a Statistician working in New York City.</p>
+  
+</section>
+
+
+
+
+
+
+<nav class="post-nav">
+  <span class="nav-prev"><a href="/2018/11/15/xgboost-dart-example/">&larr; Study shrinkage and DART in xgboost modeling using a simple dataset</a></span>
+  <span class="nav-next"><a href="/2018/07/20/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/">Spatial data in R: Dividing raster layers into equal-area rings &rarr;</a></span>
+</nav>
+
+
+<div id="disqus_thread"></div>
+<script>
+(function() {
+var d = document, s = d.createElement('script');
+s.src = 'https://liuyanguu.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</article>
+</div>
+
+<script async src="//yihui.name/js/center-img.js"></script>
+
+<footer>
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-122668586-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+
+  <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "liuyanguu" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+<div class="footer">
+  <ul class="menu">
+    
+    <li><a href="/"><span data-hover="Home">Home</span></a></li>
+    
+    <li><a href="/tags/"><span data-hover="Tags">Tags</span></a></li>
+    
+    <li><a href="/categories/"><span data-hover="Categories">Categories</span></a></li>
+    
+    <li><a href="/about-me/"><span data-hover="About Me">About Me</span></a></li>
+    
+  </ul>
+  
+  <div class="copyright">@2020 Yang Liu <em>liuyanguu</em>. Powered by Github. Blogdown and Hugo Theme made by Yihui Xie.</div>
+  
+</div>
+</footer>
+
+
+<script src="//yihui.name/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.12.0/languages/r.min.js"></script>
+<script>
+hljs.configure({languages: []});
+hljs.initHighlightingOnLoad();
+</script>
+
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-122668586-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+
+</body>
+</html>
+

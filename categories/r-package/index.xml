@@ -1,34 +1,29 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>R package on Welcome to my blog</title>
-    <link>/categories/r-package/</link>
+    <link>https://liuyanguu.github.io/categories/r-package/</link>
     <description>Recent content in R package on Welcome to my blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 28 Jul 2019 00:00:00 +0000</lastBuildDate>
-    
-	<atom:link href="/categories/r-package/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Sun, 28 Jul 2019 00:00:00 +0000</lastBuildDate><atom:link href="https://liuyanguu.github.io/categories/r-package/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Notes on writing an R package</title>
-      <link>/post/2019/07/28/some-experience-on-writing-r-package/</link>
+      <link>https://liuyanguu.github.io/post/2019/07/28/some-experience-on-writing-r-package/</link>
       <pubDate>Sun, 28 Jul 2019 00:00:00 +0000</pubDate>
       
-      <guid>/post/2019/07/28/some-experience-on-writing-r-package/</guid>
-      <description>Requirements from cran editorsSome of my own experienceDescriptionNamespace:Files locations:Although ‘SHAPforxgboost’ is not a package too complicated, it took me some time to get the package pass all the cran check. Now (Aug.03,2019) it is available on cran. Install by either
+      <guid>https://liuyanguu.github.io/post/2019/07/28/some-experience-on-writing-r-package/</guid>
+      <description>Some of my own experienceDescriptionNamespace, load vs attach:Files locations:Some nice suggestions from the CRAN editors when submitting the packageAlthough ‘SHAPforxgboost’ is not a package too complicated, it took me some time to get the package pass all the cran check. Now (Aug.03,2019) it is available on cran. Install by either
 install.packages(&amp;quot;SHAPforxgboost&amp;quot;)or
-devtools::install_github(&amp;quot;liuyanguu/SHAPforxgboost&amp;quot;)The most recent version is 0.0.2.
-I used ‘usethis’ package https://usethis.r-lib.org/ to set up the structure of the package.</description>
+devtools::install_github(&amp;quot;liuyanguu/SHAPforxgboost&amp;quot;)Use the ‘usethis’ package https://usethis.r-lib.org/ to set up the structure of the package.</description>
     </item>
     
     <item>
       <title>SHAP for XGBoost in R: SHAPforxgboost</title>
-      <link>/post/2019/07/18/visualization-of-shap-for-xgboost/</link>
+      <link>https://liuyanguu.github.io/post/2019/07/18/visualization-of-shap-for-xgboost/</link>
       <pubDate>Thu, 18 Jul 2019 00:00:00 +0000</pubDate>
       
-      <guid>/post/2019/07/18/visualization-of-shap-for-xgboost/</guid>
+      <guid>https://liuyanguu.github.io/post/2019/07/18/visualization-of-shap-for-xgboost/</guid>
       <description>SHAP package in RWhy SHAP valuesLocal ExplanationConsistency in Global Feature ImportanceSHAP plotsSummary plotDependence plotInteraction effectsSHAP force plotReferencesSHAP package in RI built an R package SHAPforxgboost that wraps all the R plotting functions illustrated in this post. It serves for now as the vignette for the package.
 Please install from cran or Github page.</description>
     </item>

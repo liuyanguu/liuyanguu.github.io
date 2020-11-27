@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <title>US and China Admin1 COVID19 mortality and incidence rate | Welcome to my blog</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    <link href="//cdn.bootcss.com/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+
+  </head>
+
+  <body class="page">
+    <nav class="header">
+      <div class="banner">
+<a href="/">
+
+<img src="/ocean%202.jpg" alt="Text on Image" />
+</a>
+</div>
+
+      <div class="head-meta">
+      
+        <span><a href="/">&larr; Back to Home</a></span>
+        <span class="date">2020-06-14</span>
+        
+        
+        
+          
+        
+        
+        
+        <span><a href="https://github.com/liuyanguu/Blogdown/edit/master/hugo-xmag/content/post/2020-06-15-us-and-china-admin1-covid-19-mortality-and-incidence-rate.Rmd">Edit this page &rarr;</a></span>
+        
+        
+      
+      </div>
+    </nav>
+
+<div class="container">
+<article>
+<div class="article-meta">
+
+  <div class="categories">
+  
+    <a href="/categories/data-visualization">Data Visualization</a>
+  
+  </div>
+
+  <h1><span class="title">US and China Admin1 COVID19 mortality and incidence rate</span></h1>
+
+  
+  <h3 class="author">Yang Liu
+</h3>
+  
+
+  
+  <p>Tags: <a href="/tags/geodata">Geodata</a>
+  </p>
+  
+  
+
+</div>
+
+
+
+<main>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#us">US</a></li>
+<li><a href="#china">China</a></li>
+<li><a href="#compared-to-lung-cancer-mortality">Compared to lung cancer mortality</a></li>
+</ul>
+</div>
+
+<p>Similar to the last <a href="https://liuyanguu.github.io/post/2020/06/14/ggplot-us-state-and-china-province-heatmap/">heatmap post I just revised</a>, here I wrapped up the function and showing COVID-19 data just downloaded from <a href="https://github.com/CSSEGISandData/COVID-19">JHU CSSE Github page</a>. The function can take a given dataset and plot designated variable.</p>
+<p>Code hosted on my <a href="https://github.com/liuyanguu/Blogdown/tree/master/hugo-xmag/Code">Github repo</a>.</p>
+<div id="us" class="section level2">
+<h2>US</h2>
+<pre class="r"><code># major function, can download from Github repo Blogdown/hugo-xmag/Code
+source(here::here(&quot;Code/COVID_make_map.R&quot;))
+
+# US
+dt_JUH_US &lt;- get.JHU.us.state()
+
+make_heatmap(data = dt_JUH_US, 
+            geo_data = get_state_name(),
+            state_var = &quot;Province_State&quot;, fill_var = &quot;Mortality_Rate&quot;, label_var = &quot;abb&quot;)</code></pre>
+<p><img src="/post/2020-06-15-us-and-china-admin1-covid-19-mortality-and-incidence-rate_files/figure-html/unnamed-chunk-1-1.png" width="576" /></p>
+<pre class="r"><code>us_maps &lt;- lapply(c(&quot;Mortality_Rate&quot;, &quot;Incident_Rate&quot;,  &quot;Testing_Rate&quot;, &quot;Hospitalization_Rate&quot;),
+                  make_heatmap, 
+                  data = dt_JUH_US, 
+                  geo_data = get_state_name(),
+                  state_var = &quot;Province_State&quot;, label_var = &quot;abb&quot;)</code></pre>
+<pre class="r"><code>plot_grid &lt;- gridExtra::grid.arrange(grobs = (us_maps), ncol = 2)</code></pre>
+<p><img src="/post/2020-06-15-us-and-china-admin1-covid-19-mortality-and-incidence-rate_files/figure-html/unnamed-chunk-2-1.png" width="1152" /></p>
+<p>Compared to</p>
+</div>
+<div id="china" class="section level2">
+<h2>China</h2>
+<pre class="r"><code># China (incl. Taiwan)
+dt_JUH &lt;- get.JHU.daily()
+dt_CN &lt;- dt_JUH[Country_Region %in% c(&quot;China&quot;, &quot;Taiwan*&quot;),]
+dt_CN[Country_Region==&quot;Taiwan*&quot;, Province_State:= &quot;Taiwan&quot;]
+dt_china_map &lt;- readRDS(&quot;D:/liuyanguu/Blogdown/Data/dt_china.rds&quot;)
+setnames(dt_china_map, &quot;province_EN&quot;, &quot;state&quot;)
+unique(dt_CN$Province_State[!dt_CN$Province_State%in%dt_china_map$state])</code></pre>
+<pre><code>## [1] &quot;Hong Kong&quot; &quot;Macau&quot;</code></pre>
+<pre class="r"><code>make_heatmap(data = dt_CN, 
+             geo_data = dt_china_map,
+             state_var = &quot;Province_State&quot;, fill_var = &quot;Case-Fatality_Ratio&quot;)</code></pre>
+<p><img src="/post/2020-06-15-us-and-china-admin1-covid-19-mortality-and-incidence-rate_files/figure-html/unnamed-chunk-3-1.png" width="768" /></p>
+<pre class="r"><code>make_heatmap(data = dt_CN, 
+             geo_data = dt_china_map,
+             state_var = &quot;Province_State&quot;, fill_var = &quot;Incidence_Rate&quot;)</code></pre>
+<p><img src="/post/2020-06-15-us-and-china-admin1-covid-19-mortality-and-incidence-rate_files/figure-html/unnamed-chunk-3-2.png" width="768" /></p>
+</div>
+<div id="compared-to-lung-cancer-mortality" class="section level2">
+<h2>Compared to lung cancer mortality</h2>
+<p>Age-adjusted mortality rate (A) and crude mortality rate (B) in the US by state (in 2015) and in China by province (in 2008), from my paper “Epidemiology of lung cancer and lung cancer screening programs in China and the United States”, <a href="https://doi.org/10.1016/j.canlet.2019.10.009">Cancer Letters 2020-01</a></p>
+<p><img src="/post/2020-06-15-us-and-china-admin1-covid-19-mortality-and-incidence-rate_files/published%206-pics.jpg" /></p>
+</div>
+
+</main>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section class="article-meta article-footer">
+  <h3>About the Author</h3>
+  
+    <p>Yang Liu (刘杨) is a Statistician working in New York City.</p>
+  
+</section>
+
+
+
+
+
+
+<nav class="post-nav">
+  <span class="nav-prev"></span>
+  <span class="nav-next"><a href="/2020/06/12/ggplot-us-state-and-china-province-heatmap/">ggplot US state and China province heatmap &rarr;</a></span>
+</nav>
+
+
+<div id="disqus_thread"></div>
+<script>
+(function() {
+var d = document, s = d.createElement('script');
+s.src = 'https://liuyanguu.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</article>
+</div>
+
+<script async src="//yihui.name/js/center-img.js"></script>
+
+<footer>
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-122668586-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+
+  <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "liuyanguu" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+<div class="footer">
+  <ul class="menu">
+    
+    <li><a href="/"><span data-hover="Home">Home</span></a></li>
+    
+    <li><a href="/tags/"><span data-hover="Tags">Tags</span></a></li>
+    
+    <li><a href="/categories/"><span data-hover="Categories">Categories</span></a></li>
+    
+    <li><a href="/about-me/"><span data-hover="About Me">About Me</span></a></li>
+    
+  </ul>
+  
+  <div class="copyright">@2020 Yang Liu <em>liuyanguu</em>. Powered by Github. Blogdown and Hugo Theme made by Yihui Xie.</div>
+  
+</div>
+</footer>
+
+
+<script src="//yihui.name/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.12.0/languages/r.min.js"></script>
+<script>
+hljs.configure({languages: []});
+hljs.initHighlightingOnLoad();
+</script>
+
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-122668586-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+
+</body>
+</html>
+

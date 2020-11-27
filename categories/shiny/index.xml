@@ -1,22 +1,18 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Shiny on Welcome to my blog</title>
-    <link>/categories/shiny/</link>
+    <link>https://liuyanguu.github.io/categories/shiny/</link>
     <description>Recent content in Shiny on Welcome to my blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 24 Feb 2019 00:00:00 +0000</lastBuildDate>
-    
-	<atom:link href="/categories/shiny/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Sun, 24 Feb 2019 00:00:00 +0000</lastBuildDate><atom:link href="https://liuyanguu.github.io/categories/shiny/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Shiny in Blogdown</title>
-      <link>/post/2019/02/24/shiny-in-blogdown/</link>
+      <link>https://liuyanguu.github.io/post/2019/02/24/shiny-in-blogdown/</link>
       <pubDate>Sun, 24 Feb 2019 00:00:00 +0000</pubDate>
       
-      <guid>/post/2019/02/24/shiny-in-blogdown/</guid>
+      <guid>https://liuyanguu.github.io/post/2019/02/24/shiny-in-blogdown/</guid>
       <description>How to embed ShinyMy Shiny app exampleHow to embed ShinySince Blogdown is for static websites, it cannot run Shiny in rmarkdown directly. According to discussion here and document here.
 The only way to do it is using iframe and write outside the chunk:
 &amp;lt;iframe src=&#34;https://liuyanguu.shinyapps.io/bcl_app/&#34; width=1000 height=800&#34;&amp;gt;&amp;lt;/iframe&amp;gt;

@@ -1,22 +1,18 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Data Engineering on Welcome to my blog</title>
-    <link>/categories/data-engineering/</link>
+    <link>https://liuyanguu.github.io/categories/data-engineering/</link>
     <description>Recent content in Data Engineering on Welcome to my blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 11 Jan 2020 00:00:00 +0000</lastBuildDate>
-    
-	<atom:link href="/categories/data-engineering/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Sat, 11 Jan 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://liuyanguu.github.io/categories/data-engineering/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Working with 3D array as long-format data in R</title>
-      <link>/post/2020/01/11/working-with-3d-array-as-long-format-data-in-r/</link>
+      <link>https://liuyanguu.github.io/post/2020/01/11/working-with-3d-array-as-long-format-data-in-r/</link>
       <pubDate>Sat, 11 Jan 2020 00:00:00 +0000</pubDate>
       
-      <guid>/post/2020/01/11/working-with-3d-array-as-long-format-data-in-r/</guid>
+      <guid>https://liuyanguu.github.io/post/2020/01/11/working-with-3d-array-as-long-format-data-in-r/</guid>
       <description>Example: a 3-D array with dimension 4x3x2Melt into longRecover the arraycheck.and.install.pkgs &amp;lt;- function(pkgs){new.packages &amp;lt;- pkgs[!pkgs %in% installed.packages()[,&amp;quot;Package&amp;quot;]]if(length(new.packages)) install.packages(new.packages, dependencies = TRUE)suppressPackageStartupMessages(invisible(lapply(pkgs, library, character.only = TRUE)))}check.and.install.pkgs(c(&amp;quot;data.table&amp;quot;, &amp;quot;reshape2&amp;quot;, &amp;quot;scatterplot3d&amp;quot;))Happy New Year!
 Recently I spent some time working with array in R.
 I believe it is a bad idea to work with array using for loop, which is both slow and error-prone.</description>
