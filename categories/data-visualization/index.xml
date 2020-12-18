@@ -33,8 +33,9 @@ US# major function, can download from Github repo Blogdown/hugo-xmag/Codesourc
       <pubDate>Thu, 18 Jul 2019 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/post/2019/07/18/visualization-of-shap-for-xgboost/</guid>
-      <description>SHAP package in RWhy SHAP valuesLocal ExplanationConsistency in Global Feature ImportanceSHAP plotsSummary plotDependence plotInteraction effectsSHAP force plotReferencesSHAP package in RI built an R package SHAPforxgboost that wraps all the R plotting functions illustrated in this post. It serves for now as the vignette for the package.
-Please install from cran or Github page.</description>
+      <description>The SHAPforxgboost packageWhy SHAP valuesLocal explanationConsistency in Global Feature ImportanceSHAP plotsSummary plotDependence plotInteraction effectsSHAP force plotReferencesThe SHAPforxgboost packageI wrote the R package SHAPforxgboost to cover all the plotting functions illustrated in this post. This post serves as the vignette for the package.
+Please install from CRAN or Github.
+install.packages(&amp;quot;SHAPforxgboost&amp;quot;)# or devtools::install_github(&amp;quot;liuyanguu/SHAPforxgboost&amp;quot;)Why SHAP valuesSHAP’s main advantages are local explanation and consistency in global model structure.</description>
     </item>
     
     <item>
