@@ -81,7 +81,7 @@
 <li><a href="#the-shapforxgboost-package">The <code>SHAPforxgboost</code> package</a></li>
 <li><a href="#why-shap-values">Why SHAP values</a><ul>
 <li><a href="#local-explanation">Local explanation</a></li>
-<li><a href="#consistency-in-global-feature-importance">Consistency in Global Feature Importance</a></li>
+<li><a href="#consistency-in-global-feature-importance">Consistency in global feature importance</a></li>
 </ul></li>
 <li><a href="#shap-plots">SHAP plots</a><ul>
 <li><a href="#summary-plot">Summary plot</a></li>
@@ -121,46 +121,39 @@ param_list &lt;- list(objective = &quot;reg:squarederror&quot;,  # For regressio
                    eta = 0.02,
                    max_depth = 10,
                    gamma = 0.01,
-                   subsample = 0.95,
-                   nrounds = 10
+                   subsample = 0.95
                    )
-
 mod &lt;- xgboost::xgboost(data = dataX, 
                         label = as.matrix(dataXY_df[[y_var]]), 
-                        params = param_list, nrounds = param_list$nrounds,
+                        params = param_list, nrounds = 10,
                         verbose = FALSE, nthread = parallel::detectCores() - 2,
-                        early_stopping_rounds = 8)</code></pre>
-<pre><code>## [14:59:06] WARNING: amalgamation/../src/learner.cc:516: 
-## Parameters: { nrounds } might not be used.
-## 
-##   This may not be accurate due to some parameters are only used in language bindings but
-##   passed down to XGBoost core.  Or some parameters are not used but slip through this
-##   verification. Please open an issue if you find above cases.</code></pre>
-<pre class="r"><code># To return the SHAP values and ranked features by mean|SHAP|
+                        early_stopping_rounds = 8)
+                       
+# To return the SHAP values and ranked features by mean|SHAP|
 shap_values &lt;- shap.values(xgb_model = mod, X_train = dataX)
 # The ranked features by mean |SHAP|
 shap_values$mean_shap_score</code></pre>
 <pre><code>##          dayint       Column_WV AOT_Uncertainty   dist_water_km             aod 
-##    0.0162445841    0.0117872316    0.0074174150    0.0063834592    0.0040107869 
+##    0.0164610224    0.0117145059    0.0072662862    0.0055210823    0.0040159752 
 ##            elev     DevAll_P1km           RelAZ  forestProp_1km 
-##    0.0032941351    0.0023432484    0.0009083741    0.0004444623</code></pre>
+##    0.0038652825    0.0023151470    0.0008675773    0.0003986912</code></pre>
 <p>SHAP values are calculated for each cell in the training dataset. The SHAP values dataset (<code>shap_values$shap_score</code>) has the same dimension (10148,9) as the dataset of the independent variables (10148,9) fit into the xgboost model.</p>
 <p>The sum of each row’s SHAP values (plus the <strong>BIAS</strong> column, which is like an intercept) is the predicted model output. As in the following table of SHAP values, <code>rowSum</code> equals the output <code>predict(xgb_mod)</code>. I.e., the explanation’s attribution values sum up to the model output (last column in the table below). This is the case in this example, but not so if you are running e.g. 5-fold cross-validation.</p>
 <pre class="r"><code># to show that `rowSum` is the output:
 shap_data &lt;- copy(shap_values$shap_score)
 shap_data[, BIAS := shap_values$BIAS0]
-pred_mod &lt;- predict(mod, dataX, ntreelimit = param_list$nrounds)
+pred_mod &lt;- predict(mod, dataX, ntreelimit = 10)
 shap_data[, `:=`(rowSum = round(rowSums(shap_data),6), pred_mod = round(pred_mod,6))]
 rmarkdown::paged_table(shap_data[1:20,])</code></pre>
 <div data-pagedtable="false">
 <script data-pagedtable-source type="application/json">
-{"columns":[{"label":["dayint"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["Column_WV"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["AOT_Uncertainty"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["elev"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["aod"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["RelAZ"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["DevAll_P1km"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["dist_water_km"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["forestProp_1km"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["BIAS"],"name":[10],"type":["dbl"],"align":["right"]},{"label":["rowSum"],"name":[11],"type":["dbl"],"align":["right"]},{"label":["pred_mod"],"name":[12],"type":["dbl"],"align":["right"]}],"data":[{"1":"-0.02484323","2":"1.276061e-04","3":"-0.0093965214","4":"0.0061565684","5":"-0.0101606362","6":"-0.0003637352","7":"-1.117407e-03","8":"0.0060287626","9":"2.714564e-04","10":"0.417487","11":"0.384190","12":"0.384190"},{"1":"-0.02515629","2":"-3.147761e-03","3":"-0.0112391375","4":"-0.0049259933","5":"-0.0307911187","6":"-0.0008063385","7":"-2.881510e-03","8":"-0.0214976985","9":"-2.890879e-04","10":"0.417487","11":"0.316752","12":"0.316752"},{"1":"-0.03421871","2":"-5.091745e-04","3":"-0.0014518457","4":"-0.0048771873","5":"-0.0089820568","6":"-0.0004941606","7":"2.166215e-03","8":"0.0029394703","9":"6.312537e-04","10":"0.417487","11":"0.372691","12":"0.372691"},{"1":"-0.03404450","2":"-2.937897e-03","3":"-0.0229325593","4":"-0.0033397474","5":"-0.0223914068","6":"-0.0014456721","7":"1.721132e-03","8":"-0.0210161693","9":"1.133214e-03","10":"0.417487","11":"0.312233","12":"0.312233"},{"1":"-0.01665639","2":"-8.774022e-03","3":"0.0037106439","4":"0.0043300460","5":"0.0009173186","6":"-0.0004332766","7":"-5.725431e-05","8":"0.0011462163","9":"2.069034e-04","10":"0.417487","11":"0.401877","12":"0.401877"},{"1":"-0.01749862","2":"1.965925e-04","3":"0.0011261886","4":"-0.0015540487","5":"0.0015849092","6":"-0.0002358956","7":"1.163635e-03","8":"-0.0019891523","9":"6.282887e-04","10":"0.417487","11":"0.400909","12":"0.400909"},{"1":"-0.02103115","2":"-5.566089e-03","3":"0.0003142084","4":"-0.0049967058","5":"0.0011117499","6":"-0.0002517921","7":"1.115691e-03","8":"-0.0015869010","9":"2.100030e-04","10":"0.417487","11":"0.386806","12":"0.386806"},{"1":"-0.01491000","2":"-4.420471e-03","3":"-0.0064755818","4":"0.0026768786","5":"0.0042444463","6":"-0.0002799424","7":"1.032132e-04","8":"0.0018182558","9":"1.615181e-04","10":"0.417487","11":"0.400405","12":"0.400405"},{"1":"-0.01426583","2":"4.441248e-03","3":"-0.0060875155","4":"-0.0012867553","5":"0.0032825025","6":"-0.0002530246","7":"2.410130e-04","8":"-0.0048859641","9":"-5.980342e-05","10":"0.417487","11":"0.398613","12":"0.398613"},{"1":"-0.01489296","2":"1.370292e-03","3":"-0.0064317454","4":"-0.0005446730","5":"0.0039324407","6":"-0.0001056414","7":"1.172273e-03","8":"-0.0036947592","9":"3.206517e-04","10":"0.417487","11":"0.398613","12":"0.398613"},{"1":"-0.01467329","2":"2.223336e-03","3":"-0.0062473421","4":"-0.0008027153","5":"0.0015485189","6":"-0.0001593551","7":"1.114653e-03","8":"-0.0030776008","9":"3.232834e-04","10":"0.417487","11":"0.397736","12":"0.397736"},{"1":"-0.01644231","2":"-4.160558e-03","3":"-0.0047785612","4":"-0.0020513250","5":"0.0028960265","6":"-0.0002390601","7":"1.095910e-03","8":"-0.0008798022","9":"1.191945e-04","10":"0.417487","11":"0.393047","12":"0.393046"},{"1":"-0.01712753","2":"-7.991962e-03","3":"0.0019954101","4":"0.0041991211","5":"0.0017395908","6":"-0.0003802659","7":"6.281259e-05","8":"0.0011318035","9":"1.966430e-04","10":"0.417487","11":"0.401313","12":"0.401313"},{"1":"-0.01734078","2":"-1.049811e-03","3":"0.0019590221","4":"-0.0014329900","5":"0.0015043309","6":"-0.0003420209","7":"1.151322e-03","8":"-0.0016560174","9":"6.288394e-04","10":"0.417487","11":"0.400909","12":"0.400909"},{"1":"-0.02170551","2":"-7.498138e-03","3":"0.0028377303","4":"-0.0052623036","5":"0.0018560321","6":"-0.0002678265","7":"8.553949e-04","8":"-0.0017117682","9":"2.153947e-04","10":"0.417487","11":"0.386806","12":"0.386806"},{"1":"-0.01784440","2":"1.141593e-02","3":"-0.0030145005","4":"-0.0030490994","5":"-0.0079486631","6":"-0.0003921673","7":"-7.661614e-04","8":"-0.0024550851","9":"-1.765451e-04","10":"0.417487","11":"0.393256","12":"0.393256"},{"1":"-0.01588543","2":"2.300258e-05","3":"-0.0052371328","4":"-0.0011896745","5":"0.0043474110","6":"-0.0001135112","7":"1.016306e-03","8":"-0.0030286221","9":"3.171382e-04","10":"0.417487","11":"0.397736","12":"0.397736"},{"1":"-0.01783640","2":"-5.623913e-03","3":"-0.0018683039","4":"-0.0028839633","5":"0.0036556935","6":"-0.0002071625","7":"1.116749e-03","8":"-0.0006099875","9":"1.534658e-04","10":"0.417487","11":"0.393383","12":"0.393383"},{"1":"-0.01501059","2":"-5.761094e-03","3":"-0.0057589267","4":"0.0024454640","5":"0.0021698356","6":"-0.0002433772","7":"-1.194389e-05","8":"0.0013462871","9":"1.703842e-04","10":"0.417487","11":"0.396833","12":"0.396833"},{"1":"-0.01748374","2":"-3.106653e-03","3":"0.0041110916","4":"-0.0030134530","5":"0.0045619570","6":"-0.0002862460","7":"1.034104e-04","8":"-0.0012754285","9":"-1.890452e-04","10":"0.417487","11":"0.400909","12":"0.400909"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+{"columns":[{"label":["dayint"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["Column_WV"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["AOT_Uncertainty"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["elev"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["aod"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["RelAZ"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["DevAll_P1km"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["dist_water_km"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["forestProp_1km"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["BIAS"],"name":[10],"type":["dbl"],"align":["right"]},{"label":["rowSum"],"name":[11],"type":["dbl"],"align":["right"]},{"label":["pred_mod"],"name":[12],"type":["dbl"],"align":["right"]}],"data":[{"1":"-0.02512725","2":"-2.579237e-04","3":"-0.0084221549","4":"0.0079296343","5":"-0.0107030161","6":"-3.599464e-04","7":"-8.779828e-04","8":"0.0033823210","9":"5.747727e-05","10":"0.417567","11":"0.383188","12":"0.383188"},{"1":"-0.02517161","2":"-4.707105e-04","3":"-0.0105197504","4":"-0.0047914865","5":"-0.0253382195","6":"-1.252566e-03","7":"-3.342269e-03","8":"-0.0156090092","9":"-1.802564e-04","10":"0.417567","11":"0.330891","12":"0.330891"},{"1":"-0.03124691","2":"-8.366045e-04","3":"-0.0003103802","4":"-0.0018683925","5":"-0.0104470197","6":"-6.829582e-04","7":"2.568023e-03","8":"0.0020485527","9":"-1.547185e-05","10":"0.417567","11":"0.376776","12":"0.376776"},{"1":"-0.03530009","2":"-3.965796e-03","3":"-0.0202379748","4":"-0.0030842710","5":"-0.0206626523","6":"-1.439516e-03","7":"1.171224e-03","8":"-0.0141980052","9":"1.572551e-04","10":"0.417567","11":"0.320007","12":"0.320007"},{"1":"-0.01629014","2":"-8.606741e-03","3":"0.0034891085","4":"0.0035692565","5":"0.0008110153","6":"-3.033155e-04","7":"-2.463328e-04","8":"0.0013446093","9":"6.398254e-05","10":"0.417567","11":"0.401398","12":"0.401398"},{"1":"-0.01745438","2":"-6.209470e-04","3":"0.0011335793","4":"-0.0009226634","5":"0.0020744787","6":"-1.555696e-04","7":"1.075144e-03","8":"-0.0023404141","9":"1.483818e-04","10":"0.417567","11":"0.400505","12":"0.400505"},{"1":"-0.01891590","2":"-5.327203e-03","3":"0.0010200819","4":"-0.0029446082","5":"0.0015204573","6":"-2.229926e-04","7":"8.649328e-04","8":"-0.0012631265","9":"2.177754e-05","10":"0.417567","11":"0.392320","12":"0.392320"},{"1":"-0.01463646","2":"-3.635206e-03","3":"-0.0070708729","4":"0.0029852372","5":"0.0039614504","6":"-2.905147e-04","7":"-9.170818e-05","8":"0.0014928372","9":"5.134134e-05","10":"0.417567","11":"0.400333","12":"0.400333"},{"1":"-0.01450177","2":"4.406898e-03","3":"-0.0058671264","4":"-0.0010832315","5":"0.0034831432","6":"-2.481457e-04","7":"-2.551501e-04","8":"-0.0039535495","9":"-7.440009e-05","10":"0.417567","11":"0.399474","12":"0.399474"},{"1":"-0.01554643","2":"5.986372e-05","3":"-0.0061168470","4":"0.0002918497","5":"0.0046576816","6":"-1.007339e-04","7":"1.063115e-03","8":"-0.0024847796","9":"8.293920e-05","10":"0.417567","11":"0.399474","12":"0.399474"},{"1":"-0.01521494","2":"5.117007e-04","3":"-0.0064541730","4":"0.0006574338","5":"0.0019668702","6":"-1.128574e-04","7":"9.237871e-04","8":"-0.0030058858","9":"1.086933e-04","10":"0.417567","11":"0.396948","12":"0.396948"},{"1":"-0.01533218","2":"-3.760019e-03","3":"-0.0054974332","4":"-0.0003850806","5":"0.0031928632","6":"-2.324403e-04","7":"8.023523e-04","8":"-0.0008121239","9":"6.070643e-06","10":"0.417567","11":"0.395549","12":"0.395549"},{"1":"-0.01677677","2":"-8.184441e-03","3":"0.0023931658","4":"0.0037290785","5":"0.0018768881","6":"-2.862476e-04","7":"-1.955940e-04","8":"0.0012279755","9":"4.738041e-05","10":"0.417567","11":"0.401398","12":"0.401398"},{"1":"-0.01740731","2":"-1.812330e-03","3":"0.0018528623","4":"-0.0005146732","5":"0.0019964534","6":"-2.892063e-04","7":"1.075238e-03","8":"-0.0021151600","9":"1.517325e-04","10":"0.417567","11":"0.400505","12":"0.400505"},{"1":"-0.01938305","2":"-7.173172e-03","3":"0.0036213936","4":"-0.0037015721","5":"0.0023304978","6":"-3.363185e-04","7":"6.261669e-04","8":"-0.0012670934","9":"3.656122e-05","10":"0.417567","11":"0.392320","12":"0.392320"},{"1":"-0.02164203","2":"1.012274e-02","3":"-0.0045267660","4":"-0.0049299477","5":"-0.0134046432","6":"-9.427884e-04","7":"-1.100965e-03","8":"-0.0036362973","9":"-1.419028e-04","10":"0.417567","11":"0.377364","12":"0.377364"},{"1":"-0.01664408","2":"-1.544298e-03","3":"-0.0044902237","4":"-0.0003809257","5":"0.0051075164","6":"-3.766953e-05","7":"9.993763e-04","8":"-0.0025114114","9":"8.385420e-05","10":"0.417567","11":"0.398149","12":"0.398149"},{"1":"-0.01708369","2":"-5.740270e-03","3":"-0.0021639667","4":"-0.0014803428","5":"0.0042529162","6":"-1.803587e-04","7":"8.346377e-04","8":"-0.0004769820","9":"2.006100e-05","10":"0.417567","11":"0.395549","12":"0.395549"},{"1":"-0.01517174","2":"-6.204172e-03","3":"-0.0046353028","4":"0.0026486048","5":"0.0025614225","6":"-2.583394e-04","7":"-3.578495e-04","8":"0.0012917498","9":"6.297311e-05","10":"0.417567","11":"0.397504","12":"0.397504"},{"1":"-0.01693953","2":"-2.882928e-03","3":"0.0042684609","4":"-0.0038960399","5":"0.0047521330","6":"-2.893288e-04","7":"-2.039634e-04","8":"-0.0016760333","9":"-1.951585e-04","10":"0.417567","11":"0.400505","12":"0.400505"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
 <p>This offers model explanation for each observation in the dataset. And offers lots of flexibility when summarizing the whole model.</p>
 </div>
 <div id="consistency-in-global-feature-importance" class="section level2">
-<h2>Consistency in Global Feature Importance</h2>
+<h2>Consistency in global feature importance</h2>
 <p><strong>And why feature importance by Gain is inconsistent</strong></p>
 <p>Consistency means it is legitimate to compare feature importance across different models. When we modify the model to make a feature more important, the feature importance should increase. The paper used the following example:</p>
 <p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/SHAPsuppfig2.JPG" />
@@ -203,12 +196,10 @@ knitr::kable(d)</code></pre>
 <pre class="r"><code>X1 = as.matrix(d[,.(Fever, Cough)])
 X2 = as.matrix(d[,.(Cough, Fever)])
 m1 = xgboost(
-  data = X1, label = d$y,base_score = 0, gamma = 0, eta = 1, lambda = 0,nrounds = 1,objective = &quot;reg:linear&quot;,  verbose = F)</code></pre>
-<pre><code>## [14:59:08] WARNING: amalgamation/../src/objective/regression_obj.cu:174: reg:linear is now deprecated in favor of reg:squarederror.</code></pre>
-<pre class="r"><code>m2 = xgboost(
-  data = X2, label = d$y,base_score = 0, gamma = 0, eta = 1, lambda = 0,nrounds = 1,objective = &quot;reg:linear&quot;,verbose = F)</code></pre>
-<pre><code>## [14:59:08] WARNING: amalgamation/../src/objective/regression_obj.cu:174: reg:linear is now deprecated in favor of reg:squarederror.</code></pre>
-<pre class="r"><code>xgb.importance(model = m1)</code></pre>
+  data = X1, label = d$y,base_score = 0, gamma = 0, eta = 1, lambda = 0,nrounds = 1, verbose = F)
+m2 = xgboost(
+  data = X2, label = d$y,base_score = 0, gamma = 0, eta = 1, lambda = 0,nrounds = 1, verbose = F)
+xgb.importance(model = m1)</code></pre>
 <pre><code>##    Feature      Gain     Cover Frequency
 ## 1:   Cough 0.6666667 0.3333333       0.5
 ## 2:   Fever 0.3333333 0.6666667       0.5</code></pre>
@@ -303,9 +294,8 @@ gridExtra::grid.arrange(g3, g4, ncol=2)</code></pre>
 <pre class="r"><code># choose to show top 4 features by setting `top_n = 4`, 
 # set 6 clustering groups of observations.  
 plot_data &lt;- shap.prep.stack.data(shap_contrib = shap_values$shap_score, top_n = 4, n_groups = 6)
-# choose to zoom in at location 500, set y-axis limit using `y_parent_limit`  
-# it is also possible to set y-axis limit for zoom-in part alone using `y_zoomin_limit`  
-shap.plot.force_plot(plot_data, zoom_in_location = 500, y_parent_limit = c(-1.5,1.5))</code></pre>
+# you may choose to zoom in at a location, and set y-axis limit using `y_parent_limit`  
+shap.plot.force_plot(plot_data, zoom_in_location = 5000, y_parent_limit = c(-0.1,0.1))</code></pre>
 <p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-15-1.png" width="768" /></p>
 <pre class="r"><code># plot the 6 clusters
 shap.plot.force_plot_bygroup(plot_data)</code></pre>
