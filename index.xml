@@ -54,7 +54,7 @@ RMarkdown file could be very slow to generate if lots of calculations are involv
       <pubDate>Sun, 28 Jul 2019 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/post/2019/07/28/some-experience-on-writing-r-package/</guid>
-      <description>Some of my own experienceOn descriptionNamespaceload vs attachDocumentationPotential problems when checking the packageSome nice suggestions from the CRAN editors when submitting the packageAlthough ‘SHAPforxgboost’ is not a package too complicated, it took me some time to get the package pass all the cran check. Now (Aug.03,2019) it is available on cran. Install by either
+      <description>Some of my own experienceOn descriptionNamespaceload vs attachDocumentationPotential problems when checking the packageSome nice suggestions from the CRAN team when submitting the packageAlthough ‘SHAPforxgboost’ is not a package too complicated, it took me some time to get the package pass all the cran check. Now (Aug.03,2019) it is available on cran. Install by either
 install.packages(&amp;quot;SHAPforxgboost&amp;quot;)or</description>
     </item>
     

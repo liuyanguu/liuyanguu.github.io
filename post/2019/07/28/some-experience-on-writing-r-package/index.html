@@ -77,7 +77,7 @@
 <li><a href="#documentation">Documentation</a></li>
 <li><a href="#potential-problems-when-checking-the-package">Potential problems when checking the package</a></li>
 </ul></li>
-<li><a href="#some-nice-suggestions-from-the-cran-editors-when-submitting-the-package">Some nice suggestions from the CRAN editors when submitting the package</a></li>
+<li><a href="#some-nice-suggestions-from-the-cran-team-when-submitting-the-package">Some nice suggestions from the CRAN team when submitting the package</a></li>
 </ul>
 </div>
 
@@ -108,7 +108,7 @@
 <li><p>I.e., when others <strong>load and attach</strong> your package, they can use your functions depending on <code>ggplot2</code> but they cannot use the functions from the <code>ggplot2</code> package unless they <strong>load and attach</strong> <code>ggplot2</code> by <code>library(ggplot2)</code>.</p></li>
 <li><p>If you put <code>ggplot2</code> in <strong>Depends</strong> in the <strong>DESCRIPTION</strong>, <code>library(yourPackage)</code> would load and attach <code>ggplot2</code> — same as doing <code>library(ggplot2)</code> — generally speaking you don’t need to do so.</p></li>
 </ul></li>
-<li><p>If you name a function like <code>plot.shap.summary</code> it would be documented automatically as S3 method even if you wrote <code>@export plot.shap.summary</code> (By the way, must export the full function name, otherwise, it would become an S3 method in the namespace). Don’t name function this way to avoid confusion with S3method. For example, I changed the name to <code>shap.plot.summary</code>.</p></li>
+<li><p>If you name a function like <code>plot.shap.summary</code> it would be documented automatically as a S3 method of the <code>plot</code> generic function. So I changed the name to <code>shap.plot.summary</code>. I think in the future I shall not use dot in function names.</p></li>
 </ul>
 </div>
 </div>
@@ -133,9 +133,8 @@
 </ul>
 </div>
 </div>
-<div id="some-nice-suggestions-from-the-cran-editors-when-submitting-the-package" class="section level1">
-<h1>Some nice suggestions from the CRAN editors when submitting the package</h1>
-<p>Lots of thanks to Dr. Ligges and Dr. Herbrandt for their patient advice.</p>
+<div id="some-nice-suggestions-from-the-cran-team-when-submitting-the-package" class="section level1">
+<h1>Some nice suggestions from the CRAN team when submitting the package</h1>
 <ul>
 <li><p>In the description, write package names, software names and API names in single quotes (e.g. ‘Python’). The Title field should be in title case. The description should not start with package name or “This package”.</p></li>
 <li><p>Please ensure that you do not use more than 2 cores in your examples.
