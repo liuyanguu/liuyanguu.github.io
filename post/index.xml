@@ -8,13 +8,15 @@
     <language>en-us</language>
     <lastBuildDate>Wed, 06 Jan 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://liuyanguu.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>MPIDR COVID Age Overview</title>
-      <link>https://liuyanguu.github.io/post/2021/01/06/mpidr-covid-age-overview/</link>
+      <title>RMarkdown to Github Pages</title>
+      <link>https://liuyanguu.github.io/post/2021/01/06/rmarkdown-to-github-pages/</link>
       <pubDate>Wed, 06 Jan 2021 00:00:00 +0000</pubDate>
       
-      <guid>https://liuyanguu.github.io/post/2021/01/06/mpidr-covid-age-overview/</guid>
-      <description>Global confirmed cases and deathsGlobal confirmed casesGlobal deathsAge pyramid using MPIDR COVeAGE-DB databaseDisaggregated by ageDisaggregated by age and sexGlobal confirmed cases and deathsSources: Max Planck Institute for Demographic Research (MPIDR) COVeAGE-DB database and CSSE at Johns Hopkins University (JHU)
-Global confirmed cases{&#34;x&#34;:{&#34;filter&#34;:&#34;none&#34;,&#34;data&#34;:[[&#34;Total&#34;,&#34;Female&#34;,&#34;Male&#34;],[&#34;86,405,927&#34;,&#34;&#34;,&#34;&#34;],[&#34;32,954,752&#34;,&#34;10,731,099&#34;,&#34;10,908,224&#34;],[&#34;38%&#34;,null,null],[96,70,71],[&#34;501,302&#34;,&#34;147,600&#34;,&#34;161,770&#34;],[&#34;639,047&#34;,&#34;201,019&#34;,&#34;216,327&#34;],[&#34;974,055&#34;,&#34;312,301&#34;,&#34;334,890&#34;],[&#34;1,632,949&#34;,&#34;504,751&#34;,&#34;532,241&#34;],[&#34;3,747,353 (11%)&#34;,&#34;1,165,671 (11%)&#34;,&#34;1,245,228 (11%)&#34;]],&#34;container&#34;:&#34;\n \n \n Sex\n JHU\n MPIDR\n MPIDR/JHU(%)\n MPIDR Number\nof Countries\n Age\n 0-4\n Age\n 5-9\n Age\n 10-14\n Age\n 15-19\n Age\n 0-19\n \n \n&#34;</description>
+      <guid>https://liuyanguu.github.io/post/2021/01/06/rmarkdown-to-github-pages/</guid>
+      <description>Turn Rmarkdown output into Github PagesIf you Google this topic you will find this GitHub and RStudio tutorial, which is quite long.
+Here is the short version:
+Name the output html file as index.html and go to repo settings -&amp;gt; GitHub Pages and point the source to where this file is. Also you can change theme just by clicking the buttom.
+You can assign the short domain names like liuyanguu.</description>
     </item>
     
     <item>
