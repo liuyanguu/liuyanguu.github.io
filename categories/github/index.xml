@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Github on Welcome to my blog</title>
+    <link>https://liuyanguu.github.io/categories/github/</link>
+    <description>Recent content in Github on Welcome to my blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 06 Jan 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://liuyanguu.github.io/categories/github/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>RMarkdown to Github Pages</title>
+      <link>https://liuyanguu.github.io/post/2021/01/06/rmarkdown-to-github-pages/</link>
+      <pubDate>Wed, 06 Jan 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://liuyanguu.github.io/post/2021/01/06/rmarkdown-to-github-pages/</guid>
+      <description>Turn Rmarkdown output into Github PagesIf you Google this topic you will find this GitHub and RStudio tutorial, which is quite long.
+Here is the short version:
+Name the output html file as index.html and go to repo settings -&amp;gt; GitHub Pages and point the source to where this file is. Also you can change theme just by clicking the buttom.
+You can assign the short domain names like liuyanguu.</description>
+    </item>
+    
+  </channel>
+</rss>
