@@ -71,10 +71,41 @@
 <div id="turn-rmarkdown-output-into-github-pages" class="section level1">
 <h1>Turn Rmarkdown output into Github Pages</h1>
 <p>If you Google this topic you will find this <a href="https://resources.github.com/whitepapers/github-and-rstudio/">GitHub and RStudio</a> tutorial, which is quite long.</p>
-<p>Here is the short version:</p>
+<p>Here is the short version (i.e., some short supplementary notes):</p>
 <p>Name the output html file as <code>index.html</code> and go to repo settings -&gt; GitHub Pages and point the source to where this file is. Also you can change theme just by clicking the buttom.</p>
-<p><img src="images/Github%20Page.JPG" /></p>
-<p>You can assign the short domain names like <a href="https://liuyanguu.github.io/">liuyanguu.github.io</a> to only one repo (in my case, this blog). All the rest will have to add the repo name behind: like <a href="https://liuyanguu.github.io/COVerAge_Plot/">liuyanguu.github.io/COVerAge_Plot</a></p>
+<div class="figure">
+<img src="https://user-images.githubusercontent.com/11966330/104090319-f7496180-5243-11eb-91f9-39cf0ddf30ab.JPG" alt="" />
+<p class="caption">Github Page</p>
+</div>
+<p>I guess you can only assign the short domain names like <a href="https://liuyanguu.github.io/">liuyanguu.github.io</a> to one repo (in my case, this blog). All the rest pages/site hosted on Github will have the repo name behind: like <a href="https://liuyanguu.github.io/COVerAge_Plot/">liuyanguu.github.io/COVerAge_Plot</a></p>
+<p>The “Add welcome page, theme and navigation” part of the <a href="https://resources.github.com/whitepapers/github-and-rstudio/">GitHub and RStudio</a> tutorial tells you how to turn Github page into site.</p>
+<ol style="list-style-type: decimal">
+<li>Create in the root directory a file like "_site.yml"</li>
+</ol>
+<p>Make sure the yaml format is correct.</p>
+<p>The following example as in the tutorial (format corrected) creates a navbar with website title “Cars”, home page named “HomePage” (using index.html) and “Page 1” using the “speed-and-distance.html”.</p>
+<p>The name of the html files shall match your rmarkdown output.</p>
+<div class="figure">
+<img src="https://user-images.githubusercontent.com/11966330/104111727-a1ac9d80-52b3-11eb-98ae-164eb2d0008e.JPG" alt="" />
+<p class="caption">site example</p>
+</div>
+<pre class="r"><code>name: &quot;cars&quot;
+output_dir: &quot;docs&quot;
+navbar:
+  title: &quot;Cars&quot;
+  left:
+    - text: &quot;HomePage&quot;
+      href: index.html
+    - text: &quot;Page 1&quot;
+      href: speed-and-distance.html
+output:
+  html_document:
+    theme: cosmo</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>Render site and push to Github</li>
+</ol>
+<pre class="r"><code>rmarkdown::render_site()</code></pre>
+<p>Think the Github page as a one-page site with index.html as the homepage.</p>
 </div>
 
 </main>
@@ -185,6 +216,13 @@ if (!doNotTrack) {
 
 
 
+
+<script src="//cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.12.0/languages/r.min.js"></script>
+<script>
+hljs.configure({languages: []});
+hljs.initHighlightingOnLoad();
+</script>
 
 
 
