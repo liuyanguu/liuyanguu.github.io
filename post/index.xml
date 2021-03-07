@@ -13,10 +13,9 @@
       <pubDate>Wed, 06 Jan 2021 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/post/2021/01/06/rmarkdown-to-github-pages/</guid>
-      <description>Turn Rmarkdown output into Github PagesIf you Google this topic you will find this GitHub and RStudio tutorial, which is quite long.
-Here is the short version (i.e., some short supplementary notes):
-Name the output html file as index.html and go to repo settings -&amp;gt; GitHub Pages and point the source to where this file is. Also you can change theme just by clicking the buttom.
-Github Page</description>
+      <description>RMarkdown into Github PagesExample of one of my Github pages:You might have read this GitHub and RStudio tutorial by searching this topic. It is quite long and confusing as it tries to teach Git at the same time. You don’t need any of those branch operations. And the example yaml code is not indented correctly (corrected below).
+Here is the short version:
+Create in the root directory a yaml file: &#34;</description>
     </item>
     
     <item>
