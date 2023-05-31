@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en-us">
   <head>
-	<meta name="generator" content="Hugo 0.77.0" />
+	<meta name="generator" content="Hugo 0.112.5">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
@@ -24,7 +24,7 @@
       <div class="head-meta">
       
         <span>Welcome to my blog</span>
-        <span>2021-03-07</span>
+        <span>2023-05-30</span>
         
         
         
@@ -39,6 +39,39 @@
 
 
 
+
+<section class="article-list">
+  <div class="categories">
+  
+  
+    <a href="/categories/r-package">R package</a>
+  
+  
+  </div>
+  <h1><a href="/post/2019/07/28/some-experience-on-writing-r-package/">Notes on writing an R package</a></h1>
+  <div class="date-author">
+    <span class="author">Yang Liu
+</span> / 
+    <span class="date">2019-07-28</span>
+  </div>
+  <div class="summary">
+    <a href="/post/2019/07/28/some-experience-on-writing-r-package/">
+    
+    
+    
+    <div class="thumbnail"><img src="/post/2019-07-28-some-experience-on-writing-r-package_files/the%20cran%20page.PNG" alt="Thumbnail" /></div>
+    
+    
+    
+      
+    
+    Although ‘SHAPforxgboost’ is not a package too complicated, it took me some time to get the package pass all the cran check. Now (Aug.03,2019) it is available on cran. Install by either
+install.packages(&quot;SHAPforxgboost&quot;)or
+devtools::install_github(&quot;liuyanguu/SHAPforxgboost&quot;)Use the ‘usethis’ package https://usethis.r-lib.org/ to set up the structure of the package.
+[&hellip;]&hellip;
+    </a>
+  </div>
+</section>
 
 <section class="article-list">
   <div class="categories">
@@ -67,7 +100,7 @@
     
     I wrote the R package SHAPforxgboost to cover all the plotting functions illustrated in this post. This post serves as the vignette for the package.
 Please install from CRAN or Github.
-install.packages(&quot;SHAPforxgboost&quot;)# or devtools::install_github(&quot;liuyanguu/SHAPforxgboost&quot;)Why SHAP valuesSHAP’s main advantages are local explanation and consistency in global model&hellip;
+install.packages(&quot;SHAPforxgboost&quot;)# or devtools::install_github(&quot;liuyanguu/SHAPforxgboost&quot;)Why SHAP valuesSHAP’s main advantages are local explanation and consistency in global model&hellip;
     </a>
   </div>
 </section>
@@ -202,67 +235,31 @@ Since my R Package SHAPforxgboost has been released on CRAN, I updated this post
   </div>
 </section>
 
-<section class="article-list">
-  <div class="categories">
-  
-  
-    <a href="/categories/data-visualization">Data Visualization</a>
-  
-  
-  </div>
-  <h1><a href="/post/2018/07/16/how-to-draw-heatmap-with-colorful-dendrogram/">How to Draw Heatmap with Colorful Dendrogram</a></h1>
-  <div class="date-author">
-    <span class="author">Yang Liu
-</span> / 
-    <span class="date">2018-07-16</span>
-  </div>
-  <div class="summary">
-    <a href="/post/2018/07/16/how-to-draw-heatmap-with-colorful-dendrogram/">
-    
-    
-    
-    <div class="thumbnail"><img src="/post/2018-07-16-how-to-draw-heatmap-with-colorful-dendrogram_files/figure-html/unnamed-chunk-1-1.png" alt="Thumbnail" /></div>
-    
-    
-    
-      
-    
-    This data visualization example include:
-* Hierarchical clustering, dendrogram and heat map based on normalized odds ratios
-* The dendrogram was built separately to give color to dendrogram’s branches/labels based on cluster using dendextend
-* Heatmap is made by heatmap.2 from gplots using the built dendrogram
-* The rows are sorted by means from highest to lowest, it can be done in either the&hellip;
-    </a>
-  </div>
-</section>
-
 </main>
 <nav>
-<ul class="pagination">
-  <li class="page-item">
-    <a href="/" class="page-link" aria-label="First"><span aria-hidden="true">&laquo;&laquo;</span></a>
-  </li>
-  <li class="page-item">
-    <a href="/" class="page-link" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
-  </li>
-  <li class="page-item">
-    <a class="page-link" href="/">1</a>
-  </li>
-  <li class="page-item active">
-    <a class="page-link" href="/page/2/">2</a>
-  </li>
-  <li class="page-item">
-    <a class="page-link" href="/page/3/">3</a>
-  </li>
-  <li class="page-item">
-    <a href="/page/3/" class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
-  </li>
-  <li class="page-item">
-    <a href="/page/3/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
-  </li>
-</ul>
-
-</nav>
+    <ul class="pagination pagination-default">
+      <li class="page-item">
+        <a href="/" aria-label="First" class="page-link" role="button"><span aria-hidden="true">&laquo;&laquo;</span></a>
+      </li>
+      <li class="page-item">
+        <a href="/" aria-label="Previous" class="page-link" role="button"><span aria-hidden="true">&laquo;</span></a>
+      </li>
+      <li class="page-item">
+        <a href="/" aria-label="Page 1" class="page-link" role="button">1</a>
+      </li>
+      <li class="page-item active">
+        <a aria-current="page" aria-label="Page 2" class="page-link" role="button">2</a>
+      </li>
+      <li class="page-item">
+        <a href="/page/3/" aria-label="Page 3" class="page-link" role="button">3</a>
+      </li>
+      <li class="page-item">
+        <a href="/page/3/" aria-label="Next" class="page-link" role="button"><span aria-hidden="true">&raquo;</span></a>
+      </li>
+      <li class="page-item">
+        <a href="/page/3/" aria-label="Last" class="page-link" role="button"><span aria-hidden="true">&raquo;&raquo;</span></a>
+      </li>
+    </ul></nav>
 </div>
 
 <script async src="//yihui.org/js/center-img.js"></script>
@@ -284,7 +281,6 @@ if (!doNotTrack) {
 
 
 
-
 <div class="footer">
   <ul class="menu">
     
@@ -294,7 +290,7 @@ if (!doNotTrack) {
     
     <li><a href="/categories/"><span data-hover="Categories">Categories</span></a></li>
     
-    <li><a href="/about-me/"><span data-hover="About Me">About Me</span></a></li>
+    <li><a href="/about%20me/"><span data-hover="About Me">About Me</span></a></li>
     
   </ul>
   
@@ -320,7 +316,6 @@ if (!doNotTrack) {
 	ga('send', 'pageview');
 }
 </script>
-
 
 </body>
 </html>

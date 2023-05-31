@@ -70,9 +70,9 @@
 
 <div id="TOC">
 <ul>
-<li><a href="#us">US</a></li>
-<li><a href="#china">China</a></li>
-<li><a href="#compared-to-lung-cancer-mortality">Compared to lung cancer mortality</a></li>
+<li><a href="#us" id="toc-us">US</a></li>
+<li><a href="#china" id="toc-china">China</a></li>
+<li><a href="#compared-to-lung-cancer-mortality" id="toc-compared-to-lung-cancer-mortality">Compared to lung cancer mortality</a></li>
 </ul>
 </div>
 
@@ -105,10 +105,10 @@ make_heatmap(data = dt_JUH_US,
 dt_JUH &lt;- get.JHU.daily()
 dt_CN &lt;- dt_JUH[Country_Region %in% c(&quot;China&quot;, &quot;Taiwan*&quot;),]
 dt_CN[Country_Region==&quot;Taiwan*&quot;, Province_State:= &quot;Taiwan&quot;]
-dt_china_map &lt;- readRDS(&quot;D:/liuyanguu/Blogdown/Data/dt_china.rds&quot;)
+dt_china_map &lt;- readRDS(here::here(&quot;Data/dt_china.rds&quot;))
 setnames(dt_china_map, &quot;province_EN&quot;, &quot;state&quot;)
 unique(dt_CN$Province_State[!dt_CN$Province_State%in%dt_china_map$state])</code></pre>
-<pre><code>## [1] &quot;Hong Kong&quot; &quot;Macau&quot;</code></pre>
+<pre><code>## [1] &quot;Hong Kong&quot; &quot;Macau&quot;     &quot;Unknown&quot;</code></pre>
 <pre class="r"><code>make_heatmap(data = dt_CN, 
              geo_data = dt_china_map,
              state_var = &quot;Province_State&quot;, fill_var = &quot;Case-Fatality_Ratio&quot;)</code></pre>
@@ -175,10 +175,9 @@ if (!doNotTrack) {
 }
 </script>
 
-
   <div id="disqus_thread"></div>
 <script type="application/javascript">
-    var disqus_config = function () {
+    window.disqus_config = function () {
     
     
     
@@ -208,7 +207,7 @@ if (!doNotTrack) {
     
     <li><a href="/categories/"><span data-hover="Categories">Categories</span></a></li>
     
-    <li><a href="/about-me/"><span data-hover="About Me">About Me</span></a></li>
+    <li><a href="/about%20me/"><span data-hover="About Me">About Me</span></a></li>
     
   </ul>
   
@@ -244,7 +243,6 @@ if (!doNotTrack) {
 	ga('send', 'pageview');
 }
 </script>
-
 
 </body>
 </html>

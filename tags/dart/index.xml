@@ -13,8 +13,8 @@
       <pubDate>Thu, 15 Nov 2018 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/post/2018/11/15/xgboost-dart-example/</guid>
-      <description>DataShrinkageDART: Dropout - MARTskip_droprate_dropone_dropIt is always a good idea to study the packaged algorithm with a simple example. Inspired by my colleague Kodi’s excellent work showing how xgboost handles missing values, I tried a simple 5x2 dataset to show how shrinkage and DART influence the growth of trees in the model.
-Dataset.seed(123)n0 &amp;lt;- 5X &amp;lt;- data.</description>
+      <description>DataShrinkageDART: Dropout - MARTskip_droprate_dropone_dropIt is always a good idea to study the packaged algorithm with a simple example. Inspired by my colleague Kodi’s excellent work showing how xgboost handles missing values, I tried a simple 5x2 dataset to show how shrinkage and DART influence the growth of trees in the model.
+Dataset.seed(123)n0 &amp;lt;- 5X &amp;lt;- data.frame(x1 = runif(n0), x2 = runif(n0))Y &amp;lt;- c(1, 5, 20, 50, 100)cbind(X, Y)## x1 x2 Y## 1 0.</description>
     </item>
     
   </channel>

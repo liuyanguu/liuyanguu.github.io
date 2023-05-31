@@ -69,17 +69,20 @@
 
 <main>
 
+<script src="/rmarkdown-libs/header-attrs/header-attrs.js"></script>
 
 <div id="TOC">
 <ul>
-<li><a href="#example-1">Example 1</a><ul>
+<li><a href="#example-1">Example 1</a>
+<ul>
 <li><a href="#shap-summary-plot">SHAP summary plot</a></li>
 <li><a href="#alternative-ways">Alternative ways:</a></li>
 <li><a href="#shap-dependence-plot">SHAP dependence plot</a></li>
 <li><a href="#shap-interaction-effect-plot">SHAP interaction effect plot</a></li>
 <li><a href="#shap-force-plot">SHAP force plot</a></li>
 </ul></li>
-<li><a href="#example-2">Example 2</a><ul>
+<li><a href="#example-2">Example 2</a>
+<ul>
 <li><a href="#summary-plot">Summary plot</a></li>
 <li><a href="#dependence-plot-for-each-feature">Dependence plot for each feature</a></li>
 <li><a href="#force-plot">Force plot</a></li>
@@ -208,13 +211,15 @@ best_param &lt;- list(objective = &quot;reg:linear&quot;,  # For regression
 nround &lt;- best_rmse_index
 set.seed(best_seednumber)
 mod1 &lt;- xgboost::xgboost(data = X_train, label = Y_train, params = best_param, nround = nround, verbose = F)</code></pre>
+<pre><code>## [23:14:47] WARNING: amalgamation/../src/objective/regression_obj.cu:174: reg:linear is now deprecated in favor of reg:squarederror.</code></pre>
 <pre class="r"><code>shap.plot.summary.wrap1(mod1, X_train, top_n = 10)</code></pre>
 <p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
 </div>
 <div id="dependence-plot-for-each-feature" class="section level2">
 <h2>Dependence plot for each feature</h2>
 <ul>
-<li>Here we choose to show top 6 features ranked by mean|SHAP|</li>
+<li>Here we choose to show top 6 features ranked by mean|SHAP|<br />
+</li>
 </ul>
 <pre class="r"><code>data_long &lt;-  shap.prep(mod1, X_train = X_train)
 shap_values &lt;- shap.values(mod1, X_train)
@@ -223,7 +228,8 @@ fig_list &lt;- lapply(features_ranked, shap.plot.dependence, data_long = data_lo
 gridExtra::grid.arrange(grobs = fig_list, ncol = 2)</code></pre>
 <p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-10-1.png" width="768" /></p>
 <ul>
-<li>If Use the built-in <code>xgb.shap.plot</code> function</li>
+<li>If Use the built-in <code>xgb.shap.plot</code> function<br />
+</li>
 </ul>
 <pre class="r"><code>xgboost::xgb.plot.shap(data = X_train, model = mod1, top_n = 4, n_col = 2)</code></pre>
 <p><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-11-1.png" width="768" /></p>
@@ -300,10 +306,9 @@ if (!doNotTrack) {
 }
 </script>
 
-
   <div id="disqus_thread"></div>
 <script type="application/javascript">
-    var disqus_config = function () {
+    window.disqus_config = function () {
     
     
     
@@ -333,7 +338,7 @@ if (!doNotTrack) {
     
     <li><a href="/categories/"><span data-hover="Categories">Categories</span></a></li>
     
-    <li><a href="/about-me/"><span data-hover="About Me">About Me</span></a></li>
+    <li><a href="/about%20me/"><span data-hover="About Me">About Me</span></a></li>
     
   </ul>
   
@@ -369,7 +374,6 @@ if (!doNotTrack) {
 	ga('send', 'pageview');
 }
 </script>
-
 
 </body>
 </html>

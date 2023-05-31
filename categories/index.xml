@@ -6,22 +6,31 @@
     <description>Recent content in Categories on Welcome to my blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 06 Jan 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://liuyanguu.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 29 May 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://liuyanguu.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Data Visualization</title>
+      <link>https://liuyanguu.github.io/categories/data-visualization/</link>
+      <pubDate>Mon, 29 May 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://liuyanguu.github.io/categories/data-visualization/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Spatial Data</title>
+      <link>https://liuyanguu.github.io/categories/spatial-data/</link>
+      <pubDate>Mon, 29 May 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://liuyanguu.github.io/categories/spatial-data/</guid>
+      <description></description>
+    </item>
+    
     <item>
       <title>Github</title>
       <link>https://liuyanguu.github.io/categories/github/</link>
       <pubDate>Wed, 06 Jan 2021 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/categories/github/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Data Visualization</title>
-      <link>https://liuyanguu.github.io/categories/data-visualization/</link>
-      <pubDate>Sun, 14 Jun 2020 00:00:00 +0000</pubDate>
-      
-      <guid>https://liuyanguu.github.io/categories/data-visualization/</guid>
       <description></description>
     </item>
     
@@ -67,15 +76,6 @@
       <pubDate>Sun, 24 Feb 2019 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/categories/shiny/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Spatial Data</title>
-      <link>https://liuyanguu.github.io/categories/spatial-data/</link>
-      <pubDate>Fri, 20 Jul 2018 00:00:00 +0000</pubDate>
-      
-      <guid>https://liuyanguu.github.io/categories/spatial-data/</guid>
       <description></description>
     </item>
     

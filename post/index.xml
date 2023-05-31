@@ -6,7 +6,18 @@
     <description>Recent content in Posts on Welcome to my blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 06 Jan 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://liuyanguu.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 29 May 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://liuyanguu.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Plot multiple countries on the world map</title>
+      <link>https://liuyanguu.github.io/post/2023/05/29/plot-multiple-countries-on-the-world-map/</link>
+      <pubDate>Mon, 29 May 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://liuyanguu.github.io/post/2023/05/29/plot-multiple-countries-on-the-world-map/</guid>
+      <description>This post will show it’s quite easy to download and plot the administrative areas of multiple countries on the world map.I will also showcase a bug that puzzled me for a long time and I recently figured out: strange connecting lines among countries!
+The most straightforward way(You may download the world map from Github)
+suppressPackageStartupMessages({library(&amp;quot;data.table&amp;quot;)library(&amp;quot;ggplot2&amp;quot;)library(&amp;quot;rgdal&amp;quot;)library(&amp;quot;raster&amp;quot;)library(&amp;quot;rgeos&amp;quot;)library(&amp;quot;here&amp;quot;)library(&amp;quot;ggthemes&amp;quot;)})# download data from GADM directly and row-bind the spatial polygons data framecnames &amp;lt;- c(&amp;quot;Haiti&amp;quot;, &amp;quot;Togo&amp;quot;, &amp;quot;Uganda&amp;quot;, &amp;quot;Ghana&amp;quot;, &amp;quot;South Africa&amp;quot;, &amp;quot;Angola&amp;quot;)download.</description>
+    </item>
+    
     <item>
       <title>RMarkdown to Github Pages</title>
       <link>https://liuyanguu.github.io/post/2021/01/06/rmarkdown-to-github-pages/</link>
@@ -24,7 +35,7 @@ Create in the root directory a yaml file: &#34;</description>
       <pubDate>Sun, 14 Jun 2020 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/post/2020/06/14/us-and-china-admin1-covid19-mortality-and-incidence-rate/</guid>
-      <description>USChinaCompared to lung cancer mortalitySimilar to the last heatmap post I just revised, here I wrapped up the function and showing COVID-19 data just downloaded from JHU CSSE Github page. The function can take a given dataset and plot designated variable.
+      <description>USChinaCompared to lung cancer mortalitySimilar to the last heatmap post I just revised, here I wrapped up the function and showing COVID-19 data just downloaded from JHU CSSE Github page. The function can take a given dataset and plot designated variable.
 Code hosted on my Github repo.
 US# major function, can download from Github repo Blogdown/hugo-xmag/Codesource(here::here(&amp;quot;Code/COVID_make_map.R&amp;quot;))# USdt_JUH_US &amp;lt;- get.JHU.us.state()make_heatmap(data = dt_JUH_US, geo_data = get_state_name(),state_var = &amp;quot;Province_State&amp;quot;, fill_var = &amp;quot;Mortality_Rate&amp;quot;, label_var = &amp;quot;abb&amp;quot;)us_maps &amp;lt;- lapply(c(&amp;quot;Mortality_Rate&amp;quot;, &amp;quot;Incident_Rate&amp;quot;, &amp;quot;Testing_Rate&amp;quot;, &amp;quot;Hospitalization_Rate&amp;quot;),make_heatmap, data = dt_JUH_US, geo_data = get_state_name(),state_var = &amp;quot;Province_State&amp;quot;, label_var = &amp;quot;abb&amp;quot;)plot_grid &amp;lt;- gridExtra::grid.</description>
     </item>
@@ -44,9 +55,9 @@ US# major function, can download from Github repo Blogdown/hugo-xmag/Codesourc
       <pubDate>Sat, 11 Jan 2020 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/post/2020/01/11/working-with-3d-array-as-long-format-data-in-r/</guid>
-      <description>Example: a 3-D array with dimension 4x3x2Melt into longRecover the arraycheck.and.install.pkgs &amp;lt;- function(pkgs){new.packages &amp;lt;- pkgs[!pkgs %in% installed.packages()[,&amp;quot;Package&amp;quot;]]if(length(new.packages)) install.packages(new.packages, dependencies = TRUE)suppressPackageStartupMessages(invisible(lapply(pkgs, library, character.only = TRUE)))}check.and.install.pkgs(c(&amp;quot;data.table&amp;quot;, &amp;quot;reshape2&amp;quot;, &amp;quot;scatterplot3d&amp;quot;))Happy New Year!
+      <description>Example: a 3-D array with dimension 4x3x2Melt into longRecover the arraycheck.and.install.pkgs &amp;lt;- function(pkgs){new.packages &amp;lt;- pkgs[!pkgs %in% installed.packages()[,&amp;quot;Package&amp;quot;]]if(length(new.packages)) install.packages(new.packages, dependencies = TRUE)suppressPackageStartupMessages(invisible(lapply(pkgs, library, character.only = TRUE)))}check.and.install.pkgs(c(&amp;quot;data.table&amp;quot;, &amp;quot;reshape2&amp;quot;, &amp;quot;scatterplot3d&amp;quot;))Happy New Year!
 Recently I spent some time working with array in R.
-I believe it is a bad idea to work with array using for loop, which is both slow and error-prone.</description>
+I believe it is a bad idea to work with array using for loop, which is both slow and error-prone. We can just melt it into a long data, do the work, and arrange back into array in the end if needed.</description>
     </item>
     
     <item>
@@ -65,8 +76,9 @@ RMarkdown file could be very slow to generate if lots of calculations are involv
       <pubDate>Sun, 28 Jul 2019 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/post/2019/07/28/some-experience-on-writing-r-package/</guid>
-      <description>Some of my own experienceOn descriptionNamespaceload vs attachDocumentationPotential problems when checking the packageSome nice suggestions from the CRAN team when submitting the packageAlthough ‘SHAPforxgboost’ is not a package too complicated, it took me some time to get the package pass all the cran check. Now (Aug.03,2019) it is available on cran. Install by either
-install.packages(&amp;quot;SHAPforxgboost&amp;quot;)or</description>
+      <description>Some of my own experienceOn descriptionNamespaceload vs attachDocumentationPotential problems when checking the packageSome nice suggestions from the CRAN team when submitting the packageAlthough ‘SHAPforxgboost’ is not a package too complicated, it took me some time to get the package pass all the cran check. Now (Aug.03,2019) it is available on cran. Install by either
+install.packages(&amp;quot;SHAPforxgboost&amp;quot;)or
+devtools::install_github(&amp;quot;liuyanguu/SHAPforxgboost&amp;quot;)Use the ‘usethis’ package https://usethis.r-lib.org/ to set up the structure of the package.</description>
     </item>
     
     <item>
@@ -75,9 +87,9 @@ install.packages(&amp;quot;SHAPforxgboost&amp;quot;)or</description>
       <pubDate>Thu, 18 Jul 2019 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/post/2019/07/18/visualization-of-shap-for-xgboost/</guid>
-      <description>The SHAPforxgboost packageWhy SHAP valuesLocal explanationConsistency in global feature importanceSHAP plotsSummary plotDependence plotInteraction effectsSHAP force plotReferencesThe SHAPforxgboost packageI wrote the R package SHAPforxgboost to cover all the plotting functions illustrated in this post. This post serves as the vignette for the package.
+      <description>The SHAPforxgboost packageWhy SHAP valuesLocal explanationConsistency in global feature importanceSHAP plotsSummary plotDependence plotInteraction effectsSHAP force plotReferencesThe SHAPforxgboost packageI wrote the R package SHAPforxgboost to cover all the plotting functions illustrated in this post. This post serves as the vignette for the package.
 Please install from CRAN or Github.
-install.packages(&amp;quot;SHAPforxgboost&amp;quot;)# or devtools::install_github(&amp;quot;liuyanguu/SHAPforxgboost&amp;quot;)Why SHAP valuesSHAP’s main advantages are local explanation and consistency in global model structure.</description>
+install.packages(&amp;quot;SHAPforxgboost&amp;quot;)# or devtools::install_github(&amp;quot;liuyanguu/SHAPforxgboost&amp;quot;)Why SHAP valuesSHAP’s main advantages are local explanation and consistency in global model structure.</description>
     </item>
     
     <item>
@@ -86,10 +98,10 @@ install.packages(&amp;quot;SHAPforxgboost&amp;quot;)# or devtools::install_gith
       <pubDate>Sun, 24 Feb 2019 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/post/2019/02/24/shiny-in-blogdown/</guid>
-      <description>How to embed ShinyMy Shiny app exampleHow to embed ShinySince Blogdown is for static websites, it cannot run Shiny in rmarkdown directly. According to discussion here and document here.
+      <description>How to embed ShinyMy Shiny app exampleHow to embed ShinySince Blogdown is for static websites, it cannot run Shiny in rmarkdown directly. According to discussion here and document here.
 The only way to do it is using iframe and write outside the chunk:
 &amp;lt;iframe src=&#34;https://liuyanguu.shinyapps.io/bcl_app/&#34; width=1000 height=800&#34;&amp;gt;&amp;lt;/iframe&amp;gt;
-There is also a built-in function in knitr to do the same thing and write in the chunk.</description>
+There is also a built-in function in knitr to do the same thing and write in the chunk. The only difference is that we can only set height, and the shiny app would appear slightly different with the siderbarPanel at the top and the mainPanel beneath it.</description>
     </item>
     
     <item>
@@ -98,8 +110,8 @@ There is also a built-in function in knitr to do the same thing and write in the
       <pubDate>Thu, 15 Nov 2018 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/post/2018/11/15/xgboost-dart-example/</guid>
-      <description>DataShrinkageDART: Dropout - MARTskip_droprate_dropone_dropIt is always a good idea to study the packaged algorithm with a simple example. Inspired by my colleague Kodi’s excellent work showing how xgboost handles missing values, I tried a simple 5x2 dataset to show how shrinkage and DART influence the growth of trees in the model.
-Dataset.seed(123)n0 &amp;lt;- 5X &amp;lt;- data.</description>
+      <description>DataShrinkageDART: Dropout - MARTskip_droprate_dropone_dropIt is always a good idea to study the packaged algorithm with a simple example. Inspired by my colleague Kodi’s excellent work showing how xgboost handles missing values, I tried a simple 5x2 dataset to show how shrinkage and DART influence the growth of trees in the model.
+Dataset.seed(123)n0 &amp;lt;- 5X &amp;lt;- data.frame(x1 = runif(n0), x2 = runif(n0))Y &amp;lt;- c(1, 5, 20, 50, 100)cbind(X, Y)## x1 x2 Y## 1 0.</description>
     </item>
     
     <item>
@@ -108,7 +120,7 @@ Dataset.seed(123)n0 &amp;lt;- 5X &amp;lt;- data.</description>
       <pubDate>Sun, 14 Oct 2018 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/post/2018/10/14/shap-visualization-for-xgboost/</guid>
-      <description>Example 1SHAP summary plotAlternative ways:SHAP dependence plotSHAP interaction effect plotSHAP force plotExample 2Summary plotDependence plot for each featureForce plotStack plot by clustering groupsUpdate 19/07/21:
+      <description>Example 1SHAP summary plotAlternative ways:SHAP dependence plotSHAP interaction effect plotSHAP force plotExample 2Summary plotDependence plot for each featureForce plotStack plot by clustering groupsUpdate 19/07/21:
 Since my R Package SHAPforxgboost has been released on CRAN, I updated this post using the new functions and illustrate how to use these functions using two datasets. For more information, please refer to: SHAP visualization for XGBoost in R</description>
     </item>
     
@@ -118,7 +130,7 @@ Since my R Package SHAPforxgboost has been released on CRAN, I updated this post
       <pubDate>Fri, 20 Jul 2018 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/post/2018/07/20/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/</guid>
-      <description>Saturation in ten cities with equal-area ringsR Code for one cityResults for the ring saturationsAverage saturation in each ringMethodologyOriginal CodeThis data visualization example include:
+      <description>Saturation in ten cities with equal-area ringsR Code for one cityResults for the ring saturationsAverage saturation in each ringMethodologyOriginal CodeThis data visualization example include:
 * Import .img file as a raster
 * Turn raster into a data.frame of points (coordinates) and values
 * Dividing the points into 100 equal-area rings
@@ -132,19 +144,10 @@ Since my R Package SHAPforxgboost has been released on CRAN, I updated this post
       <pubDate>Mon, 16 Jul 2018 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/post/2018/07/16/how-to-draw-heatmap-with-colorful-dendrogram/</guid>
-      <description>DataVersion 1: Color both the branches and labelsVersion 2: color only the labels.Version 3: If there is no color, and we do not reorder the branchesThis data visualization example include:
+      <description>DataVersion 1: Color both the branches and labelsVersion 2: color only the labels.Version 3: If there is no color, and we do not reorder the branchesThis data visualization example include:
 * Hierarchical clustering, dendrogram and heat map based on normalized odds ratios
 * The dendrogram was built separately to give color to dendrogram’s branches/labels based on cluster using dendextend
-* Heatmap is made by heatmap.</description>
-    </item>
-    
-    <item>
-      <title>eXtreme Gradient Boosting (XGBoost): Better than random forest or gradient boosting</title>
-      <link>https://liuyanguu.github.io/post/2018/07/09/extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting/</link>
-      <pubDate>Mon, 09 Jul 2018 00:00:00 +0000</pubDate>
-      
-      <guid>https://liuyanguu.github.io/post/2018/07/09/extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting/</guid>
-      <description>OverviewAbout the Data1. Extreme Gradient Boosting2. Gradient boosting3. Random Forest4. Lasso5. Best SubsetCompare MSEsOriginal Code are stored on githubOverviewI recently had the great pleasure to meet with Professor Allan Just and he introduced me to eXtreme Gradient Boosting (XGBoost). I have extended the earlier work on my old blog by comparing the results across XGBoost, Gradient Boosting (GBM), Random Forest, Lasso, and Best Subset.</description>
+* Heatmap is made by heatmap.2 from gplots using the built dendrogram</description>
     </item>
     
     <item>
@@ -154,7 +157,7 @@ Since my R Package SHAPforxgboost has been released on CRAN, I updated this post
       
       <guid>https://liuyanguu.github.io/post/2018/07/01/catalogue-of-my-old-blog/</guid>
       <description>Introducing my new blog written solely in R MarkdownWhen I realized it was so convenient to write blog directly using R Markdown, I searched if there is a specific tool for it. And I found Blogdown, an R package developed by Yihui Xie, who also developed R Markdown.
-CatalogAs a summary, I would like to create a catalog for the main topics I wrote on google blogger before July 2018.</description>
+CatalogAs a summary, I would like to create a catalog for the main topics I wrote on google blogger before July 2018.</description>
     </item>
     
   </channel>

@@ -13,7 +13,7 @@
       <pubDate>Fri, 20 Jul 2018 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/post/2018/07/20/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/</guid>
-      <description>Saturation in ten cities with equal-area ringsR Code for one cityResults for the ring saturationsAverage saturation in each ringMethodologyOriginal CodeThis data visualization example include:
+      <description>Saturation in ten cities with equal-area ringsR Code for one cityResults for the ring saturationsAverage saturation in each ringMethodologyOriginal CodeThis data visualization example include:
 * Import .img file as a raster
 * Turn raster into a data.frame of points (coordinates) and values
 * Dividing the points into 100 equal-area rings
@@ -27,10 +27,10 @@
       <pubDate>Mon, 16 Jul 2018 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/post/2018/07/16/how-to-draw-heatmap-with-colorful-dendrogram/</guid>
-      <description>DataVersion 1: Color both the branches and labelsVersion 2: color only the labels.Version 3: If there is no color, and we do not reorder the branchesThis data visualization example include:
+      <description>DataVersion 1: Color both the branches and labelsVersion 2: color only the labels.Version 3: If there is no color, and we do not reorder the branchesThis data visualization example include:
 * Hierarchical clustering, dendrogram and heat map based on normalized odds ratios
 * The dendrogram was built separately to give color to dendrogram’s branches/labels based on cluster using dendextend
-* Heatmap is made by heatmap.</description>
+* Heatmap is made by heatmap.2 from gplots using the built dendrogram</description>
     </item>
     
   </channel>

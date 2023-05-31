@@ -23,10 +23,10 @@ RMarkdown file could be very slow to generate if lots of calculations are involv
       <pubDate>Mon, 16 Jul 2018 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/post/2018/07/16/how-to-draw-heatmap-with-colorful-dendrogram/</guid>
-      <description>DataVersion 1: Color both the branches and labelsVersion 2: color only the labels.Version 3: If there is no color, and we do not reorder the branchesThis data visualization example include:
+      <description>DataVersion 1: Color both the branches and labelsVersion 2: color only the labels.Version 3: If there is no color, and we do not reorder the branchesThis data visualization example include:
 * Hierarchical clustering, dendrogram and heat map based on normalized odds ratios
 * The dendrogram was built separately to give color to dendrogram’s branches/labels based on cluster using dendextend
-* Heatmap is made by heatmap.</description>
+* Heatmap is made by heatmap.2 from gplots using the built dendrogram</description>
     </item>
     
   </channel>

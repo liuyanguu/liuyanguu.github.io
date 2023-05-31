@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <title>Plot multiple countries on the world map | Welcome to my blog</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    <link href="//cdn.bootcss.com/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+
+  </head>
+
+  <body class="page">
+    <nav class="header">
+      <div class="banner">
+<a href="/">
+
+<img src="/ocean%202.jpg" alt="Text on Image" />
+</a>
+</div>
+
+      <div class="head-meta">
+      
+        <span><a href="/">&larr; Back to Home</a></span>
+        <span class="date">2023-05-29</span>
+        
+        
+        
+          
+        
+        
+        
+        <span><a href="https://github.com/liuyanguu/Blogdown/edit/master/hugo-xmag/content/post/2023-05-29-plot-multiple-countries-on-the-world-map/index.Rmd">Edit this page &rarr;</a></span>
+        
+        
+      
+      </div>
+    </nav>
+
+<div class="container">
+<article>
+<div class="article-meta">
+
+  <div class="categories">
+  
+    <a href="/categories/data-visualization">Data Visualization</a>
+  
+     &hercon; <a href="/categories/spatial-data">Spatial Data</a>
+  
+  </div>
+
+  <h1><span class="title">Plot multiple countries on the world map</span></h1>
+
+  
+  <h3 class="author">Yang Liu
+</h3>
+  
+
+  
+  <p>Tags: <a href="/tags/geodata">Geodata</a>; <a href="/tags/geographic">Geographic</a>
+  </p>
+  
+  
+
+</div>
+
+
+
+<main>
+
+
+
+<p>This post will show it’s quite easy to download and plot the administrative areas of multiple countries on the world map.
+I will also showcase a bug that puzzled me for a long time and I recently figured out: strange connecting lines among countries!</p>
+<div id="the-most-straightforward-way" class="section level1">
+<h1>The most straightforward way</h1>
+<p>(You may download the world map from <a href="https://github.com/liuyanguu/Blogdown/tree/ef15e72d86d99cd538a591780822226de664e6f5/Data">Github</a>)</p>
+<pre class="r"><code>suppressPackageStartupMessages({
+library(&quot;data.table&quot;)
+library(&quot;ggplot2&quot;)
+library(&quot;rgdal&quot;)
+library(&quot;raster&quot;)
+library(&quot;rgeos&quot;)
+library(&quot;here&quot;)
+library(&quot;ggthemes&quot;)
+})
+
+# download data from GADM directly and row-bind the spatial polygons data frame
+cnames &lt;- c(&quot;Haiti&quot;, &quot;Togo&quot;, &quot;Uganda&quot;, &quot;Ghana&quot;, &quot;South Africa&quot;, &quot;Angola&quot;)
+download.GADM &lt;- function(cname0) raster::getData(&quot;GADM&quot;, country = cname0, level = 1)
+dt_geos &lt;- raster::bind(lapply(cnames, download.GADM))
+dt_geos &lt;- sp::spTransform(dt_geos, CRS(&quot;+proj=robin&quot;)) # robin transformation
+dt_geos_df &lt;- broom::tidy(dt_geos, region = &quot;GID_1&quot;)
+
+  x_min &lt;- min(dt_geos_df$long)*1.2
+  x_max &lt;- max(dt_geos_df$long)*1.2
+  y_min &lt;- min(dt_geos_df$lat)* 1.2
+  y_max &lt;- max(dt_geos_df$lat)* 1.2
+  
+  map_theme &lt;- ggthemes::theme_map() +
+    theme(legend.position = &quot;bottom&quot;, legend.direction = &quot;horizontal&quot;, legend.justification = c(&quot;center&quot;))
+  
+  shp_world_robin &lt;- readRDS(here::here(&quot;../Data/World.shp/sp.world.robin.rds&quot;)) # this has to be sourced locally
+  ggplot() +
+    geom_polygon(data = shp_world_robin, aes(x = long, y = lat, group = group), fill=&quot;lightgray&quot;, 
+                 colour = &quot;white&quot;, size=0.05) +
+    geom_polygon(data = dt_geos, aes(x = long, y = lat, group = group), 
+                 color = &quot;red&quot;, size=0.05, fill=&quot;#ffc069&quot;)  +
+    # if want to crop map:
+    coord_fixed(xlim=c(x_min, x_max), ylim=c(y_min, y_max)) +
+    map_theme +
+    guides(fill = guide_legend(nrow = 1, title.position = &quot;top&quot;))</code></pre>
+<p><img src="https://liuyanguu.github.io/post/2023/05/29/plot-multiple-countries-on-the-world-map/index_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+</div>
+<div id="a-more-complicated-example" class="section level1">
+<h1>A more complicated example</h1>
+<p>Now we will also plot some values on the map. These values need to be merged directly to the spatial polygons <em>sp</em> data frame, or the corresponding data frame. Here I show the second approach: transforming <em>sp</em> data frame into a data frame first. And we can supply either the <em>sp</em> data frame or the data frame to <code>ggplot2::geom_polygon</code>.</p>
+<p>Note that in GADM admin 1 shape files, <code>GID_1</code> is a unique identifier even after binding multiple countries, here we <em>intentionally</em> use region names (the <code>NAME_1</code> column from GADM file) as the region identifier to show a bug. And in my case we indeed have to use the region names to merge with estimates.</p>
+<pre class="r"><code># `region` will become the id/group used to identify each area 
+# Either broom::tidy or ggplot2::fortify can work:
+# dt_geos_data &lt;- broom::tidy(dt_geos, region = &quot;NAME_1&quot;)
+# dt_geos_data &lt;- ggplot2::fortify(dt_geos, region = &quot;NAME_1&quot;)
+
+download.GADM.df &lt;- function(cname0){
+  dfsp &lt;- raster::getData(&quot;GADM&quot;, country = cname0, level = 1) # download data from GADM
+  dfsp &lt;- sp::spTransform(dfsp, CRS(&quot;+proj=robin&quot;)) # robin transformation
+  dfsf &lt;- broom::tidy(dfsp, region = &quot;NAME_1&quot;) # get df
+  dfsf$country &lt;- cname0 # add a country identifier 
+  return(setDT(dfsf))
+}
+
+dt_geos_data &lt;- rbindlist(lapply(cnames, download.GADM.df))
+
+# imaging we want to plot some estimates, not only the map
+dt_admin1 &lt;- unique(setDT(dt_geos_data)[,.(country, id)])
+set.seed(1234)
+dt_admin1$value &lt;- rgamma(nrow(dt_admin1), shape = 4, scale = 15) # some random values
+
+setkey(dt_geos_data, country, id)
+setkey(dt_admin1, country, id)
+dt_geos_data_value &lt;- dt_geos_data[dt_admin1]
+
+legend_break &lt;- c(0, 25, 50, 75,  100, 150, 200, 300, 500)
+legend_label &lt;- c(&quot;≤25&quot;, &quot;25 to 50&quot;, &quot;50 to 75&quot;, &quot;75 to 100&quot;, &quot;100 to 150&quot;,&quot;150 to 200&quot;,&quot;200 to 300&quot;,&quot;&gt;300&quot;)
+legend_color &lt;- c(&quot;#80BD41&quot;, &quot;#CFF4FF&quot;,&quot;#feec9f&quot;,&quot;#ffc069&quot;,&quot;#fa8c16&quot;,&quot;#d46b08&quot;,&quot;#ad4e00&quot;,&quot;#612500&quot;)
+dt_geos_data_value$col &lt;- cut(dt_geos_data_value$value, breaks = legend_break, labels = legend_label)</code></pre>
+</div>
+<div id="the-bug-strange-connecting-lines" class="section level1">
+<h1>The bug: strange connecting lines</h1>
+<pre class="r"><code>ggplot() +
+  geom_polygon(data = shp_world_robin, aes(x = long, y = lat, group = group), fill=&quot;lightgray&quot;, 
+               colour = &quot;white&quot;, size=0.05) +
+  geom_polygon(data = dt_geos_data_value, aes(x = long, y = lat, group = group, fill= col), 
+               color = &quot;red&quot;, size=0.05)  +
+  coord_fixed(xlim=c(x_min, x_max), ylim=c(y_min, y_max)) + # crop map
+  scale_fill_manual(&quot;Some random values for example&quot;, values = legend_color, drop = FALSE) +# Keep all legend item
+  map_theme + 
+  guides(fill = guide_legend(nrow = 1, title.position = &quot;top&quot;))</code></pre>
+<p><img src="https://liuyanguu.github.io/post/2023/05/29/plot-multiple-countries-on-the-world-map/index_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>The reason is some countries have shared admin names, which comes from <code>NAME_1</code> in the GADM file (during the <code>broom::tidy</code> or <code>ggplot2::fortify</code> step).<br />
+Here, Haiti and Togo have these shared admin 1 names: “Centre.1” and “Centre.2” (see the table below).<br />
+The bug is solved by setting <code>group</code> to a unique identifier in the <code>ggplot2::geom_polygon</code>:</p>
+<pre class="r"><code>dt_geos_data_value[, county_group := paste(country, group, sep = &quot;_&quot;)]
+unique(dt_geos_data_value[group %in% c(&quot;Centre.1&quot;),.(country, id, group, county_group, value)])</code></pre>
+<pre><code>##    country     id    group   county_group    value
+## 1:   Haiti Centre Centre.1 Haiti_Centre.1 24.09058
+## 2:    Togo Centre Centre.1  Togo_Centre.1 54.32445</code></pre>
+<pre class="r"><code>ggplot() +
+    geom_polygon(data = shp_world_robin, aes(x = long, y = lat, group = group), fill=&quot;lightgray&quot;, 
+                 colour = &quot;white&quot;, size=0.05) +
+    geom_polygon(data = dt_geos_data_value, aes(x = long, y = lat, group = county_group, fill= col), 
+                 # it&#39;s important to set `group = county_group` instead of `group = group`
+                 color = &quot;red&quot;, size=0.05)  +
+    coord_fixed(xlim=c(x_min, x_max), ylim=c(y_min, y_max))  +
+    scale_fill_manual(&quot;Some random values for example&quot;, values = legend_color, drop = FALSE) +# Keep all legend item
+    map_theme + 
+    guides(fill = guide_legend(nrow = 1, title.position = &quot;top&quot;))</code></pre>
+<p><img src="https://liuyanguu.github.io/post/2023/05/29/plot-multiple-countries-on-the-world-map/index_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>Hope this post is helpful to people who meet similar issues!</p>
+</div>
+
+</main>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<nav class="post-nav">
+  <span class="nav-prev"></span>
+  <span class="nav-next"><a href="/post/2021/01/06/rmarkdown-to-github-pages/">RMarkdown to Github Pages &rarr;</a></span>
+</nav>
+
+
+<div id="disqus_thread"></div>
+<script>
+(function() {
+var d = document, s = d.createElement('script');
+s.src = 'https://liuyanguu.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</article>
+</div>
+
+<script async src="//yihui.org/js/center-img.js"></script>
+
+<footer>
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-122668586-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  <div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "liuyanguu" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+<div class="footer">
+  <ul class="menu">
+    
+    <li><a href="/"><span data-hover="Home">Home</span></a></li>
+    
+    <li><a href="/tags/"><span data-hover="Tags">Tags</span></a></li>
+    
+    <li><a href="/categories/"><span data-hover="Categories">Categories</span></a></li>
+    
+    <li><a href="/about%20me/"><span data-hover="About Me">About Me</span></a></li>
+    
+  </ul>
+  
+  <div class="copyright">@2021 Yang Liu <em>github.com/liuyanguu</em>. Powered by Github.</div>
+  
+</div>
+</footer>
+
+
+<script src="//yihui.org/js/math-code.js"></script>
+<script async src="//mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.12.0/languages/r.min.js"></script>
+<script>
+hljs.configure({languages: []});
+hljs.initHighlightingOnLoad();
+</script>
+
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-122668586-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+</body>
+</html>
+

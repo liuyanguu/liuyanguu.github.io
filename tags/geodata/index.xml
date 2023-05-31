@@ -6,14 +6,25 @@
     <description>Recent content in Geodata on Welcome to my blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 14 Jun 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://liuyanguu.github.io/tags/geodata/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 29 May 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://liuyanguu.github.io/tags/geodata/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Plot multiple countries on the world map</title>
+      <link>https://liuyanguu.github.io/post/2023/05/29/plot-multiple-countries-on-the-world-map/</link>
+      <pubDate>Mon, 29 May 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://liuyanguu.github.io/post/2023/05/29/plot-multiple-countries-on-the-world-map/</guid>
+      <description>This post will show it’s quite easy to download and plot the administrative areas of multiple countries on the world map.I will also showcase a bug that puzzled me for a long time and I recently figured out: strange connecting lines among countries!
+The most straightforward way(You may download the world map from Github)
+suppressPackageStartupMessages({library(&amp;quot;data.table&amp;quot;)library(&amp;quot;ggplot2&amp;quot;)library(&amp;quot;rgdal&amp;quot;)library(&amp;quot;raster&amp;quot;)library(&amp;quot;rgeos&amp;quot;)library(&amp;quot;here&amp;quot;)library(&amp;quot;ggthemes&amp;quot;)})# download data from GADM directly and row-bind the spatial polygons data framecnames &amp;lt;- c(&amp;quot;Haiti&amp;quot;, &amp;quot;Togo&amp;quot;, &amp;quot;Uganda&amp;quot;, &amp;quot;Ghana&amp;quot;, &amp;quot;South Africa&amp;quot;, &amp;quot;Angola&amp;quot;)download.</description>
+    </item>
+    
     <item>
       <title>US and China Admin1 COVID19 mortality and incidence rate</title>
       <link>https://liuyanguu.github.io/post/2020/06/14/us-and-china-admin1-covid19-mortality-and-incidence-rate/</link>
       <pubDate>Sun, 14 Jun 2020 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/post/2020/06/14/us-and-china-admin1-covid19-mortality-and-incidence-rate/</guid>
-      <description>USChinaCompared to lung cancer mortalitySimilar to the last heatmap post I just revised, here I wrapped up the function and showing COVID-19 data just downloaded from JHU CSSE Github page. The function can take a given dataset and plot designated variable.
+      <description>USChinaCompared to lung cancer mortalitySimilar to the last heatmap post I just revised, here I wrapped up the function and showing COVID-19 data just downloaded from JHU CSSE Github page. The function can take a given dataset and plot designated variable.
 Code hosted on my Github repo.
 US# major function, can download from Github repo Blogdown/hugo-xmag/Codesource(here::here(&amp;quot;Code/COVID_make_map.R&amp;quot;))# USdt_JUH_US &amp;lt;- get.JHU.us.state()make_heatmap(data = dt_JUH_US, geo_data = get_state_name(),state_var = &amp;quot;Province_State&amp;quot;, fill_var = &amp;quot;Mortality_Rate&amp;quot;, label_var = &amp;quot;abb&amp;quot;)us_maps &amp;lt;- lapply(c(&amp;quot;Mortality_Rate&amp;quot;, &amp;quot;Incident_Rate&amp;quot;, &amp;quot;Testing_Rate&amp;quot;, &amp;quot;Hospitalization_Rate&amp;quot;),make_heatmap, data = dt_JUH_US, geo_data = get_state_name(),state_var = &amp;quot;Province_State&amp;quot;, label_var = &amp;quot;abb&amp;quot;)plot_grid &amp;lt;- gridExtra::grid.</description>
     </item>

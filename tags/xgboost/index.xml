@@ -13,9 +13,9 @@
       <pubDate>Thu, 18 Jul 2019 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/post/2019/07/18/visualization-of-shap-for-xgboost/</guid>
-      <description>The SHAPforxgboost packageWhy SHAP valuesLocal explanationConsistency in global feature importanceSHAP plotsSummary plotDependence plotInteraction effectsSHAP force plotReferencesThe SHAPforxgboost packageI wrote the R package SHAPforxgboost to cover all the plotting functions illustrated in this post. This post serves as the vignette for the package.
+      <description>The SHAPforxgboost packageWhy SHAP valuesLocal explanationConsistency in global feature importanceSHAP plotsSummary plotDependence plotInteraction effectsSHAP force plotReferencesThe SHAPforxgboost packageI wrote the R package SHAPforxgboost to cover all the plotting functions illustrated in this post. This post serves as the vignette for the package.
 Please install from CRAN or Github.
-install.packages(&amp;quot;SHAPforxgboost&amp;quot;)# or devtools::install_github(&amp;quot;liuyanguu/SHAPforxgboost&amp;quot;)Why SHAP valuesSHAP’s main advantages are local explanation and consistency in global model structure.</description>
+install.packages(&amp;quot;SHAPforxgboost&amp;quot;)# or devtools::install_github(&amp;quot;liuyanguu/SHAPforxgboost&amp;quot;)Why SHAP valuesSHAP’s main advantages are local explanation and consistency in global model structure.</description>
     </item>
     
     <item>
@@ -24,8 +24,8 @@ install.packages(&amp;quot;SHAPforxgboost&amp;quot;)# or devtools::install_gith
       <pubDate>Thu, 15 Nov 2018 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/post/2018/11/15/xgboost-dart-example/</guid>
-      <description>DataShrinkageDART: Dropout - MARTskip_droprate_dropone_dropIt is always a good idea to study the packaged algorithm with a simple example. Inspired by my colleague Kodi’s excellent work showing how xgboost handles missing values, I tried a simple 5x2 dataset to show how shrinkage and DART influence the growth of trees in the model.
-Dataset.seed(123)n0 &amp;lt;- 5X &amp;lt;- data.</description>
+      <description>DataShrinkageDART: Dropout - MARTskip_droprate_dropone_dropIt is always a good idea to study the packaged algorithm with a simple example. Inspired by my colleague Kodi’s excellent work showing how xgboost handles missing values, I tried a simple 5x2 dataset to show how shrinkage and DART influence the growth of trees in the model.
+Dataset.seed(123)n0 &amp;lt;- 5X &amp;lt;- data.frame(x1 = runif(n0), x2 = runif(n0))Y &amp;lt;- c(1, 5, 20, 50, 100)cbind(X, Y)## x1 x2 Y## 1 0.</description>
     </item>
     
     <item>
@@ -34,17 +34,8 @@ Dataset.seed(123)n0 &amp;lt;- 5X &amp;lt;- data.</description>
       <pubDate>Sun, 14 Oct 2018 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/post/2018/10/14/shap-visualization-for-xgboost/</guid>
-      <description>Example 1SHAP summary plotAlternative ways:SHAP dependence plotSHAP interaction effect plotSHAP force plotExample 2Summary plotDependence plot for each featureForce plotStack plot by clustering groupsUpdate 19/07/21:
+      <description>Example 1SHAP summary plotAlternative ways:SHAP dependence plotSHAP interaction effect plotSHAP force plotExample 2Summary plotDependence plot for each featureForce plotStack plot by clustering groupsUpdate 19/07/21:
 Since my R Package SHAPforxgboost has been released on CRAN, I updated this post using the new functions and illustrate how to use these functions using two datasets. For more information, please refer to: SHAP visualization for XGBoost in R</description>
-    </item>
-    
-    <item>
-      <title>eXtreme Gradient Boosting (XGBoost): Better than random forest or gradient boosting</title>
-      <link>https://liuyanguu.github.io/post/2018/07/09/extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting/</link>
-      <pubDate>Mon, 09 Jul 2018 00:00:00 +0000</pubDate>
-      
-      <guid>https://liuyanguu.github.io/post/2018/07/09/extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting/</guid>
-      <description>OverviewAbout the Data1. Extreme Gradient Boosting2. Gradient boosting3. Random Forest4. Lasso5. Best SubsetCompare MSEsOriginal Code are stored on githubOverviewI recently had the great pleasure to meet with Professor Allan Just and he introduced me to eXtreme Gradient Boosting (XGBoost). I have extended the earlier work on my old blog by comparing the results across XGBoost, Gradient Boosting (GBM), Random Forest, Lasso, and Best Subset.</description>
     </item>
     
   </channel>

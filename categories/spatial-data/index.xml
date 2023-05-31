@@ -6,14 +6,25 @@
     <description>Recent content in Spatial Data on Welcome to my blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 20 Jul 2018 00:00:00 +0000</lastBuildDate><atom:link href="https://liuyanguu.github.io/categories/spatial-data/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 29 May 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://liuyanguu.github.io/categories/spatial-data/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Plot multiple countries on the world map</title>
+      <link>https://liuyanguu.github.io/post/2023/05/29/plot-multiple-countries-on-the-world-map/</link>
+      <pubDate>Mon, 29 May 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://liuyanguu.github.io/post/2023/05/29/plot-multiple-countries-on-the-world-map/</guid>
+      <description>This post will show it’s quite easy to download and plot the administrative areas of multiple countries on the world map.I will also showcase a bug that puzzled me for a long time and I recently figured out: strange connecting lines among countries!
+The most straightforward way(You may download the world map from Github)
+suppressPackageStartupMessages({library(&amp;quot;data.table&amp;quot;)library(&amp;quot;ggplot2&amp;quot;)library(&amp;quot;rgdal&amp;quot;)library(&amp;quot;raster&amp;quot;)library(&amp;quot;rgeos&amp;quot;)library(&amp;quot;here&amp;quot;)library(&amp;quot;ggthemes&amp;quot;)})# download data from GADM directly and row-bind the spatial polygons data framecnames &amp;lt;- c(&amp;quot;Haiti&amp;quot;, &amp;quot;Togo&amp;quot;, &amp;quot;Uganda&amp;quot;, &amp;quot;Ghana&amp;quot;, &amp;quot;South Africa&amp;quot;, &amp;quot;Angola&amp;quot;)download.</description>
+    </item>
+    
     <item>
       <title>Spatial data in R: Dividing raster layers into equal-area rings</title>
       <link>https://liuyanguu.github.io/post/2018/07/20/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/</link>
       <pubDate>Fri, 20 Jul 2018 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/post/2018/07/20/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/</guid>
-      <description>Saturation in ten cities with equal-area ringsR Code for one cityResults for the ring saturationsAverage saturation in each ringMethodologyOriginal CodeThis data visualization example include:
+      <description>Saturation in ten cities with equal-area ringsR Code for one cityResults for the ring saturationsAverage saturation in each ringMethodologyOriginal CodeThis data visualization example include:
 * Import .img file as a raster
 * Turn raster into a data.frame of points (coordinates) and values
 * Dividing the points into 100 equal-area rings

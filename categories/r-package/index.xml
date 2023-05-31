@@ -13,8 +13,9 @@
       <pubDate>Sun, 28 Jul 2019 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/post/2019/07/28/some-experience-on-writing-r-package/</guid>
-      <description>Some of my own experienceOn descriptionNamespaceload vs attachDocumentationPotential problems when checking the packageSome nice suggestions from the CRAN team when submitting the packageAlthough ‘SHAPforxgboost’ is not a package too complicated, it took me some time to get the package pass all the cran check. Now (Aug.03,2019) it is available on cran. Install by either
-install.packages(&amp;quot;SHAPforxgboost&amp;quot;)or</description>
+      <description>Some of my own experienceOn descriptionNamespaceload vs attachDocumentationPotential problems when checking the packageSome nice suggestions from the CRAN team when submitting the packageAlthough ‘SHAPforxgboost’ is not a package too complicated, it took me some time to get the package pass all the cran check. Now (Aug.03,2019) it is available on cran. Install by either
+install.packages(&amp;quot;SHAPforxgboost&amp;quot;)or
+devtools::install_github(&amp;quot;liuyanguu/SHAPforxgboost&amp;quot;)Use the ‘usethis’ package https://usethis.r-lib.org/ to set up the structure of the package.</description>
     </item>
     
     <item>
@@ -23,9 +24,9 @@ install.packages(&amp;quot;SHAPforxgboost&amp;quot;)or</description>
       <pubDate>Thu, 18 Jul 2019 00:00:00 +0000</pubDate>
       
       <guid>https://liuyanguu.github.io/post/2019/07/18/visualization-of-shap-for-xgboost/</guid>
-      <description>The SHAPforxgboost packageWhy SHAP valuesLocal explanationConsistency in global feature importanceSHAP plotsSummary plotDependence plotInteraction effectsSHAP force plotReferencesThe SHAPforxgboost packageI wrote the R package SHAPforxgboost to cover all the plotting functions illustrated in this post. This post serves as the vignette for the package.
+      <description>The SHAPforxgboost packageWhy SHAP valuesLocal explanationConsistency in global feature importanceSHAP plotsSummary plotDependence plotInteraction effectsSHAP force plotReferencesThe SHAPforxgboost packageI wrote the R package SHAPforxgboost to cover all the plotting functions illustrated in this post. This post serves as the vignette for the package.
 Please install from CRAN or Github.
-install.packages(&amp;quot;SHAPforxgboost&amp;quot;)# or devtools::install_github(&amp;quot;liuyanguu/SHAPforxgboost&amp;quot;)Why SHAP valuesSHAP’s main advantages are local explanation and consistency in global model structure.</description>
+install.packages(&amp;quot;SHAPforxgboost&amp;quot;)# or devtools::install_github(&amp;quot;liuyanguu/SHAPforxgboost&amp;quot;)Why SHAP valuesSHAP’s main advantages are local explanation and consistency in global model structure.</description>
     </item>
     
   </channel>
