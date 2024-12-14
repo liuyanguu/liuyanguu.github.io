@@ -105,7 +105,7 @@ make_heatmap(data = dt_JUH_US,
 dt_JUH &lt;- get.JHU.daily()
 dt_CN &lt;- dt_JUH[Country_Region %in% c(&quot;China&quot;, &quot;Taiwan*&quot;),]
 dt_CN[Country_Region==&quot;Taiwan*&quot;, Province_State:= &quot;Taiwan&quot;]
-dt_china_map &lt;- readRDS(here::here(&quot;Data/dt_china.rds&quot;))
+dt_china_map &lt;- readRDS(here::here(&quot;../Data/dt_china.rds&quot;))
 setnames(dt_china_map, &quot;province_EN&quot;, &quot;state&quot;)
 unique(dt_CN$Province_State[!dt_CN$Province_State%in%dt_china_map$state])</code></pre>
 <pre><code>## [1] &quot;Hong Kong&quot; &quot;Macau&quot;     &quot;Unknown&quot;</code></pre>

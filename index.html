@@ -24,7 +24,7 @@
       <div class="head-meta">
       
         <span>Welcome to my blog</span>
-        <span>2024-03-31</span>
+        <span>2024-12-13</span>
         
         
         
@@ -39,6 +39,38 @@
 
 
 
+
+<section class="article-list">
+  <div class="categories">
+  
+  
+    <a href="/categories/data-visualization">Data Visualization</a>
+  
+  
+  </div>
+  <h1><a href="/post/2024/12/13/how-many-children-under-5-worldwide/">How many children under 5 worldwide?</a></h1>
+  <div class="date-author">
+    <span class="author">Yang Liu
+</span> / 
+    <span class="date">2024-12-13</span>
+  </div>
+  <div class="summary">
+    <a href="/post/2024/12/13/how-many-children-under-5-worldwide/">
+    
+    
+    
+    <div class="thumbnail"><img src="https://liuyanguu.github.io/post/2024/12/13/how-many-children-under-5-worldwide/index_files/figure-html/unnamed-chunk-2-1.png" alt="Thumbnail" /></div>
+    
+    
+    
+      
+    
+    Since these figures are not directly available via Google search, I calculated them using the mid-year population estimates from the World Population Prospects (WPP) 2024:
+World Population: In 2024, the global population is estimated at 8.2 billion (8,162 million). The population is projected to peak in 2084 at 10.3 billion.
+Children Under 5 Years Old: The number of children under 5 is 647 million&hellip;
+    </a>
+  </div>
+</section>
 
 <section class="article-list">
   <div class="categories">
@@ -196,37 +228,6 @@ It sounds easy but turned out not as straight-forward as I thought.I will show:
       
     
     check.and.install.pkgs &lt;- function(pkgs){new.packages &lt;- pkgs[!pkgs %in% installed.packages()[,&quot;Package&quot;]]if(length(new.packages)) install.packages(new.packages, dependencies = TRUE)suppressPackageStartupMessages(invisible(lapply(pkgs, library, character.only = TRUE)))}check.and.install.pkgs(c(&quot;data.table&quot;, &quot;reshape2&quot;, &quot;scatterplot3d&quot;))Happy New&hellip;
-    </a>
-  </div>
-</section>
-
-<section class="article-list">
-  <div class="categories">
-  
-  
-    <a href="/categories/reproducible-workflow">Reproducible Workflow</a>
-  
-  
-  </div>
-  <h1><a href="/post/2019/09/15/drake-powerful-tool-for-automatic-reproducible-workflow/">Drake: powerful tool for automatic reproducible workflow</a></h1>
-  <div class="date-author">
-    <span class="author">Yang Liu
-</span> / 
-    <span class="date">2019-09-15</span>
-  </div>
-  <div class="summary">
-    <a href="/post/2019/09/15/drake-powerful-tool-for-automatic-reproducible-workflow/">
-    
-    
-    
-    <div class="thumbnail"><img src="/post/2019-09-15-drake-powerful-tool-for-automatic-reproducible-workflow_files/dependency%20plot.PNG" alt="Thumbnail" /></div>
-    
-    
-    
-      
-    
-    drake is a powerful tool for automatic reproducible workflow. I found it a perfect match when used together with RMarkdown. There are great documentations online for drake thus here I only show a simple example working with RMarkdown.
-RMarkdown file could be very slow to generate if lots of calculations are involved. Any small revise makes you rerun everything. When we use drake we can do all the&hellip;
     </a>
   </div>
 </section>

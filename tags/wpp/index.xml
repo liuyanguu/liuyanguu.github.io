@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>WPP on Welcome to my blog</title>
+    <link>https://liuyanguu.github.io/tags/wpp/</link>
+    <description>Recent content in WPP on Welcome to my blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 13 Dec 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://liuyanguu.github.io/tags/wpp/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>How many children under 5 worldwide?</title>
+      <link>https://liuyanguu.github.io/post/2024/12/13/how-many-children-under-5-worldwide/</link>
+      <pubDate>Fri, 13 Dec 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://liuyanguu.github.io/post/2024/12/13/how-many-children-under-5-worldwide/</guid>
+      <description>Since these figures are not directly available via Google search, I calculated them using the mid-year population estimates from the World Population Prospects (WPP) 2024:
+World Population: In 2024, the global population is estimated at 8.2 billion (8,162 million). The population is projected to peak in 2084 at 10.3 billion.
+Children Under 5 Years Old: The number of children under 5 is 647 million in 2024. This figure peaked in 2017 at 698 million and is projected to decline to 550 million by 2100.</description>
+    </item>
+    
+  </channel>
+</rss>
