@@ -23,7 +23,7 @@
       <div class="head-meta">
       
         <span>Posts</span>
-        <span>2024-12-13</span>
+        <span>2024-12-15</span>
         
         
         
@@ -38,6 +38,36 @@
 
 
 
+
+<section class="article-list">
+  <div class="categories">
+  
+  
+    <a href="/categories/data-engineering">Data Engineering</a>
+  
+  
+  </div>
+  <h1><a href="/post/2020/01/11/working-with-3d-array-as-long-format-data-in-r/">Working with 3D array as long-format data in R</a></h1>
+  <div class="date-author">
+    <span class="author">Yang Liu
+</span> / 
+    <span class="date">2020-01-11</span>
+  </div>
+  <div class="summary">
+    <a href="/post/2020/01/11/working-with-3d-array-as-long-format-data-in-r/">
+    
+    
+    
+    <div class="thumbnail"><img src="/post/2020-01-11-working-with-r-3d-array-as-long-format-data_files/figure-html/unnamed-chunk-10-1.png" alt="Thumbnail" /></div>
+    
+    
+    
+      
+    
+    check.and.install.pkgs &lt;- function(pkgs){new.packages &lt;- pkgs[!pkgs %in% installed.packages()[,&quot;Package&quot;]]if(length(new.packages)) install.packages(new.packages, dependencies = TRUE)suppressPackageStartupMessages(invisible(lapply(pkgs, library, character.only = TRUE)))}check.and.install.pkgs(c(&quot;data.table&quot;, &quot;reshape2&quot;, &quot;scatterplot3d&quot;))Happy New&hellip;
+    </a>
+  </div>
+</section>
 
 <section class="article-list">
   <div class="categories">
@@ -191,39 +221,6 @@ There is also a built-in function in knitr to do the same thing and write in the
     
     It is always a good idea to study the packaged algorithm with a simple example. Inspired by my colleague Kodi’s excellent work showing how xgboost handles missing values, I tried a simple 5x2 dataset to show how shrinkage and DART influence the growth of trees in the model.
 [&hellip;] set.seed(123)n0 &lt;- 5X &lt;- data.frame(x1 = runif(n0), x2 = runif(n0))Y &lt;- c(1, 5, 20, 50, 100)cbind(X,&hellip;
-    </a>
-  </div>
-</section>
-
-<section class="article-list">
-  <div class="categories">
-  
-  
-    <a href="/categories/machine-learning">Machine Learning</a>
-  
-  
-  </div>
-  <h1><a href="/post/2018/10/14/shap-visualization-for-xgboost/">SHAP Visualization in R (first post)</a></h1>
-  <div class="date-author">
-    <span class="author">Yang Liu
-</span> / 
-    <span class="date">2018-10-14</span>
-  </div>
-  <div class="summary">
-    <a href="/post/2018/10/14/shap-visualization-for-xgboost/">
-    
-    
-    
-    <div class="thumbnail"><img src="/post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-2-1.png" alt="Thumbnail" /></div>
-    
-    
-    
-      
-    
-    Update 19/07/21:
-Since my R Package SHAPforxgboost has been released on CRAN, I updated this post using the new functions and illustrate how to use these functions using two datasets. For more information, please refer to: SHAP visualization for XGBoost in R
-[&hellip;] This is the example I used in the package SHAPforxgboost
-# Example use irissuppressPackageStartupMessages({&hellip;
     </a>
   </div>
 </section>
