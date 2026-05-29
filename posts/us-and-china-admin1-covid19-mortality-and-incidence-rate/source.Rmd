@@ -1,0 +1,77 @@
+---
+title: US and China Admin1 COVID19 mortality and incidence rate
+author: Yang Liu
+date: '2020-06-14'
+slug: us-and-china-admin1-covid19-mortality-and-incidence-rate
+categories:
+  - Data Visualization
+tags:
+  - Geodata
+output:
+  blogdown::html_page:
+    toc: true
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE,
+                      error = FALSE, fig.width = 12, fig.height = 6)
+# error=TRUE allows error
+```
+
+
+Similar to the last [heatmap post I just revised](https://liuyanguu.github.io/post/2020/06/14/ggplot-us-state-and-china-province-heatmap/), here I wrapped up the function and showing COVID-19 data just downloaded from [JHU CSSE Github page](https://github.com/CSSEGISandData/COVID-19). The function can take a given dataset and plot designated variable.  
+
+Code hosted on my [Github repo](https://github.com/liuyanguu/Blogdown/tree/master/hugo-xmag/Code).  
+
+## US 
+
+```{r, fig.width = 6, fig.height=4}
+# major function, can download from Github repo Blogdown/hugo-xmag/Code
+source(here::here("Code/COVID_make_map.R"))
+
+# US
+dt_JUH_US <- get.JHU.us.state()
+
+make_heatmap(data = dt_JUH_US, 
+            geo_data = get_state_name(),
+            state_var = "Province_State", fill_var = "Mortality_Rate", label_var = "abb")
+
+us_maps <- lapply(c("Mortality_Rate", "Incident_Rate",  "Testing_Rate", "Hospitalization_Rate"),
+                  make_heatmap, 
+                  data = dt_JUH_US, 
+                  geo_data = get_state_name(),
+                  state_var = "Province_State", label_var = "abb")
+```
+
+```{r, fig.width = 12, fig.height=8}
+plot_grid <- gridExtra::grid.arrange(grobs = (us_maps), ncol = 2)
+```
+
+Compared to 
+
+## China   
+
+```{r, fig.width = 8, fig.height=6}
+# China (incl. Taiwan)
+dt_JUH <- get.JHU.daily()
+dt_CN <- dt_JUH[Country_Region %in% c("China", "Taiwan*"),]
+dt_CN[Country_Region=="Taiwan*", Province_State:= "Taiwan"]
+dt_china_map <- readRDS(here::here("../Data/dt_china.rds"))
+setnames(dt_china_map, "province_EN", "state")
+unique(dt_CN$Province_State[!dt_CN$Province_State%in%dt_china_map$state])
+
+make_heatmap(data = dt_CN, 
+             geo_data = dt_china_map,
+             state_var = "Province_State", fill_var = "Case-Fatality_Ratio")
+
+make_heatmap(data = dt_CN, 
+             geo_data = dt_china_map,
+             state_var = "Province_State", fill_var = "Incidence_Rate")
+
+```
+
+## Compared to lung cancer mortality 
+
+Age-adjusted mortality rate (A) and crude mortality rate (B) in the US by state (in 2015) and in China by province (in 2008), from my paper "Epidemiology of lung cancer and lung cancer screening programs in China and the United States", [Cancer Letters 2020-01](https://doi.org/10.1016/j.canlet.2019.10.009)  
+
+![](/post/2020-06-15-us-and-china-admin1-covid-19-mortality-and-incidence-rate_files/published 6-pics.jpg)

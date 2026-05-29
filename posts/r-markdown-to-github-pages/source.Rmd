@@ -1,0 +1,91 @@
+---
+title: RMarkdown to Github Pages
+author: Yang Liu
+date: '2021-01-06'
+slug: RMarkdown-to-Github-Pages
+categories:
+  - Github
+output:
+  blogdown::html_page:
+    toc: FALSE
+---
+
+
+# RMarkdown into Github Pages
+
+Example of one of my Github pages:
+![](https://user-images.githubusercontent.com/11966330/110238718-2a8d3180-7f11-11eb-9655-dd6c4a4c5a3b.JPG)
+
+You might have read this [GitHub and RStudio](https://resources.github.com/whitepapers/github-and-rstudio/) tutorial by searching this topic. It is quite long and confusing as it tries to teach Git at the same time. You don't need any of those branch operations. And the example yaml code is not indented correctly (corrected below). 
+
+**Here is the short version:**  
+
+1. Create in the root directory a yaml file: "_site.yml"  
+
+Make sure the yaml format is indented correct. Most errors come from a wrong format of the yml file, for example, I'd get an error "Format is not of class rmarkdown" when the rendering completes if I remove one space before `theme: cosmo`.  
+  
+The following example as in the tutorial (format corrected) creates a navbar with website title "Cars", home page named "HomePage" (using *index.html*) and another page called "Page 1" (using *speed-and-distance.html*).
+
+The name of the html files `href` match your RMarkdown html output. I'd just name the **.Rmd** files with the same names
+
+```{r, eval = FALSE}
+name: "cars"
+output_dir: "docs"
+navbar:
+  title: "Cars"
+  left:
+    - text: "HomePage"
+      href: index.html
+    - text: "Page 1"
+      href: speed-and-distance.html
+output:
+  html_document:
+    theme: cosmo
+```
+
+How the navbar on the site looks like 
+![](https://user-images.githubusercontent.com/11966330/104111727-a1ac9d80-52b3-11eb-98ae-164eb2d0008e.JPG)
+
+Here is another example, the yaml file for the sample page posted in the beginning, you can check [the repo](https://github.com/liuyanguu/COVerAge_Plot) to see how are the files organized.
+```{r, eval = FALSE}
+name: "COVerAge_Plot"
+output_dir: "docs"
+navbar:
+  title: "HOME"
+  left: 
+    - text: "Plots for COVerAGE-DB"
+      href: index.html
+    - text: "Country profile"
+      href: country_report.html
+output:
+  html_document:
+    theme: cosmo
+```
+
+
+2. Remove the `knit` and `output` part from the heading of **.Rmd** files 
+So they don't need their own `output` anymore  
+
+```{r, eval = FALSE}
+---
+title: "Speed and Distance"
+---
+```
+
+
+3. Render site  
+
+This will render every **.Rmd** file in the root directory.  
+Think the Github page as a one-page site with index.html as the homepage.
+```{r, eval = FALSE}
+rmarkdown::render_site()
+```
+
+
+4.  Push to Github
+
+Make sure the homepage is named as `index.html`. Go to repo settings -> GitHub Pages and point the source to where this`index.html`file is. Also you can change theme using the "Theme Chooser".
+
+![Github Page](https://user-images.githubusercontent.com/11966330/104090319-f7496180-5243-11eb-91f9-39cf0ddf30ab.JPG)
+
+You can only assign the short domain names like [liuyanguu.github.io](https://liuyanguu.github.io/) to one repo by changing the name of your repo into this URL (in my case, this blog, I have a repo named `liuyanguu.github.io`). All the rest pages and sites hosted on Github will have the repo name attached behind: [liuyanguu.github.io/COVerAge_Plot](https://liuyanguu.github.io/COVerAge_Plot/) (although this is not a page on this blog).

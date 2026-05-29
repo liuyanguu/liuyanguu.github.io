@@ -1,0 +1,123 @@
+---
+title: How many children under 5 worldwide?
+author: Yang Liu
+date: '2024-12-13'
+slug: how-many-children-under-5-worldwide
+categories:
+  - Data Visualization
+output:
+  blogdown::html_page:
+    toc: true
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE,
+                      error = FALSE, fig.width = 12, fig.height = 6)
+# error=TRUE allows error
+```
+
+```{r}
+library("data.table")
+library("ggplot2")
+library("cowplot")
+
+CURRENT_YEAR <- 2025 # also label on the plot value for the current year
+
+if(dir.exists(here::here("../Data"))){
+dt_wpp_world <- fread(here::here("../Data/WPP2024_World_PopulationByAge1GroupSex_Medium.csv"))
+source(here::here("Code/prepare_WPP_data.R"))
+} else {
+dt_wpp_world <- fread("../Data/WPP2024_World_PopulationByAge1GroupSex_Medium.csv")
+source("Code/prepare_WPP_data.R")
+}
+# melt into long-format by sex
+dt_wpp_world_l <- melt(dt_wpp_world, id.vars = c("Location", "Time", "AgeGrp", "AgeGrpStart"), 
+                       variable.name = "Sex", value.name = "Pop")
+dt_wpp_world_l[, Sex := gsub("Pop", "", Sex)]
+
+
+sum.by.age <- function(age0){
+  dt_wpp_sub <- dt_wpp_world_l[AgeGrpStart %in% c(0:(age0-1))]
+  dt_wpp_sub[, value:= sum(Pop), by = c("Location", "Time", "Sex")]
+  dt_wpp_sub <- unique(dt_wpp_sub[,.(Location, Time, Sex, value)])
+  dt_wpp_sub[, Age := age0]
+}
+dt_age <- rbindlist(lapply(c(5, 10, 15, 18, 20, 25), sum.by.age))
+dt_age[, valueM := scales::comma(round(value/1E3))] # in million, format add comma
+dt_age[, Population:= paste0("Under ", Age, " years old")]
+dt_age[, `Age Group`:= paste0("0-", Age-1)]
+
+dt_age_table <- dcast(dt_age[Sex == "Total" & Time %in% c(2015, 2020, CURRENT_YEAR, 2030, 2050, 2100)], 
+                      Age + Population + `Age Group`~ Time, value.var = "valueM")
+dt_age_table[, Age := NULL]
+
+p5  <- plot.wpp.data(data_plot = dt_wpp_world_l[AgeGrpStart %in% c(0:4)],  "World population of children Under Age 5 ")
+p10 <- plot.wpp.data(data_plot = dt_wpp_world_l[AgeGrpStart %in% c(0:9)], "World population of children under 10 years old")
+p15 <- plot.wpp.data(data_plot = dt_wpp_world_l[AgeGrpStart %in% c(0:14)], "World population of children under 15 years old")
+p18 <- plot.wpp.data(data_plot = dt_wpp_world_l[AgeGrpStart %in% c(0:17)], "World population of children under 18 years old")
+p20 <- plot.wpp.data(data_plot = dt_wpp_world_l[AgeGrpStart %in% c(0:19)], "World population of children under 20 years old")
+p25 <- plot.wpp.data(data_plot = dt_wpp_world_l[AgeGrpStart %in% c(0:24)], "World population under 25 years old")
+
+p35 <- plot.wpp.data(data_plot = dt_wpp_world_l[AgeGrpStart %in% c(0:34)], "World population under 35 years old")
+p45 <- plot.wpp.data(data_plot = dt_wpp_world_l[AgeGrpStart %in% c(0:44)], "World population under 45 years old")
+p60 <- plot.wpp.data(data_plot = dt_wpp_world_l[AgeGrpStart %in% c(0:59)], "World population under 60 years old")
+p70 <- plot.wpp.data(data_plot = dt_wpp_world_l[AgeGrpStart %in% c(0:69)], "World population under 70 years old")
+p80 <- plot.wpp.data(data_plot = dt_wpp_world_l[AgeGrpStart %in% c(0:79)], "World population under 80 years old")
+pw  <- plot.wpp.data(data_plot = dt_wpp_world_l, "World population")
+
+gg_world_age1 <- plot_grid(p5, p10, p15, p18, p20, p25, ncol = 2)
+gg_world_age2 <- plot_grid(p35, p45, p60, p70, p80, pw, ncol = 2)
+
+
+p5_s  <- plot.wpp.data(data_plot = dt_wpp_world_l[AgeGrpStart %in% c(0:4)],  "World population of Children Under Age 5 ", by_sex = TRUE)
+p10_s <- plot.wpp.data(data_plot = dt_wpp_world_l[AgeGrpStart %in% c(0:9)], "World population of children under 10 years old", by_sex = TRUE)
+p15_s <- plot.wpp.data(data_plot = dt_wpp_world_l[AgeGrpStart %in% c(0:14)], "World population of children under 15 years old", by_sex = TRUE)
+p18_s <- plot.wpp.data(data_plot = dt_wpp_world_l[AgeGrpStart %in% c(0:17)], "World population of children under 18 years old", by_sex = TRUE)
+p20_s <- plot.wpp.data(data_plot = dt_wpp_world_l[AgeGrpStart %in% c(0:19)], "World population of children under 20 years old", by_sex = TRUE)
+p25_s <- plot.wpp.data(data_plot = dt_wpp_world_l[AgeGrpStart %in% c(0:24)], "World population under 25 years old", by_sex = TRUE)
+gg_world_age1_by_sex <- plot_grid(p5_s, p10_s, p15_s, p18_s, p20_s, p25_s, ncol = 2)
+
+```
+
+Since these figures are not directly available via Google search, I calculated them using the mid-year population estimates from the World population Prospects (WPP) 2024: 
+
+**World population:** In 2024, the World population is estimated at 8.2 billion (8,162 million). The population is projected to peak in 2084 at 10.3 billion.
+
+**Children Under 5 Years Old:** The number of children under 5 is 647 million in 2024. This figure peaked in 2017 at 698 million and is projected to decline to 550 million by 2100.
+
+**Children Aged 0–14 Years:** The population of children aged 0–14 peaked in 2020 and stands at 2.0 billion in 2024.
+  
+**Children and Adolescents under 18:** The population of those aged 0–17 years peaked in 2022 and stands at 2.4 billion (2,413 million) in 2024.  
+  
+**Children and Adolescents under 20:** The population of those aged 0–19 years is 2.7 billion (2,668 million) in 2024, which marks the peak year for this age group.
+
+**Population Under 25 Years Old (0–24):** The number of people aged 0–24 years is 3.3 billion in 2024. This population is expected to experience a slight increase and peak in 2030.
+
+```{r, fig.width = 10, fig.height = 12}
+gg_world_age1
+
+```
+
+
+**Table of the World population under 5, 10, 15, 18, 20, and 25 years old (in million)**  
+```{r}
+knitr::kable(dt_age_table)
+```
+
+
+**Also by sex:  **
+
+```{r, fig.width = 10, fig.height = 14}
+gg_world_age1_by_sex 
+
+```
+
+
+**World population**  
+
+```{r, fig.width = 10, fig.height = 12}
+gg_world_age2
+
+```
+
+Source: [World population Prospects (WPP) 2024](https://population.un.org/wpp/downloads?folder=Standard%20Projections&group=CSV%20format). Population on 01 July, by 1-year age groups.

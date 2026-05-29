@@ -1,42 +1,0 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title>Machine Learning on Welcome to my blog</title>
-    <link>https://liuyanguu.github.io/categories/machine-learning/</link>
-    <description>Recent content in Machine Learning on Welcome to my blog</description>
-    <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language>
-    <lastBuildDate>Thu, 18 Jul 2019 00:00:00 +0000</lastBuildDate><atom:link href="https://liuyanguu.github.io/categories/machine-learning/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>SHAP for XGBoost in R: SHAPforxgboost</title>
-      <link>https://liuyanguu.github.io/post/2019/07/18/visualization-of-shap-for-xgboost/</link>
-      <pubDate>Thu, 18 Jul 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://liuyanguu.github.io/post/2019/07/18/visualization-of-shap-for-xgboost/</guid>
-      <description>The SHAPforxgboost packageWhy SHAP valuesLocal explanationConsistency in global feature importanceSHAP plotsSummary plotDependence plotInteraction effectsSHAP force plotReferencesThe SHAPforxgboost packageI wrote the R package SHAPforxgboost to cover all the plotting functions illustrated in this post. This post serves as the vignette for the package.
-Please install from CRAN or Github.
-install.packages(&amp;quot;SHAPforxgboost&amp;quot;)# or devtools::install_github(&amp;quot;liuyanguu/SHAPforxgboost&amp;quot;)Why SHAP valuesSHAP’s main advantages are local explanation and consistency in global model structure.</description>
-    </item>
-    
-    <item>
-      <title>Study shrinkage and DART in xgboost modeling using a simple dataset</title>
-      <link>https://liuyanguu.github.io/post/2018/11/15/xgboost-dart-example/</link>
-      <pubDate>Thu, 15 Nov 2018 00:00:00 +0000</pubDate>
-      
-      <guid>https://liuyanguu.github.io/post/2018/11/15/xgboost-dart-example/</guid>
-      <description>DataShrinkageDART: Dropout - MARTskip_droprate_dropone_dropIt is always a good idea to study the packaged algorithm with a simple example. Inspired by my colleague Kodi’s excellent work showing how xgboost handles missing values, I tried a simple 5x2 dataset to show how shrinkage and DART influence the growth of trees in the model.
-Dataset.seed(123)n0 &amp;lt;- 5X &amp;lt;- data.frame(x1 = runif(n0), x2 = runif(n0))Y &amp;lt;- c(1, 5, 20, 50, 100)cbind(X, Y)## x1 x2 Y## 1 0.</description>
-    </item>
-    
-    <item>
-      <title>SHAP Visualization in R (first post)</title>
-      <link>https://liuyanguu.github.io/post/2018/10/14/shap-visualization-for-xgboost/</link>
-      <pubDate>Sun, 14 Oct 2018 00:00:00 +0000</pubDate>
-      
-      <guid>https://liuyanguu.github.io/post/2018/10/14/shap-visualization-for-xgboost/</guid>
-      <description>Example 1SHAP summary plotAlternative ways:SHAP dependence plotSHAP interaction effect plotSHAP force plotExample 2Summary plotDependence plot for each featureForce plotStack plot by clustering groupsUpdate 19/07/21:
-Since my R Package SHAPforxgboost has been released on CRAN, I updated this post using the new functions and illustrate how to use these functions using two datasets. For more information, please refer to: SHAP visualization for XGBoost in R</description>
-    </item>
-    
-  </channel>
-</rss>

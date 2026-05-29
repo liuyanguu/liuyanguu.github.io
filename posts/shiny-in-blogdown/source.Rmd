@@ -1,0 +1,44 @@
+---
+title: Shiny in Blogdown
+author: Yang Liu
+date: '2019-02-24'
+slug: shiny-in-blogdown
+categories:
+  - Data Visualization
+  - Shiny
+tags:
+  - Shiny
+output:
+  blogdown::html_page:
+    toc: true
+---
+
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = T, message=FALSE, warning=FALSE)
+```
+
+## How to embed _Shiny_  
+Since _Blogdown_ is for static websites, it cannot run _Shiny_ in rmarkdown directly. According to discussion [here](https://github.com/rstudio/blogdown/issues/166) and document [here](https://bookdown.org/yihui/blogdown/html-widgets.html).
+
+The only way to do it is using `iframe` and write outside the chunk:  
+`<iframe src="https://liuyanguu.shinyapps.io/bcl_app/" width=1000 height=800"></iframe>`  
+  
+There is also a built-in function in _knitr_ to do the same thing and write in the chunk. The only difference is that we can only set `height`, and the shiny app would appear slightly different with the **siderbarPanel** at the top and the **mainPanel** beneath it.  
+```{r, echo = T, eval = F}
+knitr::include_app("https://liuyanguu.shinyapps.io/bcl_app/", height = "100%")
+# by the way, you can also embed your slides in a similar way, for example:
+knitr::include_url('https://timmastny.rbind.io/slides/first_presentation#2')
+```
+
+## My *Shiny* app example
+I modified based on the [great example and tutorial](https://deanattali.com/blog/building-shiny-apps-tutorial/) by Dean Attali, whom I found is also the author of _ggExtra_'s marginal plot. It is definitely better than Shiny's own training materials.   
+Thanks a lot. Yes, I donated.  
+  
+If this embedment doesn't appear well on your screen, here is [the link to the app](https://liuyanguu.shinyapps.io/bcl_app/).
+<iframe src="https://liuyanguu.shinyapps.io/bcl_app/" width=1000 height=800"></iframe>
+
+  
+**The code for the app**  
+All the code is in one file. I did not split ui with server.  
+The code are hosted [on github](https://github.com/liuyanguu/shiny_app/blob/master/bcl_app.R).  

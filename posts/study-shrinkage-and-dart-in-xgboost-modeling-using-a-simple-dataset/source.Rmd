@@ -1,0 +1,146 @@
+---
+title: "Study shrinkage and DART in xgboost modeling using a simple dataset"
+author: Yang Liu
+date: "2018-11-15"
+slug: xgboost-dart-example
+categories:
+  - Machine Learning
+tags:
+  - XGBoost
+  - DART
+output:
+  blogdown::html_page:
+    toc: true
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
+```
+
+```{r loadlibs, include = F}
+suppressPackageStartupMessages({
+library(xgboost)
+library(DiagrammeR)
+})
+options(digits = 4)
+```
+
+It is always a good idea to study the packaged algorithm with a simple example. Inspired by [my colleague Kodi's excellent work showing how `xgboost` handles missing values](http://arfer.net/w/xgboost-sparsity), I tried a simple 5x2 dataset to show how shrinkage and DART influence the growth of trees in the model.
+
+# Data
+```{r}
+set.seed(123)
+n0 <- 5
+X <-  data.frame(x1 = runif(n0), x2 = runif(n0))
+Y <-  c(1, 5, 20, 50, 100)
+cbind(X, Y)
+```
+
+# Shrinkage
+1. Step size shrinkage was the major tool designed to prevents overfitting (over-specialization).   
+* [The R document](https://xgboost.readthedocs.io/en/latest/parameter.html) says that the learning rate `eta` has range [0, 1] but `xgboost` takes any value of $eta\ge0$. Here I select eta = 2, then the model can perfectly predict in two steps, the train rmse from iter 2 was 0, only two trees were used.   
+Of course, it is a bad idea to use a very large _eta_ in real applications as the tree will not be helpful and the predicted value will be very wrong.   
+* The `max_depth` is the maximum depth of a tree, I set 10 but it won't be reached    
+* By default, there is no other regularization
+* By setting `base_score = 0` in `xgboost` we can add up the values in the leaves of two trees to get every number in Y: `r Y`
+```{r}
+# non-zero skip_drop has higher priority than rate_drop or one_drop
+param_gbtree <- list(objective = 'reg:linear', nrounds = 3, 
+                   eta = 2,
+                   max_depth = 10,
+                   min_child_weight = 0,
+                   booster = 'gbtree'
+)
+
+simple.xgb.output <- function(param,...){
+  set.seed(1234)
+  m = xgboost(data = as.matrix(X), label = Y, params = param,
+              nrounds = param$nround, 
+              base_score = 0)
+  cat('Evaluation log showing testing error:\n')
+  print(m$evaluation_log)
+  pred <- predict(m, as.matrix(X), ntreelimit = param$nrounds)
+  cat('Predicted values of Y: \n')
+  print(pred)
+  pred2 <- predict(m, as.matrix(X), predcontrib = TRUE)
+  cat("SHAP value for X: \n")
+  print(pred2)
+  p <- xgb.plot.tree(model = m)
+  p
+}
+simple.xgb.output(param_gbtree)
+```
+   
+* If `eta` = 1  
+Then no perfect prediction could be made and the trees grow in a more conservative manner  
+```{r}
+# non-zero skip_drop has higher priority than rate_drop or one_drop
+param_gbtree <- list(objective = 'reg:linear', nrounds = 3, 
+                   eta = 1,
+                   max_depth = 10,
+                   min_child_weight = 0,
+                   booster = 'gbtree'
+)
+simple.xgb.output(param_gbtree)
+```
+
+# DART: Dropout - MART
+DART ([paper on JMLR](http://proceedings.mlr.press/v38/korlakaivinayak15.pdf)) adopted dropout method from neural networks to boosted regression rees (i.e.,MART: Multiple Additive Regression Trees). DART aims to further prevent over-specialization. It requires select `booster = 'dart'` in `xgboost` and tune several hyper-parameters ([Ref: R documents](https://xgboost.readthedocs.io/en/latest/parameter.html#additional-parameters-for-dart-booster-booster-dart)).  
+  
+## `skip_drop`  
+* The `skip_drop`(default = 0, range [0, 1]) is the probability of skipping dropout. It has a higher priority than other DART parameters. If `skip_drop` = 1, the dropout procedure would be skipped and `dart` is the same as `gbtree`. The setting below gives the same result as the `gbtree` above (results omitted):
+```{r}
+param_gbtree <- list(objective = 'reg:linear', nrounds = 3, 
+                   eta = 2,
+                   max_depth = 10,
+                   booster = 'dart',
+                   skip_drop = 1,  # = 1 means always skip, = gbtree
+                   rate_drop = 1,  # doesn't matter since drop is always skipped
+                   one_drop = 1
+)
+```
+  
+## `rate_drop`  
+* If `skip_drop`$\ne0$, `rate_drop (default = 0, range [0, 1])` will drop a fraction of the trees before the model update in every iteration. 
+* The DART paper [JMLR](http://proceedings.mlr.press/v38/korlakaivinayak15.pdf) said the dropout makes DART between gbtree and random forest: "If no tree is dropped, DART is the same as MART (`gbtree`); if all the trees are dropped, DART is no different than random forest."
+* If `rate_drop` = 1 then all the trees are dropped, a random forest of trees is built. In our case of a very simple dataset, the 'random forest' just repeats the same tree `nrounds` times:   
+```{r}
+param_dart1 <- list(objective = 'reg:linear', nrounds = 3, 
+                   eta = 2,
+                   max_depth = 10,
+                   booster = 'dart',
+                   skip_drop = 0,  
+                   rate_drop = 1,  # doesn't matter since drop is always skipped
+                   one_drop = 1
+)
+simple.xgb.output(param_dart1)
+```
+  
+## `one_drop`  
+* If `one_drop` = 1 then at least one tree is always dropped. If I let `rate_drop`=0, but `one_drop` = 1, the dropping was still working, and the trees were built in a more conservative manner. Since the first tree will be dropped, the second tree is the same as the first one  
+```{r, fig.width = 8, fig.height = 10}
+param_dart2 <- list(objective = 'reg:linear', nrounds = 5, 
+                   eta = 2,
+                   max_depth = 10,
+                   booster = 'dart',
+                   skip_drop = 0,  
+                   rate_drop = 0,  # doesn't matter since drop is always skipped
+                   one_drop = 1
+)
+simple.xgb.output(param_dart2)
+```
+
+* Similar conservative effect if I set `skip_drop` to be non-zero:  
+```{r, fig.width = 8, fig.height = 10}
+param_dart3 <- list(objective = 'reg:linear', nrounds = 5, 
+                   eta = 2,
+                   max_depth = 10,
+                   booster = 'dart',
+                   skip_drop = 0,  
+                   rate_drop = 0.5,  # doesn't matter since drop is always skipped
+                   one_drop = 0
+)
+simple.xgb.output(param_dart3)
+```
+
+Letting `one_drop` = 1 also gives result more conservative, and smaller train-rmse if use same rounds. 

@@ -1,0 +1,58 @@
+---
+title: Catalog of my old blog
+author: Yang Liu
+date: '2018-07-01'
+slug: catalogue-of-my-old-blog
+categories:
+  - Catalog
+tags:
+  - Catalog
+---
+
+# Introducing my new blog written solely in __R Markdown__
+When I realized it was so convenient to write blog directly using R Markdown, I searched if there is a specific tool for it. And I found __Blogdown__, an R package developed by Yihui Xie, who also developed R Markdown. 
+
+# Catalog
+As a summary, I would like to create a catalog for the main topics I wrote on google blogger before July 2018. I included some figures too, most were created in R.
+
+__1. Details behind my work at Marron Institute__  
+  
+  * [The Zipf's Law in details and the math behind](https://yangliuresearch.blogspot.com/2018/01/power-law-distribution-pareto-zipfs-law.html)  
+![](/post/2018-07-20-catalogue-on-my-old-blogger_files/Zipf CDFs.jpeg){width=60%}  
+  * [How to use our city and population weights](https://yangliuresearch.blogspot.com/2018/01/interesting-findings-on-weights.html)  
+  * [How I created the city-level GDP per capita](https://yangliuresearch.blogspot.com/2018/01/how-to-get-city-gdp-for-universe-of.html)  
+  * [How I calculated the distances for airport score](https://yangliuresearch.blogspot.com/2018/01/fixed-minor-issue-calculating.html) 
+    
+
+__2. Data Visualization__  
+  
+  * [The pattern of 3.5 million commuting trips in Chicago](https://yangliuresearch.blogspot.com/2018/03/week-319-how-many-jobs-are-passed-on.html)   
+![](/post/2018-07-20-catalogue-on-my-old-blogger_files/Chicago small.JPG){width=60%}  
+  * [Visualization using heatmap](https://yangliuresearch.blogspot.com/2018/03/visualization-of-workhome-density-and.html)   
+![](/post/2018-07-20-catalogue-on-my-old-blogger_files/Work - Live Count.JPG){width=60%}  
+  * [3D World Map: Air Connectivity (Airport Score)](https://yangliuresearch.blogspot.com/2018/01/3d-world-map-and-global-housing.html)  
+![](/post/2018-07-20-catalogue-on-my-old-blogger_files/v3.JPG){width=60%}  
+  * [Method and New Updates for Airport Score](https://yangliuresearch.blogspot.com/2018/01/redo-airport-score.html)  
+  * [Visualization of Conflicts in Colombia and the World](https://yangliuresearch.blogspot.com/2018/01/visualization-of-conflicts-in-colombia.html)  
+![](/post/2018-07-20-catalogue-on-my-old-blogger_files/Colombia conflict PDETS v2.JPG){width=60%}  
+  * [City population, growth rate, and income](https://yangliuresearch.blogspot.com/2018/02/city-population-growth-rate-and-income.html)
+    
+__3. Introduction to Statistics__  
+  
+  * [Boxplot can be viewed as a vertical histogram](https://yangliuresearch.blogspot.com/2018/03/boxplot-as-vertical-histogram.html)  
+![](/post/2018-07-20-catalogue-on-my-old-blogger_files/living histogram.jpg){width=60%}  
+  * [RSS Statistic of the year: 69 Americans were killed by lawnmowers annually](https://yangliuresearch.blogspot.com/2018/02/rss-statistic-of-year-69-americans-were.html)  
+  * [Why a perfect correlation can mean nothing](https://yangliuresearch.blogspot.com/2018/01/why-perfect-correlation-can-mean.html)  
+  * [Why it is so wrong to average ratios: Simpson's paradox](https://yangliuresearch.blogspot.com/2018/01/why-it-is-so-wrong-to-average-ratios.html)  
+  * [How to calculate the weighted standard deviation](https://yangliuresearch.blogspot.com/2018/01/the-weighted-standard-deviation.html)  
+  * [Logistic regression can be equivalent to contingency table explained by an example](https://yangliuresearch.blogspot.com/2018/02/logistic-regression-can-be-equivalent.html)  
+  
+    
+__4. R programming and statistical modeling__  
+  
+  * [Modeling of Slums: Model Selection using Lasso and Best Subset](https://yangliuresearch.blogspot.com/2018/06/modeling-of-slums-model-selection-using.html)  
+![](/post/2018-07-20-catalogue-on-my-old-blogger_files/1.1.JPG){width=60%}  
+  * [Best subset selection uses the branch and bound algorithm to speed up](https://yangliuresearch.blogspot.com/2018/07/best-subset-selection-in-both-r-and-sas.html)  
+  * [Spatial join is very useful: project coordinate onto geological grid](https://yangliuresearch.blogspot.com/2018/04/spatial-join-is-very-useful-project.html)  
+  * [How to batch analysis multiple data files in R](https://yangliuresearch.blogspot.com/2018/05/batch-analysis-group-of-data-files-in-r.html)  
+  

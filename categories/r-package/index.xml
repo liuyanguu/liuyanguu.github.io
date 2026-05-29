@@ -1,33 +1,0 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title>R package on Welcome to my blog</title>
-    <link>https://liuyanguu.github.io/categories/r-package/</link>
-    <description>Recent content in R package on Welcome to my blog</description>
-    <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language>
-    <lastBuildDate>Sun, 28 Jul 2019 00:00:00 +0000</lastBuildDate><atom:link href="https://liuyanguu.github.io/categories/r-package/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>Notes on writing an R package</title>
-      <link>https://liuyanguu.github.io/post/2019/07/28/some-experience-on-writing-r-package/</link>
-      <pubDate>Sun, 28 Jul 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://liuyanguu.github.io/post/2019/07/28/some-experience-on-writing-r-package/</guid>
-      <description>Some of my own experienceOn descriptionNamespaceload vs attachDocumentationPotential problems when checking the packageSome nice suggestions from the CRAN team when submitting the packageAlthough ‘SHAPforxgboost’ is not a package too complicated, it took me some time to get the package pass all the cran check. Now (Aug.03,2019) it is available on cran. Install by either
-install.packages(&amp;quot;SHAPforxgboost&amp;quot;)or
-devtools::install_github(&amp;quot;liuyanguu/SHAPforxgboost&amp;quot;)Use the ‘usethis’ package https://usethis.r-lib.org/ to set up the structure of the package.</description>
-    </item>
-    
-    <item>
-      <title>SHAP for XGBoost in R: SHAPforxgboost</title>
-      <link>https://liuyanguu.github.io/post/2019/07/18/visualization-of-shap-for-xgboost/</link>
-      <pubDate>Thu, 18 Jul 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://liuyanguu.github.io/post/2019/07/18/visualization-of-shap-for-xgboost/</guid>
-      <description>The SHAPforxgboost packageWhy SHAP valuesLocal explanationConsistency in global feature importanceSHAP plotsSummary plotDependence plotInteraction effectsSHAP force plotReferencesThe SHAPforxgboost packageI wrote the R package SHAPforxgboost to cover all the plotting functions illustrated in this post. This post serves as the vignette for the package.
-Please install from CRAN or Github.
-install.packages(&amp;quot;SHAPforxgboost&amp;quot;)# or devtools::install_github(&amp;quot;liuyanguu/SHAPforxgboost&amp;quot;)Why SHAP valuesSHAP’s main advantages are local explanation and consistency in global model structure.</description>
-    </item>
-    
-  </channel>
-</rss>

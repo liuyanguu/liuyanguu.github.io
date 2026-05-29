@@ -1,434 +1,695 @@
 <!DOCTYPE html>
-<html lang="en-us">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    
-    <title>SHAP for XGBoost in R: SHAPforxgboost | Welcome to my blog</title>
-    <link rel="stylesheet" href="/css/style.css" />
-    <link rel="stylesheet" href="/css/fonts.css" />
-    <link href="//cdn.bootcss.com/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
-  </head>
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.36">
 
-  <body class="page">
-    <nav class="header">
-      <div class="banner">
-<a href="/">
-
-<img src="/ocean%202.jpg" alt="Text on Image" />
-</a>
-</div>
-
-      <div class="head-meta">
-      
-        <span><a href="/">&larr; Back to Home</a></span>
-        <span class="date">2019-07-18</span>
-        
-        
-        
-          
-        
-        
-        
-        <span><a href="https://github.com/liuyanguu/Blogdown/edit/master/hugo-xmag/content/post/2019-07-18-visualization-of-shap-for-xgboost.Rmd">Edit this page &rarr;</a></span>
-        
-        
-      
-      </div>
-    </nav>
-
-<div class="container">
-<article>
-<div class="article-meta">
-
-  <div class="categories">
-  
-    <a href="/categories/r-package">R package</a>
-  
-     &hercon; <a href="/categories/machine-learning">Machine Learning</a>
-  
-     &hercon; <a href="/categories/data-visualization">Data Visualization</a>
-  
-  </div>
-
-  <h1><span class="title">SHAP for XGBoost in R: SHAPforxgboost</span></h1>
-
-  
-  <h3 class="author">Yang Liu
-</h3>
-  
-
-  
-  <p>Tags: <a href="/tags/xgboost">XGBoost</a>; <a href="/tags/shap">SHAP</a>; <a href="/tags/shapforxgboost">SHAPforxgboost</a>
-  </p>
-  
-  
-
-</div>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-
-<main>
-
-<link href="/rmarkdown-libs/anchor-sections/anchor-sections.css" rel="stylesheet" />
-<script src="/rmarkdown-libs/anchor-sections/anchor-sections.js"></script>
-<link href="/rmarkdown-libs/pagedtable/css/pagedtable.css" rel="stylesheet" />
-<script src="/rmarkdown-libs/pagedtable/js/pagedtable.js"></script>
-
-<div id="TOC">
-<ul>
-<li><a href="#the-shapforxgboost-package">The <code>SHAPforxgboost</code> package</a></li>
-<li><a href="#why-shap-values">Why SHAP values</a><ul>
-<li><a href="#local-explanation">Local explanation</a></li>
-<li><a href="#consistency-in-global-feature-importance">Consistency in global feature importance</a></li>
-</ul></li>
-<li><a href="#shap-plots">SHAP plots</a><ul>
-<li><a href="#summary-plot">Summary plot</a></li>
-<li><a href="#dependence-plot">Dependence plot</a></li>
-<li><a href="#interaction-effects">Interaction effects</a></li>
-<li><a href="#shap-force-plot">SHAP force plot</a></li>
-</ul></li>
-<li><a href="#references">References</a></li>
-</ul>
-</div>
-
-<div id="the-shapforxgboost-package" class="section level1">
-<h1>The <code>SHAPforxgboost</code> package</h1>
-<p>I wrote the R package <a href="https://cran.r-project.org/web/packages/SHAPforxgboost/index.html"><strong>SHAPforxgboost</strong></a> to cover all the plotting functions illustrated in this post. This post serves as the vignette for the package.</p>
-<p>Please install from CRAN or <a href="https://github.com/liuyanguu/SHAPforxgboost">Github</a>.</p>
-<pre class="r"><code>install.packages(&quot;SHAPforxgboost&quot;)
-# or 
-devtools::install_github(&quot;liuyanguu/SHAPforxgboost&quot;)</code></pre>
-</div>
-<div id="why-shap-values" class="section level1">
-<h1>Why SHAP values</h1>
-<p>SHAP’s main advantages are <strong>local explanation</strong> and <strong>consistency</strong> in global model structure.</p>
-<p>Tree-based machine learning models (random forest, gradient boosted trees, XGBoost) are the most popular non-linear models today. SHAP (SHapley Additive exPlanations) values is claimed to be the most advanced method to interpret results from tree-based models. It is based on Shaply values from game theory, and presents the feature importance using by marginal contribution to the model outcome.</p>
-<p>This <a href="https://github.com/slundberg/shap">Github page</a> explains the Python package developed by Scott Lundberg. Here we show all the visualizations in R. The <code>xgboost::xgb.shap.plot</code> function can also make simple dependence plot.</p>
-<div id="local-explanation" class="section level2">
-<h2>Local explanation</h2>
-<pre class="r"><code># run the model with built-in data
-suppressPackageStartupMessages({
-library(&quot;SHAPforxgboost&quot;); library(&quot;ggplot2&quot;); library(&quot;xgboost&quot;)
-library(&quot;data.table&quot;); library(&quot;here&quot;)
-})
-
-y_var &lt;-  &quot;diffcwv&quot;
-dataX &lt;- as.matrix(dataXY_df[,-..y_var])
-# hyperparameter tuning results
-param_list &lt;- list(objective = &quot;reg:squarederror&quot;,  # For regression
-                   eta = 0.02,
-                   max_depth = 10,
-                   gamma = 0.01,
-                   subsample = 0.95
-                   )
-mod &lt;- xgboost::xgboost(data = dataX, 
-                        label = as.matrix(dataXY_df[[y_var]]), 
-                        params = param_list, nrounds = 10,
-                        verbose = FALSE, nthread = parallel::detectCores() - 2,
-                        early_stopping_rounds = 8)
-                       
-# To return the SHAP values and ranked features by mean|SHAP|
-shap_values &lt;- shap.values(xgb_model = mod, X_train = dataX)
-# The ranked features by mean |SHAP|
-shap_values$mean_shap_score</code></pre>
-<pre><code>##          dayint       Column_WV AOT_Uncertainty   dist_water_km             aod 
-##    0.0165331533    0.0115615699    0.0073583570    0.0057172670    0.0039983764 
-##            elev     DevAll_P1km           RelAZ  forestProp_1km 
-##    0.0037026883    0.0025215052    0.0009489252    0.0003197501</code></pre>
-<p>SHAP values are calculated for each cell in the training dataset. The SHAP values dataset (<code>shap_values$shap_score</code>) has the same dimension (10148,9) as the dataset of the independent variables (10148,9) fit into the xgboost model.</p>
-<p>The sum of each row’s SHAP values (plus the <strong>BIAS</strong> column, which is like an intercept) is the predicted model output. As in the following table of SHAP values, <code>rowSum</code> equals the output <code>predict(xgb_mod)</code>. I.e., the explanation’s attribution values sum up to the model output (last column in the table below). This is the case in this example, but not so if you are running e.g. 5-fold cross-validation.</p>
-<pre class="r"><code># to show that `rowSum` is the output:
-shap_data &lt;- copy(shap_values$shap_score)
-shap_data[, BIAS := shap_values$BIAS0]
-pred_mod &lt;- predict(mod, dataX, ntreelimit = 10)
-shap_data[, `:=`(rowSum = round(rowSums(shap_data),6), pred_mod = round(pred_mod,6))]
-rmarkdown::paged_table(shap_data[1:20,])</code></pre>
-<div data-pagedtable="false">
-<script data-pagedtable-source type="application/json">
-{"columns":[{"label":["dayint"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["Column_WV"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["AOT_Uncertainty"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["elev"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["aod"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["RelAZ"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["DevAll_P1km"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["dist_water_km"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["forestProp_1km"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["BIAS"],"name":[10],"type":["dbl"],"align":["right"]},{"label":["rowSum"],"name":[11],"type":["dbl"],"align":["right"]},{"label":["pred_mod"],"name":[12],"type":["dbl"],"align":["right"]}],"data":[{"1":"-0.02557905","2":"-0.0005755072","3":"-0.0098052761","4":"0.0073726904","5":"-0.0107722692","6":"-0.0004805907","7":"-1.117577e-03","8":"0.0061048246","9":"1.844858e-04","10":"0.4174739","11":"0.382806","12":"0.382806"},{"1":"-0.02483972","2":"-0.0034067584","3":"-0.0115150800","4":"-0.0035686186","5":"-0.0270973835","6":"-0.0015936509","7":"-3.331856e-03","8":"-0.0167273134","9":"-1.723413e-04","10":"0.4174739","11":"0.325221","12":"0.325221"},{"1":"-0.03413666","2":"-0.0007374412","3":"-0.0007180684","4":"-0.0026140946","5":"-0.0095058009","6":"-0.0005366615","7":"1.963652e-03","8":"0.0022106667","9":"8.728726e-05","10":"0.4174739","11":"0.373487","12":"0.373487"},{"1":"-0.03434632","2":"-0.0045883073","3":"-0.0191144440","4":"-0.0030631854","5":"-0.0205219947","6":"-0.0014030929","7":"1.436443e-03","8":"-0.0157566406","9":"2.180699e-04","10":"0.4174739","11":"0.320334","12":"0.320334"},{"1":"-0.01832963","2":"-0.0086402912","3":"0.0026233871","4":"0.0027268552","5":"0.0005017931","6":"-0.0003358831","7":"-2.013395e-04","8":"0.0014244873","9":"1.215334e-04","10":"0.4174739","11":"0.397365","12":"0.397365"},{"1":"-0.01772710","2":"-0.0005145757","3":"0.0013348022","4":"-0.0009447359","5":"0.0020042206","6":"-0.0003174599","7":"1.110274e-03","8":"-0.0021392661","9":"3.686000e-04","10":"0.4174739","11":"0.400649","12":"0.400649"},{"1":"-0.02023106","2":"-0.0050968509","3":"0.0011314561","4":"-0.0023222903","5":"0.0015982637","6":"-0.0002370200","7":"7.947011e-04","8":"-0.0014749069","9":"1.047513e-04","10":"0.4174739","11":"0.391741","12":"0.391741"},{"1":"-0.01525974","2":"-0.0045129582","3":"-0.0061629983","4":"0.0025710966","5":"0.0043358626","6":"-0.0003244348","7":"-3.078676e-05","8":"0.0015471068","9":"1.140457e-04","10":"0.4174739","11":"0.399751","12":"0.399751"},{"1":"-0.01445252","2":"0.0030874913","3":"-0.0059410208","4":"-0.0007819544","5":"0.0038836361","6":"-0.0003378282","7":"-1.861672e-04","8":"-0.0041062119","9":"1.649890e-05","10":"0.4174739","11":"0.398656","12":"0.398656"},{"1":"-0.01511972","2":"0.0004664771","3":"-0.0062720692","4":"-0.0001698038","5":"0.0042251395","6":"-0.0002849138","7":"8.402658e-04","8":"-0.0026890752","9":"1.856266e-04","10":"0.4174739","11":"0.398656","12":"0.398656"},{"1":"-0.01533287","2":"0.0007446357","3":"-0.0061498899","4":"0.0004168376","5":"0.0022613860","6":"-0.0002848775","7":"8.296125e-04","8":"-0.0028650968","9":"1.859436e-04","10":"0.4174739","11":"0.397280","12":"0.397280"},{"1":"-0.01604510","2":"-0.0032839011","3":"-0.0051546735","4":"-0.0004067498","5":"0.0034330199","6":"-0.0003226944","7":"7.105558e-04","8":"-0.0009660273","9":"5.508904e-05","10":"0.4174739","11":"0.395493","12":"0.395493"},{"1":"-0.01883645","2":"-0.0084283454","3":"0.0017651436","4":"0.0027960844","5":"0.0016753853","6":"-0.0002863287","7":"-1.818746e-04","8":"0.0012689425","9":"1.183508e-04","10":"0.4174739","11":"0.397365","12":"0.397365"},{"1":"-0.01770927","2":"-0.0017823400","3":"0.0018962277","4":"-0.0006375462","5":"0.0019486732","6":"-0.0002957275","7":"1.191899e-03","8":"-0.0018049469","9":"3.677855e-04","10":"0.4174739","11":"0.400649","12":"0.400649"},{"1":"-0.02038937","2":"-0.0065577431","3":"0.0035359780","4":"-0.0032310234","5":"0.0020057550","6":"-0.0003128728","7":"5.236075e-04","8":"-0.0014238193","9":"1.165268e-04","10":"0.4174739","11":"0.391741","12":"0.391741"},{"1":"-0.02046929","2":"0.0107371798","3":"-0.0026274007","4":"-0.0038221127","5":"-0.0123990234","6":"-0.0009247615","7":"-1.167993e-03","8":"-0.0033206309","9":"-7.913404e-05","10":"0.4174739","11":"0.383401","12":"0.383401"},{"1":"-0.01582124","2":"-0.0002622633","3":"-0.0052699968","4":"-0.0005557226","5":"0.0043615745","6":"-0.0002625712","7":"3.951869e-04","8":"-0.0029743179","9":"1.950321e-04","10":"0.4174739","11":"0.397280","12":"0.397280"},{"1":"-0.01715348","2":"-0.0044425409","3":"-0.0022627416","4":"-0.0016017534","5":"0.0038209974","6":"-0.0002851978","7":"6.857596e-04","8":"-0.0008376217","9":"9.609586e-05","10":"0.4174739","11":"0.395493","12":"0.395493"},{"1":"-0.01578710","2":"-0.0063197329","3":"-0.0039092759","4":"0.0023183986","5":"0.0028014842","6":"-0.0002928231","7":"-3.439377e-04","8":"0.0014018872","9":"1.287550e-04","10":"0.4174739","11":"0.397472","12":"0.397472"},{"1":"-0.01740243","2":"-0.0023277157","3":"0.0043687141","4":"-0.0035607964","5":"0.0043153968","6":"-0.0003133073","7":"-1.636773e-04","8":"-0.0016290097","9":"-1.124185e-04","10":"0.4174739","11":"0.400649","12":"0.400649"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
-  </script>
-</div>
-<p>This offers model explanation for each observation in the dataset. And offers lots of flexibility when summarizing the whole model.</p>
-</div>
-<div id="consistency-in-global-feature-importance" class="section level2">
-<h2>Consistency in global feature importance</h2>
-<p><strong>And why feature importance by Gain is inconsistent</strong></p>
-<p>Consistency means it is legitimate to compare feature importance across different models. When we modify the model to make a feature more important, the feature importance should increase. The paper used the following example:</p>
-<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/SHAPsuppfig2.JPG" />
-<em>paper 2, <a href="https://arxiv.org/abs/1905.04610">S. Lundberg 2019 arXiv:1905.04610</a></em></p>
-<p>Use the dataset of Model A above as a simple example, which feature goes <strong>first</strong> into the dataset generates <strong>opposite</strong> feature importance by Gain: whichever goes later (lower in the tree) gets more credit. Notice below the feature importance from <code>xgb.importance</code> were flipped.</p>
-<pre class="r"><code>library(xgboost)
-d &lt;- data.table::as.data.table(cbind(Fever = c(0,0,1,1), Cough = c(0,1,0,1), y = c(0,0,0,80)))
-knitr::kable(d)</code></pre>
-<table>
-<thead>
-<tr class="header">
-<th align="right">Fever</th>
-<th align="right">Cough</th>
-<th align="right">y</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">80</td>
-</tr>
-</tbody>
-</table>
-<pre class="r"><code>X1 = as.matrix(d[,.(Fever, Cough)])
-X2 = as.matrix(d[,.(Cough, Fever)])
-m1 = xgboost(
-  data = X1, label = d$y,base_score = 0, gamma = 0, eta = 1, lambda = 0,nrounds = 1, verbose = F)
-m2 = xgboost(
-  data = X2, label = d$y,base_score = 0, gamma = 0, eta = 1, lambda = 0,nrounds = 1, verbose = F)
-xgb.importance(model = m1)</code></pre>
-<pre><code>##    Feature      Gain     Cover Frequency
-## 1:   Cough 0.6666667 0.3333333       0.5
-## 2:   Fever 0.3333333 0.6666667       0.5</code></pre>
-<pre class="r"><code>xgb.importance(model = m2)</code></pre>
-<pre><code>##    Feature      Gain     Cover Frequency
-## 1:   Fever 0.6666667 0.3333333       0.5
-## 2:   Cough 0.3333333 0.6666667       0.5</code></pre>
-In short, the order/structure of how the tree is built doesn’t matter for SHAP, but matters for Gain, and the mean absolute SHAP is the same (20 vs. 20). The SHAP scores (SHAP.Fever, SHAP.Cough) for model <code>m1</code> and <code>m2</code>:
-Model <code>m1</code>:
-<div data-pagedtable="false">
-<script data-pagedtable-source type="application/json">
-{"columns":[{"label":["x.Fever"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["x.Cough"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["y.actual"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["y.pred"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["SHAP.Fever"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["SHAP.Cough"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["BIAS.BIAS"],"name":[7],"type":["dbl"],"align":["right"]}],"data":[{"1":"0","2":"0","3":"0","4":"0","5":"-10","6":"-10","7":"20"},{"1":"0","2":"1","3":"0","4":"0","5":"-30","6":"10","7":"20"},{"1":"1","2":"0","3":"0","4":"0","5":"10","6":"-30","7":"20"},{"1":"1","2":"1","3":"80","4":"80","5":"30","6":"30","7":"20"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
-  </script>
-</div>
-Model <code>m2</code>:
-<div data-pagedtable="false">
-<script data-pagedtable-source type="application/json">
-{"columns":[{"label":["x.Cough"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["x.Fever"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["y.actual"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["y.pred"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["SHAP.Cough"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["SHAP.Fever"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["BIAS.BIAS"],"name":[7],"type":["dbl"],"align":["right"]}],"data":[{"1":"0","2":"0","3":"0","4":"0","5":"-10","6":"-10","7":"20"},{"1":"1","2":"0","3":"0","4":"0","5":"10","6":"-30","7":"20"},{"1":"0","2":"1","3":"0","4":"0","5":"-30","6":"10","7":"20"},{"1":"1","2":"1","3":"80","4":"80","5":"30","6":"30","7":"20"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
-  </script>
-</div>
-<p>Moreover, comparing Model B to Model A in the figure above, Model B’s output was actually revised in a way that it relies more on a given feature (Cough, output scores increased by 10), so cough should be a more important feature. While Gain still get it wrong, SHAP reflects the correct feature importance.</p>
-</div>
-</div>
-<div id="shap-plots" class="section level1">
-<h1>SHAP plots</h1>
-<div id="summary-plot" class="section level2">
-<h2>Summary plot</h2>
-<p>The summary plot shows global feature importance. The sina plots show the distribution of feature contributions to the model output (in this example, the predictions of CWV measurement error) using SHAP values of each feature for every observation. Each dot is an observation (station-day).</p>
-<pre class="r"><code># To prepare the long-format data:
-shap_long &lt;- shap.prep(xgb_model = mod, X_train = dataX)
-# is the same as: using given shap_contrib
-shap_long &lt;- shap.prep(shap_contrib = shap_values$shap_score, X_train = dataX)</code></pre>
-<pre class="r"><code># **SHAP summary plot**
-shap.plot.summary(shap_long)</code></pre>
-<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-8-1.png" width="576" /></p>
-<p><strong>Alternative ways to make the same plot:</strong></p>
-<pre class="r"><code># option 1: from the xgboost model
-shap.plot.summary.wrap1(model = mod, X = dataX)
-
-# option 2: supply a self-made SHAP values dataset (e.g. sometimes as output from cross-validation)
-shap.plot.summary.wrap2(shap_score = shap_values$shap_score, X = dataX)</code></pre>
-</div>
-<div id="dependence-plot" class="section level2">
-<h2>Dependence plot</h2>
-<p>It plots the SHAP values against the feature values for each variable. Again, each dot is a station-day observation.</p>
-<pre class="r"><code>g1 &lt;- shap.plot.dependence(data_long = shap_long, x = &#39;dayint&#39;, y = &#39;dayint&#39;, color_feature = &#39;Column_WV&#39;) + ggtitle(&quot;(A) SHAP values of Time trend vs. Time trend&quot;)
-g2 &lt;- shap.plot.dependence(data_long = shap_long, x = &#39;dayint&#39;, y = &#39;Column_WV&#39;, color_feature = &#39;Column_WV&#39;) +  ggtitle(&quot;(B) SHAP values of CWV vs. Time trend&quot;)
-
-gridExtra::grid.arrange(g1, g2, ncol = 2)</code></pre>
-<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-10-1.png" width="960" /></p>
-<ol style="list-style-type: upper-alpha">
-<li>SHAP values showing the contribution of the time trend to predictions. The color represents the MAIAC CWV for each observation (purple high, yellow low). The LOESS (locally estimated scatterplot smoothing) curve is overlaid in red.<br />
-</li>
-<li>SHAP values showing the contribution of the MAIAC CWV to predictions of CWV measurement error shown across the time period of the study. Note distinct y-axis scales for Terra and Aqua datasets. The color represents the MAIAC CWV for each observation (purple high, yellow low).</li>
-</ol>
-<p>Here I choose to plot top 4 features using function <code>shap.plot.dependence</code>.<br />
-Plot SHAP value against feature value, without <code>color_feature</code> but has marginal distribution:</p>
-<pre class="r"><code>fig_list &lt;- lapply(names(shap_values$mean_shap_score)[1:4], 
-                   shap.plot.dependence, data_long = shap_long)
-gridExtra::grid.arrange(grobs = fig_list, ncol = 2)</code></pre>
-<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-11-1.png" width="960" /></p>
-</div>
-<div id="interaction-effects" class="section level2">
-<h2>Interaction effects</h2>
-<p>SHAP interaction values separate the impact of variable into main effects and interaction effects. They add up roughly to the dependence plot.</p>
-<p>Quote paper 2: “SHAP <strong>interaction values</strong> can be interpreted as the difference between the SHAP values for feature i when feature j is <strong>present</strong> and
-the SHAP values for feature i when feature j is <strong>absent</strong>.”</p>
-<p>The SHAP interaction values take time since it calculates all the combinations.</p>
-<pre class="r"><code># prepare the data using either: 
-# (this step is slow since it calculates all the combinations of features.)
-shap_int &lt;- shap.prep.interaction(xgb_mod = mod, X_train = dataX)
-# or:
-shap_int &lt;- predict(mod, dataX, predinteraction = TRUE) # (the same)</code></pre>
-<pre class="r"><code># **SHAP interaction effect plot **
-# if `data_int` is supplied, the same function will plot the interaction effect:
-g3 &lt;- shap.plot.dependence(data_long = shap_long,
-                           data_int = shap_int,
-                           x= &quot;dayint&quot;, y = &quot;Column_WV&quot;, 
-                           color_feature = &quot;Column_WV&quot;)
-g4 &lt;- shap.plot.dependence(data_long = shap_long,
-                           data_int = shap_int,
-                           x= &quot;Column_WV&quot;, y = &quot;AOT_Uncertainty&quot;, 
-                           color_feature = &quot;AOT_Uncertainty&quot;)
-gridExtra::grid.arrange(g3, g4, ncol=2)</code></pre>
-<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-14-1.png" width="960" /></p>
-<p>Here I show the interaction effects between Time trend and CWV (LEFT), and between Blue band uncertainty and CWV (RIGHT).</p>
-</div>
-<div id="shap-force-plot" class="section level2">
-<h2>SHAP force plot</h2>
-<p>The SHAP force plot basically stacks these SHAP values for each observation, and show how the final output was obtained as a sum of each predictor’s attributions.</p>
-<pre class="r"><code># choose to show top 4 features by setting `top_n = 4`, 
-# set 6 clustering groups of observations.  
-plot_data &lt;- shap.prep.stack.data(shap_contrib = shap_values$shap_score, top_n = 4, n_groups = 6)
-# you may choose to zoom in at a location, and set y-axis limit using `y_parent_limit`  
-shap.plot.force_plot(plot_data, zoom_in_location = 5000, y_parent_limit = c(-0.1,0.1))</code></pre>
-<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-15-1.png" width="768" /></p>
-<pre class="r"><code># plot the 6 clusters
-shap.plot.force_plot_bygroup(plot_data)</code></pre>
-<p><img src="/post/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-15-2.png" width="768" /></p>
-</div>
-</div>
-<div id="references" class="section level1">
-<h1>References</h1>
-<p>Recent submitted paper from my lab that applies these figures:
-<a href="http://doi.org/10.5281/zenodo.3334713">Gradient Boosting Machine Learning to Improve Satellite-Derived Column Water Vapor Measurement Error</a></p>
-<p>Paper 1. 2017 <a href="https://arxiv.org/abs/1705.07874">A Unified Approach to Interpreting Model Predictions</a><br />
-Paper 2. 2019 <a href="https://arxiv.org/abs/1802.03888">Consistent Individualized Feature Attribution for Tree
-Ensembles</a><br />
-Paper 3. 2019 <a href="https://arxiv.org/abs/1905.04610">Explainable AI for Trees: From Local Explanations to Global Understanding</a></p>
-</div>
-
-</main>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<nav class="post-nav">
-  <span class="nav-prev"><a href="/post/2019/07/28/some-experience-on-writing-r-package/">&larr; Notes on writing an R package</a></span>
-  <span class="nav-next"><a href="/post/2019/02/24/shiny-in-blogdown/">Shiny in Blogdown &rarr;</a></span>
-</nav>
-
-
-<div id="disqus_thread"></div>
-<script>
-(function() {
-var d = document, s = d.createElement('script');
-s.src = 'https://liuyanguu.disqus.com/embed.js';
-s.setAttribute('data-timestamp', +new Date());
-(d.head || d.body).appendChild(s);
-})();
-</script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-</article>
-</div>
-
-<script async src="//yihui.org/js/center-img.js"></script>
-
-<footer>
-
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-F3P69FBSHL"></script>
-<script>
-var doNotTrack = false;
-if (!doNotTrack) {
-	window.dataLayer = window.dataLayer || [];
-	function gtag(){dataLayer.push(arguments);}
-	gtag('js', new Date());
-	gtag('config', 'G-F3P69FBSHL', { 'anonymize_ip': false });
+<title>Redirect to /posts/shap-for-xgboost-in-r-shapforxgboost/ – Yang Liu</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
 }
-</script>
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
 
 
-  <div id="disqus_thread"></div>
-<script type="application/javascript">
-    window.disqus_config = function () {
-    
-    
-    
-    };
-    (function() {
-        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
-            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
-            return;
-        }
-        var d = document, s = d.createElement('script'); s.async = true;
-        s.src = '//' + "liuyanguu" + '.disqus.com/embed.js';
-        s.setAttribute('data-timestamp', +new Date());
-        (d.head || d.body).appendChild(s);
-    })();
-</script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+<script src="../../../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../../../">
+<link href="../../../../../assets/me.png" rel="icon" type="image/png">
+<script src="../../../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../../../site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../../../site_libs/bootstrap/bootstrap-a0f9fd0d421825b736dc1bbcbcba2219.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+<meta http-equiv="refresh" content="0; url=/posts/shap-for-xgboost-in-r-shapforxgboost/">
 
 
+<link rel="stylesheet" href="../../../../../styles.css">
+</head>
 
-<div class="footer">
-  <ul class="menu">
-    
-    <li><a href="/"><span data-hover="Home">Home</span></a></li>
-    
-    <li><a href="/tags/"><span data-hover="Tags">Tags</span></a></li>
-    
-    <li><a href="/categories/"><span data-hover="Categories">Categories</span></a></li>
-    
-    <li><a href="/about-me/"><span data-hover="About Me">About Me</span></a></li>
-    
-  </ul>
-  
-  <div class="copyright">@2024 Yang Liu <a href="https://github.com/liuyanguu">github.com/liuyanguu</a> Powered by Github.</div>
-  
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../../../../../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../../../../../assets/me.png" alt="" class="navbar-logo light-content">
+    <img src="../../../../../assets/me.png" alt="" class="navbar-logo dark-content">
+    </a>
+    <a class="navbar-brand" href="../../../../../index.html">
+    <span class="navbar-title">Yang Liu</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../../../posts/index.html"> 
+<span class="menu-text">Posts</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/liuyanguu"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://www.linkedin.com/in/liuyangbaruch/"> 
+<span class="menu-text">LinkedIn</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
 </div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Redirect to /posts/shap-for-xgboost-in-r-shapforxgboost/</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<script>window.location.replace("/posts/shap-for-xgboost-in-r-shapforxgboost/");</script>
+<p>This page has moved to <a href="../../../../..\posts/shap-for-xgboost-in-r-shapforxgboost/">/posts/shap-for-xgboost-in-r-shapforxgboost/</a>.</p>
+
+
+<!-- -->
+
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/liuyanguu\.github\.io");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Redirect to /posts/shap-for-xgboost-in-r-shapforxgboost/"</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">search:</span><span class="co"> false</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="an">page-layout:</span><span class="co"> article</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">    include-in-header:</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">      text: |</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">        &lt;meta http-equiv="refresh" content="0; url=/posts/shap-for-xgboost-in-r-shapforxgboost/"&gt;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">script</span><span class="dt">&gt;</span><span class="bu">window</span><span class="op">.</span><span class="at">location</span><span class="op">.</span><span class="fu">replace</span>(<span class="st">"/posts/shap-for-xgboost-in-r-shapforxgboost/"</span>)<span class="op">;</span><span class="dt">&lt;/</span><span class="kw">script</span><span class="dt">&gt;</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>This page has moved to <span class="co">[</span><span class="ot">/posts/shap-for-xgboost-in-r-shapforxgboost/</span><span class="co">](/posts/shap-for-xgboost-in-r-shapforxgboost/)</span>.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<ol start="3" type="a">
+<li>2026 Yang Liu</li>
+</ol>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Built with Quarto and R</p>
+</div>
+  </div>
 </footer>
 
 
-<script src="//yihui.org/js/math-code.js"></script>
-<script async src="//mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML"></script>
 
 
-
-<script src="//cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
-<script src="//cdn.bootcss.com/highlight.js/9.12.0/languages/r.min.js"></script>
-<script>
-hljs.configure({languages: []});
-hljs.initHighlightingOnLoad();
-</script>
-
-
-
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-F3P69FBSHL"></script>
-<script>
-var doNotTrack = false;
-if (!doNotTrack) {
-	window.dataLayer = window.dataLayer || [];
-	function gtag(){dataLayer.push(arguments);}
-	gtag('js', new Date());
-	gtag('config', 'G-F3P69FBSHL', { 'anonymize_ip': false });
-}
-</script>
-
-
-</body>
-</html>
-
+<script src="../../../../../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

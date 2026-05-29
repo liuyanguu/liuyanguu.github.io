@@ -1,541 +1,695 @@
 <!DOCTYPE html>
-<html lang="en-us">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    
-    <title>Spatial data in R: Dividing raster layers into equal-area rings | Welcome to my blog</title>
-    <link rel="stylesheet" href="/css/style.css" />
-    <link rel="stylesheet" href="/css/fonts.css" />
-    <link href="//cdn.bootcss.com/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
-  </head>
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.36">
 
-  <body class="page">
-    <nav class="header">
-      <div class="banner">
-<a href="/">
-
-<img src="/ocean%202.jpg" alt="Text on Image" />
-</a>
-</div>
-
-      <div class="head-meta">
-      
-        <span><a href="/">&larr; Back to Home</a></span>
-        <span class="date">2018-07-20</span>
-        
-        
-        
-          
-        
-        
-        
-        <span><a href="https://github.com/liuyanguu/Blogdown/edit/master/hugo-xmag/content/post/2018-07-19-spatial-data-in-r-dividing-raster-layers-into-equal-area-rings.Rmd">Edit this page &rarr;</a></span>
-        
-        
-      
-      </div>
-    </nav>
-
-<div class="container">
-<article>
-<div class="article-meta">
-
-  <div class="categories">
-  
-    <a href="/categories/data-visualization">Data Visualization</a>
-  
-     &hercon; <a href="/categories/spatial-data">Spatial Data</a>
-  
-  </div>
-
-  <h1><span class="title">Spatial data in R: Dividing raster layers into equal-area rings</span></h1>
-
-  
-  <h3 class="author">Yang Liu
-</h3>
-  
-
-  
-  <p>Tags: <a href="/tags/r">R</a>; <a href="/tags/geographic">Geographic</a>; <a href="/tags/spatial">Spatial</a>
-  </p>
-  
-  
-
-</div>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-
-<main>
-
-
-<div id="TOC">
-<ul>
-<li><a href="#saturation-in-ten-cities-with-equal-area-rings">Saturation in ten cities with equal-area rings</a></li>
-<li><a href="#r-code-for-one-city">R Code for one city</a></li>
-<li><a href="#results-for-the-ring-saturations">Results for the ring saturations</a></li>
-<li><a href="#average-saturation-in-each-ring">Average saturation in each ring</a></li>
-<li><a href="#methodology">Methodology</a></li>
-<li><a href="#original-code">Original Code</a></li>
-</ul>
-</div>
-
-<p><strong>This data visualization example include:</strong><br />
-* Import <code>.img</code> file as a raster<br />
-* Turn raster into a <em>data.frame</em> of points (coordinates) and values<br />
-* Dividing the points into 100 equal-area rings<br />
-* Calculate <em>Built-up Area/Urban Extent</em> for each ring<br />
-* Turn dataframe into raster<br />
-* Plot multiple figures on the same color scale</p>
-<div id="saturation-in-ten-cities-with-equal-area-rings" class="section level2">
-<h2>Saturation in ten cities with equal-area rings</h2>
-<ul>
-<li>The 1000 rings have a minimum saturation of 30.5% and a maximum of 99.9%<br />
-</li>
-<li>Same color scale for every map, with a boundary of [0.3, 1]<br />
-</li>
-<li>Dark green corresponds to a ring saturation of 0.3, and dark red corresponds to 1</li>
-</ul>
-<p><img src="/post/2018-07-19-spatial-data-in-r-dividing-raster-layers-into-equal-area-rings_files/ten%20cities%20100%20rings.jpeg" /></p>
-</div>
-<div id="r-code-for-one-city" class="section level2">
-<h2>R Code for one city</h2>
-<ul>
-<li>The setting of the code can loop around several different cities, here we only load one city.</li>
-</ul>
-<pre class="r"><code>list.of.packages &lt;- c(&quot;raster&quot;, &quot;rgdal&quot;, &quot;Hmisc&quot;, &quot;plyr&quot;, &quot;RColorBrewer&quot;, &quot;googledrive&quot;)
-new.packages &lt;- list.of.packages[!(list.of.packages %in% installed.packages()[,&quot;Package&quot;])]
-if(length(new.packages)) install.packages(new.packages)
-
-suppressPackageStartupMessages({
-library(&#39;raster&#39;)   # obtain raster from GIS image file, and plot
-library(&#39;rgdal&#39;)    # readOGR: read ArcGIS vector maps into Spatial objects
-library(&#39;Hmisc&#39;)    # cut2: cut vector into equal-length
-library(&#39;plyr&#39;)     # join
-library(&#39;RColorBrewer&#39;) # for `brewer.pal` in ggplot2
-library(&#39;knitr&#39;)    # kable
-})
-options(digits = 4)</code></pre>
-<ul>
-<li>The local version:</li>
-</ul>
-<pre class="r"><code># Where are all the data files located:
-parent_dir &lt;- c(&quot;D:/OneDrive - nyu.edu/NYU Marron/180716_Draw Circle/Data/&quot;)
-# Get all the folder names (names of the cities) in the directory, used to scan all the cities
-city_list &lt;- list.files(parent_dir)
-
-# If use Hong Kong as an example
-  city1 &lt;- city_list[6]
-  newdir &lt;- paste(parent_dir, city1, sep = &quot;&quot;)
-  image &lt;- raster(paste(newdir, c(&quot;./city_urbFootprint_clp_t3.img&quot;), sep = &quot;&quot;))
-    
-  # A point that shows the center of the city
-  cbd &lt;-  readOGR(dsn = newdir, layer = paste(city1, &quot;_CBD_Project&quot;, sep=&quot;&quot;))</code></pre>
-<pre><code>## OGR data source with driver: ESRI Shapefile 
-## Source: &quot;D:\OneDrive - nyu.edu\NYU Marron\180716_Draw Circle\Data\Hong_Kong&quot;, layer: &quot;Hong_Kong_CBD_Project&quot;
-## with 1 features
-## It has 6 fields
-## Integer64 fields read as strings:  Id</code></pre>
-<pre class="r"><code>  cbdpoint &lt;- SpatialPoints(cbd)</code></pre>
-<ul>
-<li>In this blog data is downloaded from googledrive</li>
-</ul>
-<pre class="r"><code>city1 &lt;-&quot;Hong_Kong&quot;
-library(googledrive)
-temp &lt;- tempfile(fileext = &quot;.zip&quot;)
-dl &lt;- drive_download(as_id(&quot;1z-aD2orN2k2BINkDD6whEhHFga_4HIu8&quot;), path = temp, overwrite = TRUE)
-out &lt;- unzip(temp, exdir = tempdir())
-image &lt;- raster(out[1])
-cbdpoint &lt;- SpatialPoints(readOGR(dsn = paste(tempdir(),&quot;\\Hong_Kong&quot;,sep = &quot;&quot;),
-                                  layer = &quot;Hong_Kong_CBD_Project&quot;))</code></pre>
-<ul>
-<li>Read raster as points: <code>rasterToPoints</code></li>
-</ul>
-<pre class="r"><code>  # mydata_HK contains coordinate (x,y) and category (type)
-  mydata_HK &lt;- as.data.frame(rasterToPoints(image))
-  names(mydata_HK) &lt;- c(&quot;x&quot;, &quot;y&quot;, &quot;type&quot;)</code></pre>
-<ul>
-<li>Divide points into ten equal-size rings<br />
-</li>
-<li>Calculate distances using <code>sp::spDistsN1</code></li>
-</ul>
-<pre class="r"><code>  # calculate distance to the cbd from every point
-  pts &lt;- as.matrix(mydata_HK[,1:2])
-  mydata_HK$cbd_dist &lt;- spDistsN1(pts, cbdpoint, longlat = F)
-  
-  # library(&#39;Hmisc&#39;) # cut2
-  mydata_HK$ring &lt;- as.numeric(cut2(mydata_HK$cbd_dist,g = 100)) # get 1:100
-  mydata_HK$type &lt;- as.factor(mydata_HK$type)
-  mydata_HK$ring &lt;- as.factor(mydata_HK$ring)
-
-  # Function to get saturation, as the raster have 7 layers, 1 to 3 belong to built-up area
-  get_sat &lt;- function(x){
-    x &lt;- as.factor(x)
-    # (1 + 2 + 3) / (1 + 2 + 3 + 4 + 5 + 6 + 7)
-    sum(x==1|x==2|x==3)/length(x)
+<title>Redirect to /posts/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/ – Yang Liu</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
   }
-
-  # get saturation by rings
-  sat_output &lt;- aggregate(mydata_HK$type, by = list(mydata_HK$ring), FUN = get_sat)
-  names(sat_output) &lt;- c(&quot;ring&quot;, &quot;ring_saturation&quot;)
-  # join back to mydata_HK2 so we can later plot by values of ring_saturation
-  mydata_HK2 &lt;- join(mydata_HK, sat_output, by = &quot;ring&quot;)
-  kable(head(mydata_HK2))  </code></pre>
-<table>
-<thead>
-<tr class="header">
-<th align="right">x</th>
-<th align="right">y</th>
-<th align="left">type</th>
-<th align="right">cbd_dist</th>
-<th align="left">ring</th>
-<th align="right">ring_saturation</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="right">203936</td>
-<td align="right">2478244</td>
-<td align="left">3</td>
-<td align="right">11970</td>
-<td align="left">94</td>
-<td align="right">0.5318</td>
-</tr>
-<tr class="even">
-<td align="right">203966</td>
-<td align="right">2478244</td>
-<td align="left">4</td>
-<td align="right">11961</td>
-<td align="left">94</td>
-<td align="right">0.5318</td>
-</tr>
-<tr class="odd">
-<td align="right">203996</td>
-<td align="right">2478244</td>
-<td align="left">4</td>
-<td align="right">11952</td>
-<td align="left">93</td>
-<td align="right">0.5721</td>
-</tr>
-<tr class="even">
-<td align="right">204026</td>
-<td align="right">2478244</td>
-<td align="left">3</td>
-<td align="right">11944</td>
-<td align="left">93</td>
-<td align="right">0.5721</td>
-</tr>
-<tr class="odd">
-<td align="right">204056</td>
-<td align="right">2478244</td>
-<td align="left">4</td>
-<td align="right">11935</td>
-<td align="left">93</td>
-<td align="right">0.5721</td>
-</tr>
-<tr class="even">
-<td align="right">204086</td>
-<td align="right">2478244</td>
-<td align="left">4</td>
-<td align="right">11926</td>
-<td align="left">93</td>
-<td align="right">0.5721</td>
-</tr>
-</tbody>
-</table>
-<ul>
-<li>Turn dataframe (<code>mydata_HK2</code>) into raster using <code>rasterFromXYZ</code><br />
-</li>
-<li>Numeric columns are automatically assigned as values in the raster, and if we plot it directly:</li>
-</ul>
-<pre class="r"><code>  r1 &lt;- rasterFromXYZ(mydata_HK2)
-  plot(r1)</code></pre>
-<p><img src="/post/2018-07-19-spatial-data-in-r-dividing-raster-layers-into-equal-area-rings_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
-<pre class="r"><code>  # choose a color scale from `RColorBrewer`
-  color_scale &lt;- brewer.pal(n = 10, name = &quot;RdYlGn&quot;)
-  myPalette &lt;- colorRampPalette(rev(color_scale)) # reverse the order so highly value ~ dark red
-  # set col and breaks to align color scale across figures
-  plot(r1$ring_saturation, col=myPalette(70), breaks = c(30:100)/100,
-       legend=FALSE,  main = city1)
-  plot(cbdpoint, add = TRUE, size = 3) # drawn on top of a map using `add = TRUE`</code></pre>
-<p><img src="/post/2018-07-19-spatial-data-in-r-dividing-raster-layers-into-equal-area-rings_files/figure-html/unnamed-chunk-5-2.png" width="672" /></p>
-<pre class="r"><code>  # if need to output the raster
-  # writeRaster(r1, paste(raster_dir, city1, sep = &quot;&quot;), format = &quot;HFA&quot;, overwrite=TRUE)
-
-  # To preview the color panel:
-  # display.brewer.pal(n = 12, name = &#39;RdYlGn&#39;)</code></pre>
-</div>
-<div id="results-for-the-ring-saturations" class="section level2">
-<h2>Results for the ring saturations</h2>
-<ul>
-<li>I run the code using a loop for ten cities<br />
-</li>
-<li>Ring saturation in the 10 cities has a minimum of 30.5% and a maximum of 99.9%:</li>
-</ul>
-<pre class="r"><code>#   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-#  0.305   0.545   0.646   0.656   0.771   0.999 </code></pre>
-</div>
-<div id="average-saturation-in-each-ring" class="section level2">
-<h2>Average saturation in each ring</h2>
-<ul>
-<li>There is a clear declining trend in saturation as we move towards the boundary of the cities<br />
-<img src="/post/2018-07-19-spatial-data-in-r-dividing-raster-layers-into-equal-area-rings_files/figure-html/unnamed-chunk-8-1.png" width="672" /></li>
-</ul>
-</div>
-<div id="methodology" class="section level2">
-<h2>Methodology</h2>
-<p>(Summarized by Alejandro Blei, my colleague)<br />
-1. Take the file: <code>city_urbFootprint_clp_t3.img</code>. This file is made up of many pixels. Pixels with values 1-3 = built up, pixels with values 4-6 = open space, and pixels with value 7 = water. In other words, 1 - 3 = built up, and 4 - 7 = not built.<br />
-2. Convert the pixels to points. This operation preserves the value associated with the pixel.<br />
-3. Calculate the distance from each point to the CBD.<br />
-4. Create 10 groups from these pixels, where each group has the same area. These groups radiate outward from the CBD. Since each pixel has the same size, all we need are ten groups with the same number of pixels, where the pixels in one group are closer to the CBD than the pixels in the next group.<br />
-5. Once we have the groups, we can calculate the saturation value in each group. Saturation is Built Up / (Built Up - Open Space), in other words, saturation is Pixels (1 + 2 + 3) / (1 + 2 + 3 + 4 + 5 + 6 + 7). Each of the ten groups now has a saturation value associated with it.</p>
-</div>
-<div id="original-code" class="section level2">
-<h2>Original Code</h2>
-<ul>
-<li>Local version, loop over ten cities</li>
-</ul>
-<pre class="r"><code># Fragmentation: Saturation  (Built-up Area/Urban Extent) in each ring
-# how about 100 rings
-
-# install.packages(&#39;raster&#39;)
-library(&#39;raster&#39;)   # obtain raster from GIS image file, and plot
-library(&#39;rgdal&#39;)    # readOGR: read ArcGIS vector maps into Spatial objects
-library(&#39;Hmisc&#39;)    # cut2
-library(&#39;plyr&#39;)     # join
-library(&#39;RColorBrewer&#39;) # for `brewer.pal` in ggplot2
-library(&#39;knitr&#39;)    # kable
-options(digits = 4)
-
-# get saturation
-get_sat &lt;- function(x){
-  x &lt;- as.factor(x)
-  # (1 + 2 + 3) / (1 + 2 + 3 + 4 + 5 + 6 + 7)
-  sum(x==1|x==2|x==3)/length(x)
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-
-parent_dir &lt;- c(&quot;D:/OneDrive - nyu.edu/NYU Marron/180716_Draw Circle/Data/&quot;)
-# Get all the folder names (names of the cities) in the directory
-city_list &lt;- list.files(parent_dir)
-
-sat_out &lt;- data.frame()
-par(mar = c(1,2,1,0), bty=&quot;n&quot;) # c(bottom, left, top, right)
-layout(matrix(c(1:10),ncol=2, byrow = T))
-# length(city_list)
-for (i in 1:10){
-  city1 &lt;- city_list[i]
-  newdir &lt;- paste(parent_dir, city1, sep = &quot;&quot;)
-  image &lt;- raster(paste(newdir, c(&quot;./city_urbFootprint_clp_t3.img&quot;), sep = &quot;&quot;))
-  # mydata: df that contains coordinate and category
-  mydata &lt;- as.data.frame(rasterToPoints(image))
-  names(mydata) &lt;- c(&quot;x&quot;, &quot;y&quot;, &quot;type&quot;)
-  pts &lt;- as.matrix(mydata[,1:2])
-  
-  # cbd
-  cbd &lt;-  readOGR(dsn = newdir, layer = paste(city1, &quot;_CBD_Project&quot;, sep=&quot;&quot;))
-  cbdpoint &lt;- SpatialPoints(cbd)
-
-  # distance to the cbd
-  mydata$cbd_dist &lt;- spDistsN1(pts, cbdpoint, longlat = F)
-  # library(&#39;Hmisc&#39;) # cut2
-  mydata$ring &lt;- as.numeric(cut2(mydata$cbd_dist,g = 100))
-  mydata$type &lt;- as.factor(mydata$type)
-  mydata$ring &lt;- as.factor(mydata$ring)
-
-  
-  sat_output &lt;- aggregate(mydata$type, by = list(mydata$ring), FUN = get_sat)
-  sat_output$City &lt;- city1
-  sat_output$City_Saturation &lt;- get_sat(mydata$type)
-  names(sat_output) &lt;- c(&quot;ring&quot;, &quot;ring_saturation&quot;,&quot;city&quot;, &quot;city_saturation&quot;)
-  sat_out &lt;- rbind(sat_out, sat_output)
-  
-
-  # draw the figure ---------------------------------------------------------
-  
-  mydata2 &lt;- join(mydata, sat_output, by = &quot;ring&quot;)
-  r1 &lt;- rasterFromXYZ(mydata2)
-  # writeRaster(r1, paste(raster_dir, city1, sep = &quot;&quot;), format = &quot;HFA&quot;, overwrite=TRUE)
-
-  # To preview the color panel:
-  # display.brewer.pal(n = 12, name = &#39;RdYlGn&#39;)
-  color_scale &lt;- brewer.pal(n = 10, name = &quot;RdYlGn&quot;)
-  myPalette &lt;- colorRampPalette(rev(color_scale))
-
-  plot(r1$ring_saturation, col=myPalette(70), breaks = c(30:100)/100,
-       legend=FALSE,  main = city1)
-  plot(cbdpoint, add = TRUE, size = 3) # drawn on top of a map using `add = TRUE`
-
-}
+</style>
 
 
-# Some visulization options -----------------------------------------------------------
-id &lt;- &quot;1DNyQLX0apRVWmRC1xKhpqZLE6SLcQF5p&quot; # google file ID
-sat &lt;- read.csv(sprintf(&quot;https://docs.google.com/uc?id=%s&amp;export=download&quot;, id))
-sat$idx &lt;- rep(c(1:100),10)
+<script src="../../../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../../../">
+<link href="../../../../../assets/me.png" rel="icon" type="image/png">
+<script src="../../../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../../../site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../../../site_libs/bootstrap/bootstrap-a0f9fd0d421825b736dc1bbcbcba2219.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+<meta http-equiv="refresh" content="0; url=/posts/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/">
 
-# linear regression smoothing
-ggplot(sat, aes(x=idx, y=ring_saturation)) +
-  geom_point(size = 0.5, color = &#39;blue&#39;) +  
-  geom_smooth(method = &#39;lm&#39;)+
-  theme_classic() + 
-  geom_hline(yintercept = 0) +
-  scale_y_continuous(limits = c(0,1)) +
-  labs(x = &quot;Equal-Area Rings from CBD&quot;, y = &quot;Average Built-up Area/Urban Extent&quot;) +
-  ggtitle(&quot;Average Saturation in the 100 Rings&quot;)
 
-## some other options
-# one plot for each city
-par(mar = rep(2,4), bty=&quot;n&quot;)
-layout(matrix(c(1:10),ncol=2, byrow = T))
-for (i in 1:10){
-  sat_sub &lt;- subset(sat, city == city_list[i])
-  plot(x = sat_sub$idx, y = sat_sub$ring_saturation, type = &quot;l&quot;,
-       xlab=c(&quot;Ring from CBD&quot;), ylab =c(&quot;Built-up Area/Urban Extent&quot;),
-       main = city_list[i])
-}
+<link rel="stylesheet" href="../../../../../styles.css">
+</head>
 
-# a barchart for each ring?
-sat$weight_blank &lt;- 1
-source(&quot;D:/OneDrive - nyu.edu/NYU Marron/R/Get Weighted SE and CI.R&quot;)
-Mean_byGroup &lt;- get_WM_and_CI2(sat, &quot;idx&quot;, &quot;ring_saturation&quot;, &quot;weight_blank&quot;) 
-bar_width &lt;- 0.8
-ggplot(Mean_byGroup, aes(x=idx, y=wm, 
-                         ymin=CI_low, ymax=CI_high)) +
-  geom_bar(stat=&#39;identity&#39;, position = position_dodge(), width = bar_width, alpha=0.8)+
-  geom_errorbar (width=bar_width-0.1, lwd=1, position=position_dodge(bar_width))+
-  labs(x = &quot;Ten Rings from CBD&quot;, y = &quot;Average Built-up Area/Urban Extent&quot;) +
-  ggtitle(&quot;Average Saturation in Each Ring&quot;)+
-  theme_classic()  +  
-  geom_hline(yintercept = 0)
+<body class="nav-fixed quarto-light">
 
-# scatterplot all the points for ten cities 
-ggplot(sat, aes(x=idx, y=ring_saturation, color = city)) +
-  geom_point(size = 1) 
-  labs(x = &quot;Ten Rings from CBD&quot;, y = &quot;Built-up Area/Urban Extent&quot;) +
-  ggtitle(&quot;Saturation in Each Ring of Ten Cities&quot;)+
-  theme_classic() </code></pre>
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../../../../../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../../../../../assets/me.png" alt="" class="navbar-logo light-content">
+    <img src="../../../../../assets/me.png" alt="" class="navbar-logo dark-content">
+    </a>
+    <a class="navbar-brand" href="../../../../../index.html">
+    <span class="navbar-title">Yang Liu</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../../../posts/index.html"> 
+<span class="menu-text">Posts</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/liuyanguu"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://www.linkedin.com/in/liuyangbaruch/"> 
+<span class="menu-text">LinkedIn</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Redirect to /posts/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
 </div>
 
-</main>
 
 
+<div class="quarto-title-meta">
 
-
-
-
-
-
-
-
-
-
-
-
-<nav class="post-nav">
-  <span class="nav-prev"><a href="/post/2018/10/14/shap-visualization-for-xgboost/">&larr; SHAP Visualization in R (first post)</a></span>
-  <span class="nav-next"><a href="/post/2018/07/16/how-to-draw-heatmap-with-colorful-dendrogram/">How to Draw Heatmap with Colorful Dendrogram &rarr;</a></span>
-</nav>
-
-
-<div id="disqus_thread"></div>
-<script>
-(function() {
-var d = document, s = d.createElement('script');
-s.src = 'https://liuyanguu.disqus.com/embed.js';
-s.setAttribute('data-timestamp', +new Date());
-(d.head || d.body).appendChild(s);
-})();
-</script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-</article>
-</div>
-
-<script async src="//yihui.org/js/center-img.js"></script>
-
-<footer>
-
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-F3P69FBSHL"></script>
-<script>
-var doNotTrack = false;
-if (!doNotTrack) {
-	window.dataLayer = window.dataLayer || [];
-	function gtag(){dataLayer.push(arguments);}
-	gtag('js', new Date());
-	gtag('config', 'G-F3P69FBSHL', { 'anonymize_ip': false });
-}
-</script>
-
-
-  <div id="disqus_thread"></div>
-<script type="application/javascript">
-    window.disqus_config = function () {
     
+  
     
-    
+  </div>
+  
+
+
+</header>
+
+
+<script>window.location.replace("/posts/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/");</script>
+<p>This page has moved to <a href="../../../../..\posts/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/">/posts/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/</a>.</p>
+
+
+<!-- -->
+
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
     };
-    (function() {
-        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
-            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
-            return;
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
         }
-        var d = document, s = d.createElement('script'); s.async = true;
-        s.src = '//' + "liuyanguu" + '.disqus.com/embed.js';
-        s.setAttribute('data-timestamp', +new Date());
-        (d.head || d.body).appendChild(s);
-    })();
-</script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-
-
-
-<div class="footer">
-  <ul class="menu">
-    
-    <li><a href="/"><span data-hover="Home">Home</span></a></li>
-    
-    <li><a href="/tags/"><span data-hover="Tags">Tags</span></a></li>
-    
-    <li><a href="/categories/"><span data-hover="Categories">Categories</span></a></li>
-    
-    <li><a href="/about-me/"><span data-hover="About Me">About Me</span></a></li>
-    
-  </ul>
-  
-  <div class="copyright">@2024 Yang Liu <a href="https://github.com/liuyanguu">github.com/liuyanguu</a> Powered by Github.</div>
-  
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/liuyanguu\.github\.io");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Redirect to /posts/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/"</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">search:</span><span class="co"> false</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="an">page-layout:</span><span class="co"> article</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">    include-in-header:</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">      text: |</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">        &lt;meta http-equiv="refresh" content="0; url=/posts/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/"&gt;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">script</span><span class="dt">&gt;</span><span class="bu">window</span><span class="op">.</span><span class="at">location</span><span class="op">.</span><span class="fu">replace</span>(<span class="st">"/posts/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/"</span>)<span class="op">;</span><span class="dt">&lt;/</span><span class="kw">script</span><span class="dt">&gt;</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>This page has moved to <span class="co">[</span><span class="ot">/posts/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/</span><span class="co">](/posts/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/)</span>.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<ol start="3" type="a">
+<li>2026 Yang Liu</li>
+</ol>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Built with Quarto and R</p>
 </div>
+  </div>
 </footer>
 
 
-<script src="//yihui.org/js/math-code.js"></script>
-<script async src="//mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML"></script>
 
 
-
-<script src="//cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
-<script src="//cdn.bootcss.com/highlight.js/9.12.0/languages/r.min.js"></script>
-<script>
-hljs.configure({languages: []});
-hljs.initHighlightingOnLoad();
-</script>
-
-
-
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-F3P69FBSHL"></script>
-<script>
-var doNotTrack = false;
-if (!doNotTrack) {
-	window.dataLayer = window.dataLayer || [];
-	function gtag(){dataLayer.push(arguments);}
-	gtag('js', new Date());
-	gtag('config', 'G-F3P69FBSHL', { 'anonymize_ip': false });
-}
-</script>
-
-
-</body>
-</html>
-
+<script src="../../../../../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

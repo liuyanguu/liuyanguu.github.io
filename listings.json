@@ -1,0 +1,48 @@
+[
+  {
+    "listing": "/posts/index.html",
+    "items": [
+      "/posts/2025-supernationals-viii-a-once-in-four-years-chess-spectacle/index.html",
+      "/posts/2024-national-k-12-does-a-higher-rating-lead-to-a-higher-standing/index.html",
+      "/posts/how-many-children-under-5-worldwide/index.html",
+      "/posts/plot-multiple-countries-on-the-world-map/index.html",
+      "/posts/r-markdown-to-github-pages/index.html",
+      "/posts/us-and-china-admin1-covid19-mortality-and-incidence-rate/index.html",
+      "/posts/ggplot-us-state-and-china-province-heatmap/index.html",
+      "/posts/working-with-3d-array-as-long-format-data-in-r/index.html",
+      "/posts/drake-powerful-tool-for-automatic-reproducible-workflow/index.html",
+      "/posts/notes-on-writing-an-r-package/index.html",
+      "/posts/shap-for-xgboost-in-r-shapforxgboost/index.html",
+      "/posts/shiny-in-blogdown/index.html",
+      "/posts/study-shrinkage-and-dart-in-xgboost-modeling-using-a-simple-dataset/index.html",
+      "/posts/shap-visualization-in-r-first-post/index.html",
+      "/posts/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/index.html",
+      "/posts/how-to-draw-heatmap-with-colorful-dendrogram/index.html",
+      "/posts/extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting/index.html",
+      "/posts/catalog-of-my-old-blog/index.html"
+    ]
+  },
+  {
+    "listing": "/index.html",
+    "items": [
+      "/posts/2025-supernationals-viii-a-once-in-four-years-chess-spectacle/index.html",
+      "/posts/2024-national-k-12-does-a-higher-rating-lead-to-a-higher-standing/index.html",
+      "/posts/how-many-children-under-5-worldwide/index.html",
+      "/posts/plot-multiple-countries-on-the-world-map/index.html",
+      "/posts/r-markdown-to-github-pages/index.html",
+      "/posts/us-and-china-admin1-covid19-mortality-and-incidence-rate/index.html",
+      "/posts/ggplot-us-state-and-china-province-heatmap/index.html",
+      "/posts/working-with-3d-array-as-long-format-data-in-r/index.html",
+      "/posts/drake-powerful-tool-for-automatic-reproducible-workflow/index.html",
+      "/posts/notes-on-writing-an-r-package/index.html",
+      "/posts/shap-for-xgboost-in-r-shapforxgboost/index.html",
+      "/posts/shiny-in-blogdown/index.html",
+      "/posts/study-shrinkage-and-dart-in-xgboost-modeling-using-a-simple-dataset/index.html",
+      "/posts/shap-visualization-in-r-first-post/index.html",
+      "/posts/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/index.html",
+      "/posts/how-to-draw-heatmap-with-colorful-dendrogram/index.html",
+      "/posts/extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting/index.html",
+      "/posts/catalog-of-my-old-blog/index.html"
+    ]
+  }
+]

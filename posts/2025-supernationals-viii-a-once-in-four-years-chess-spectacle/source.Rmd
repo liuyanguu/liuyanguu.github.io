@@ -1,0 +1,532 @@
+---
+title: '2025 SuperNationals VIII: A Once-in-Four-Years Chess Spectacle'
+author: Yang Liu
+date: '2025-05-15'
+slug: 2025-supernationals-viii-a-once-in-four-years-chess-spectacle
+categories:
+  - Blog
+tags:
+  - Chess
+---
+
+
+<div style="text-align: center;">
+**Statistics of the 2025 SuperNationals VIII in Orlando**    
+https://www.uschess.org/results/2025/sn8/
+
+</div>
+
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE,
+                      error = FALSE, fig.width = 12, fig.height = 6)
+# error=TRUE allows error
+```
+
+```{r, include = FALSE}
+library("data.table")
+library("ggplot2")
+library("ggforce")
+library("cowplot")
+library("ggh4x")
+library("readxl")
+
+SAVE_png <- FALSE # if I want to save charts locally
+
+# Path to input data
+excel_file <- here::here("../Data/2025 Supernational final standing.xlsx")
+
+# Get the names of all sheets in the Excel file
+sheet_names <- excel_sheets(excel_file)
+
+# Read all sheets and combine them into one data.table
+combined_data_all <- rbindlist(
+  lapply(sheet_names, function(sheet) {
+    # Read the current sheet as a data.table
+    sheet_data <- as.data.table(readxl::read_excel(excel_file, sheet = sheet))
+    # Add a column for the sheet name
+    sheet_data[, sheet_name := sheet]
+    return(sheet_data)
+  }),
+  use.names = TRUE, fill = TRUE
+)
+combined_data_all[, Grade:= Gr]
+combined_data_all[, Grade:= factor(as.factor(Grade), levels = c("K", as.character(1:12)))]
+
+data_blitz <- combined_data_all[grepl("Blitz", sheet_name)]
+combined_data <- combined_data_all[!grepl("Blitz", sheet_name)]
+
+# Define section and section_broad_group
+broad_section_groups <- c("K1", "K3", "K5", "K6", "K8", "K12")
+
+sheet_names <- sheet_names[!grepl("Blitz", sheet_names)]
+combined_data[, section := factor(as.factor(sheet_name), levels = sheet_names)]
+setorder(combined_data, section)
+combined_data[grepl("K1", section), section_broad_group := "K1"]
+combined_data[grepl("K3", section), section_broad_group := "K3"]
+combined_data[grepl("K5", section), section_broad_group := "K5"]
+combined_data[grepl("K6", section), section_broad_group := "K6"]
+combined_data[grepl("K8", section), section_broad_group := "K8"]
+combined_data[grepl("K12", section), section_broad_group := "K12"]
+combined_data[, section_broad_group:= factor(as.factor(section_broad_group), levels = broad_section_groups)]
+
+# section_label contains the string "Championship"
+section_label_order <- levels(combined_data$section)
+# Identify matching sections once
+matching_sections <- section_label_order %in% broad_section_groups
+# Modify only those matching elements
+section_label_order[matching_sections] <- paste0(section_label_order[matching_sections], "Championship")
+section_label_order <- gsub("^(K1|K3|K5|K6|K8|K12)", "\\1\n", section_label_order)
+
+# Add a new column for section_label for plot
+combined_data[, section_label := section]
+combined_data[section %in% broad_section_groups, section_label := paste0(section, "Championship")]
+combined_data[, section_label := gsub("^(K1|K3|K5|K6|K8|K12)", "\\1\n", section_label)]
+combined_data[, section_label := factor(as.factor(section_label), levels = section_label_order)]
+combined_data[, section_full := gsub("\\\n", " ", section_label)]
+combined_data[, section_full := factor(as.factor(section_full), levels = gsub("\\\n", " ", section_label_order))]
+# championship 
+combined_data[, champ := ifelse(section %in% broad_section_groups, 1, 0)]
+# unrated
+combined_data[, unrated := ifelse(grepl("Unrated", section), 1, 0)]
+
+# summary of sections available 
+combined_data[, n_broad_group := .N, by = section_broad_group]
+dt_section <- unique(combined_data[, .(section_broad_group, section, section_full, n_broad_group)])
+dt_section[, ava := paste(section_full, collapse = ", "), by = section_broad_group]
+dt_section_summary <- unique(dt_section[, .(section_broad_group, ava, n_broad_group)])
+colnames(dt_section_summary) <- c("Broad group", "Available sections", "Number of attendees")
+
+
+# some statistics of number of attendees by state / grade / section---------------
+combined_data[, nstate := .N, by = St]
+dt_St_rank <- unique(combined_data[,.(St, nstate)])[order(-nstate)]
+dt_St_rank[, pcnt := round(nstate / sum(nstate) * 100, 2)]
+head(dt_St_rank)
+
+combined_data[, ngrade := .N, by = Grade]
+dt_gr_rank <- unique(combined_data[,.(Grade, ngrade)])[order(-ngrade)]
+head(dt_gr_rank)
+y_max_grade <- max(dt_gr_rank$ngrade) * 1.1
+
+combined_data[, nsection := .N, by = section]
+dt_section_rank <- unique(combined_data[,.(section, nsection)])[order(-nsection)]
+dt_section_rank[, pcnt := round(nsection / sum(nsection) * 100, 2)]
+y_max_section <- max(dt_section_rank$nsection) * 1.1
+
+# heatmap for count
+combined_data[, n_gra_sec := .N, by = .(section, Grade)]
+dt_count <- unique(combined_data[!is.na(Grade),.(Grade, section_full, n_gra_sec)])
+dt_count[, section_full := factor(as.factor(section_full), levels = unique(combined_data$section_full))]
+
+# Add a new column for Rate category based on the given ranges
+combined_data[, RateCategory := cut(
+  Rate,
+  breaks = c(0, 500, 1000, 1500, 2000, Inf),
+  labels = c("0-500", "500-1000", "1000-1500", "1500-2000", ">2000"),
+  right = FALSE
+)]
+combined_data[is.na(RateCategory), RateCategory := "unrated"]
+
+
+# Add standing percentiles
+# Function to calculate percentiles within each Grade
+calculate_percentile <- function(data, value_col, group_col, var_new = "Percentile") {
+  if(var_new %in% colnames(data)) {
+    data[, (var_new) := NULL]
+  }
+  data[!is.na(get(value_col)), Percentile := 100 * frank(get(value_col), ties.method = "average") / .N, by = group_col]
+  setnames(data, "Percentile", var_new)
+  return(data)
+}
+
+# Calculate percentile of "No." by "Grade"
+combined_data <- calculate_percentile(combined_data, value_col = "No.", group_col = "section",
+                                      var_new = "Percentile_standing")
+# Calculate percentile of "Rating" by "Grade"
+combined_data <- calculate_percentile(combined_data, value_col = "Rate", group_col = "section", 
+                                      var_new = "Percentile_rating")
+
+# general theme for plotting -------------------------------------------
+mytheme1 <- theme_minimal() + 
+    theme(panel.grid = element_blank(),
+          axis.line.x = element_line(color = "black"),
+          axis.title.x = element_text(size = 14), # Enlarges x-axis label
+    axis.title.y = element_text(size = 14), # Enlarges y-axis label
+    axis.text = element_text(size = 12), # Enlarges axis text
+    plot.title = element_text(hjust = 0.5, size = 14, face = "bold") # Enlarged title size
+    )
+
+custom_colors <- c(
+  "0-500" = "#FFC20E",
+  "500-1000" = "#80BD41",
+  "1000-1500" = "#00833D",
+  "1500-2000" = "#1CABE2",
+  ">2000" = "#0058AB"
+)
+
+custom_colors_grade <- c("#002759", "#80BD41", "#00833D","#0058AB", "#1CABE2", "#69DBFF", "#CFF4FF", "#FFF09A",
+                          "#FFC20E", "#F26A21", "#E2231A", "#B50800", "black")
+# match K to 12 to custom_colors_grade
+names(custom_colors_grade) <- c("K", as.character(1:12))
+
+#0. map of attendees by state -------------------------------------------------------
+source(here::here("Code/COVID_make_map.R"))
+dt_US <- combined_data[, .(N = .N), by = St]
+US_map_participant <- make_heatmap(data = dt_US, 
+            geo_data = get_state_name(),
+            state_var = "St", fill_var = "N", label_var = "abb", 
+            fill_var_label = "Number of attendees")
+
+if (SAVE_png) ggsave("temp/US_map_participant.png", US_map_participant, width = 8, height = 6, bg = "white")
+
+# fwrite(combined_data, "DataVis/K12_SuperNational_2025/input/2025 Final standing.csv")
+
+```
+
+
+```{r}
+#1. descriptive bar of attendees by grade / section / rating ------------------------------------------------------
+
+g_bar <-
+  # Create a bar chart from combined_data
+  ggplot(combined_data[!is.na(Grade)], aes(x = Grade)) +
+    geom_bar(width = 0.9, fill = "#1CABE2") +
+    geom_text(stat = "count", aes(label = ..count..), vjust = -0.5, size = 4) +
+    labs(title = "Number of attendees by Grade", x = "Grade", y = "Number of attendees") +
+    scale_y_continuous(expand = c(0, 0), limits = c(0, y_max_grade)) +
+    mytheme1
+if (SAVE_png) ggsave("temp/barplot.png", g_bar, width = 6, height = 4, bg = "white")
+
+
+# section_group into 2 for facet_wrap
+combined_data[, section_group := ifelse(section_broad_group %in% c("K1", "K3", "K5", "K6"), "K1 - K6" , "K8 - K12")]
+
+g_bar_section <-
+  # Create a bar chart from combined_data
+  ggplot(combined_data[], aes(x = section_label, fill = section_broad_group)) +
+    geom_bar(width = 0.9) +
+    geom_text(stat = "count", aes(label = ..count..), vjust = -0.5, size = 4) +
+    scale_fill_brewer(palette = "Set2") + 
+    labs(title = "Number of attendees by section", x = "", y = "Number of attendees", fill = "") +
+    scale_y_continuous(expand = c(0, 0), limits = c(0, y_max_section)) +
+    facet_wrap(~ section_group, scales = "free_x", nrow = 2) +
+    mytheme1  + 
+  theme(axis.text.x = element_text(size = 8))
+if (SAVE_png) ggsave("temp/g_bar_section.png", g_bar_section, width = 10, height = 6, bg = "white")
+
+
+combined_data[is.na(Rate), Rate := 0] # 0 means unrated for the barchart
+hist_rate <- ggplot(combined_data, aes(x = Rate)) +
+  geom_histogram(binwidth = 100, width = 0.8, fill = "#1CABE2", color = "white") +
+  labs(title = "Distribution of Rating", x = "Rating", y = "Number of attendees") +
+  scale_y_continuous(expand = c(0, 0), limits = c(0, NA)) +
+  scale_x_continuous(expand = c(0, 0), breaks = seq(0, 2600, by = 200)) +
+    mytheme1
+if (SAVE_png) ggsave("temp/hist_rate.png", hist_rate, width = 6, height = 3, bg = "white")
+
+combined_data[Rate == 0, Rate:= NA] # revert it back to NA 
+
+
+# make a heatmap
+g_count_heatmap <- ggplot(dt_count, aes(x = Grade, y = section_full, fill = n_gra_sec)) +
+  geom_tile(color = "white") +
+    geom_text(aes(label = n_gra_sec), size = 4, color = "white") +
+
+  scale_fill_viridis_c(option = "D", direction = -1) +  # you can try "D", "B", "A", etc.
+  labs(x = "Grade", y = "Section", fill = "Number of\nattendees") +
+    mytheme1 + 
+  theme(panel.grid.major.x = element_line(color = "gray90"),
+        panel.grid.major.y = element_line(color = "gray90"))
+if (SAVE_png) ggsave("temp/heatmap of count.png", g_count_heatmap, width = 8, height = 6, bg = "white")
+
+
+
+#2. Rating by grade or section ---------------------------------------------------
+
+# Rating by grade 
+dt_mean <- combined_data[!is.na(Grade), .(MeanRate = mean(Rate, na.rm = TRUE)), by = Grade]
+dt_mean[, label:= round(MeanRate, 0)]
+
+g_rating_grade <- ggplot(combined_data[!is.na(Grade),.(Grade, Rate, RateCategory)], 
+                   aes(x = Grade, y = Rate, color = RateCategory)) +
+  geom_sina(aes(group = Grade), alpha = 0.7, size = 2, maxwidth = 1) + # Add sina plot with transparency and point size
+  geom_boxplot(aes(group = Grade), outlier.shape = NA, width = 0.3, alpha = 0.5) + # Boxplot by Grade
+  geom_point(data = dt_mean, aes(x = Grade, y = MeanRate), 
+             size = 9, alpha = 1, colour = "red", shape = 95) +
+  geom_text(data = dt_mean, aes(x = Grade, y = MeanRate, label = label),
+            colour = "red", vjust = -0.5, inherit.aes = FALSE) + # Add mean rating as text
+  labs(title = "Distribution of Rating by Grade", 
+       x = "Grade", y = "Rating", color = "Rating") +
+  scale_color_manual(values = custom_colors, drop = TRUE) + # Use custom colors
+  mytheme1
+
+if (SAVE_png) ggsave("temp/rating_by_grade.png", g_rating_grade, width = 10, height = 6, bg = "white")
+
+
+
+# rating by section 
+dt_mean_sec <- combined_data[unrated==0, .(MeanRate = mean(Rate, na.rm = TRUE), N = .N), by = .(section_broad_group, section_label)]
+dt_mean_sec[, label:= round(MeanRate, 0)]
+
+g_rating_section <-   ggplot(combined_data[!is.na(Rate)], 
+         aes(x = section_label, y = Rate, color = RateCategory)) +
+    geom_sina(aes(group = section_label), alpha = 0.7, size = 2, maxwidth = 1) + # Add sina plot with transparency and point size
+    geom_boxplot(aes(group = section_label), outlier.shape = NA, width = 0.3, alpha = 0.5) + # Boxplot by Grade
+    geom_point(data = dt_mean_sec, aes(x = section_label, y = MeanRate), 
+               size = 9, alpha = 1, colour = "red", shape = 95) +
+    geom_text(data = dt_mean_sec, aes(x = section_label, y = MeanRate, label = label),
+              colour = "red", vjust = -0.5, inherit.aes = FALSE) + # Add mean rating as text
+    labs(title = paste("Distribution of Rating by Section"), 
+         x = "Section", y = "Rating", color = "Rating") +
+    scale_color_manual(values = custom_colors, drop = TRUE) + # Use custom colors
+    facet_grid(~ section_broad_group, scales = "free_x", space = "free") +
+    mytheme1 + 
+    theme(axis.text.x=element_text(size = 8, angle=30), 
+          legend.position =  "bottom", 
+          panel.border = element_rect(color = "grey80", fill = NA))
+
+if (SAVE_png) ggsave("temp/rating_by_section.png", g_rating_section, width = 12, height = 6, bg = "white")
+
+
+# more detailed plot by section and grade
+plot.rating.secgrade <- function(broad_group = c("K1", "K3", "K5")){
+  stopifnot(all(broad_group %in% broad_section_groups))
+  # Create a boxplot for each section in the specified broad group
+  dt_sub <- combined_data[section_broad_group %in% broad_group & !is.na(Rate) & !is.na(Grade)]
+  
+  # limit to at least 10 attendees from that group
+  dt_sub[n_gra_sec<10]
+  dt_sub <- dt_sub[n_gra_sec>=10]
+  dt_mean_sub <- dt_sub[unrated==0 & !is.na(Grade), 
+                        .(MeanRate = mean(Rate, na.rm = TRUE), N = .N), 
+                        by = .(section_broad_group, section_full, Grade)]
+  dt_mean_sub[, label:= paste0(round(MeanRate, 0), "\nN=", N, "")]
+
+  ggplot(data = dt_sub, aes(x = Grade, y = Rate, color = Grade)) +
+    geom_sina(aes(group = Grade), alpha = 0.7, size = 2, maxwidth = 1) + # Add sina plot with transparency and point size
+    geom_boxplot(aes(group = Grade), outlier.shape = NA, width = 0.3, alpha = 0.5) + # Boxplot by Grade
+    geom_point(data = dt_mean_sub, aes(x = Grade, y = MeanRate), 
+               size = 9, alpha = 1, colour = "red", shape = 95) +
+    geom_text(data = dt_mean_sub, aes(x = Grade, y = MeanRate, label = label),
+              colour = "red", vjust = -0.5, inherit.aes = FALSE) + # Add mean rating as text
+    labs(title = paste("Distribution of Rating by Section and Grade:", paste(broad_group, collapse = ", ")), 
+         x = "", y = "Rating", color = "Grade") +
+    scale_color_manual(values = custom_colors_grade, drop = TRUE) + # Use custom colors
+    facet_nested(~ section_full + Grade,  remove_labels = "all",
+                 nest_line = element_line(colour = "black", linewidth = 1), scales = "free_x", space = "free") +
+    mytheme1 + 
+    theme(axis.text.x = element_blank(), 
+          strip.background = element_rect(fill = "#CFF4FF", color = "NA"),
+          axis.line.x = element_line(color = "grey80"),
+          legend.position =  "bottom", legend.direction = "horizontal",
+          panel.border = element_rect(color = "grey80", fill = NA)) + 
+     guides(color = guide_legend(nrow = 1))
+}
+g_rating_K1 <- plot.rating.secgrade(broad_group = c("K1", "K3", "K5"))
+g_rating_K6 <- plot.rating.secgrade(broad_group = c("K6"))
+g_rating_K8 <- plot.rating.secgrade(broad_group = c("K8"))
+g_rating_K12 <- plot.rating.secgrade(broad_group = c("K12"))
+
+if (SAVE_png) ggsave("temp/rating_by_secgraK13.png", g_rating_K1,  width = 12, height = 5, bg = "white")
+if (SAVE_png) ggsave("temp/rating_by_secgraK6.png",  g_rating_K6,  width = 12, height = 5, bg = "white")
+if (SAVE_png) ggsave("temp/rating_by_secgraK8.png",  g_rating_K8,  width = 12, height = 5, bg = "white")
+if (SAVE_png) ggsave("temp/rating_by_secgraK12.png", g_rating_K12, width = 12, height = 5, bg = "white")
+
+#3. Percentile vs Rating within each section ------------------------------------------------------
+model <- lm(Percentile_standing ~ Percentile_rating, data = combined_data)
+r2 <- summary(model)$r.squared
+
+model.champ <- lm(Percentile_standing ~ Percentile_rating, data = combined_data[champ==1])
+r2.champ <- summary(model.champ)$r.squared
+
+# for championship  
+# Step 2: Create the scatter plot with marginal histograms
+p_scatter_percentile <- ggplot(combined_data[champ==1], aes(x = Percentile_rating, y = Percentile_standing)) +
+  geom_point(aes(color = Grade), size = 2, alpha = 0.5) + # Scatter plot
+  # Smooth regression line
+    geom_smooth(method = "lm", se = FALSE, color = "#333333", linewidth = 0.8, alpha = 0.6) + 
+    geom_smooth(method = "loess",  se = FALSE, color = "#F26A21", linewidth = 1, alpha = 0.8) + 
+  scale_y_reverse() +                 # Reverse the y-axis
+  labs(title = "Standing vs. Rating (Percentile within each section)",,
+       x = "Percentile of rating", y = "Percentile of standing", color = "Grade" ) +
+  mytheme1 + theme(legend.position = "none") + 
+  ggpubr::stat_cor(method = "pearson")
+
+# scatterplot by grade (not shown)
+p_scatter_group <- ggplot(combined_data, aes(x = Rate, y = Percentile_standing)) +
+  geom_point(aes(color = RateCategory), size = 2, alpha = 0.5) + # Scatter plot
+  geom_smooth(method = "lm", se = FALSE, color = "#333333", linewidth = 0.8, alpha = 0.6) +
+  geom_smooth(method = "loess",  se = FALSE, color = "#F26A21", linewidth = 1, alpha = 0.8) + 
+  scale_y_reverse() +                 # Reverse the y-axis
+  scale_color_manual(values = custom_colors) + # Use custom colors
+
+  labs(title = "Percentile of Standing vs. Rating", 
+       x = "Rating", y = "Percentile of standing", color = "Rating" ) +
+  mytheme1 + 
+  theme(legend.position = "bottom") + 
+  guides(color = guide_legend(nrow = 1)) + 
+  ggpubr::stat_cor(method = "pearson") + 
+  ggh4x::facet_wrap2(~ section, ncol = 2, axes = "all", scales = "free")
+if (SAVE_png) ggsave("temp/scatter_standing_vs_rating_facet.png", p_scatter_group, width = 12, height = 32, bg = "white")
+
+# 
+# #4. Pts vs rating  ------------------------------------------------------
+# 
+# # overall rating vs points is meaningless due to sections 
+# # but facet by section is meaningful
+# unique_pts <- sort(unique(combined_data$Pts))
+# 
+# g_points_rating_group <- ggplot(combined_data, aes(x = Pts , y = Rate, color = RateCategory)) +
+#   geom_sina(aes(group = Pts), alpha = 0.7, size = 2, maxwidth = 1) + # Add sina plot with transparency and point size
+#   geom_boxplot(aes(group = Pts), outlier.shape = NA, width = 0.3, alpha = 0.5) + # Boxplot by Grade
+#   scale_color_manual(values = custom_colors) + # Use custom colors
+# 
+#   labs( y = "Rating", x = "Points achieved", color = "Rating" ) + 
+#     scale_x_continuous(breaks = unique_pts) +  # Set x-axis ticks to unique Pts values
+#   mytheme1 + 
+#   theme(legend.position = "bottom", axis.text = element_text(size = 8)) +
+#   guides(color = guide_legend(nrow = 1)) + 
+#   ggh4x::facet_wrap2(~ section_label, ncol = 2, axes = "all", scales = "free_y")
+# 
+# if (SAVE_png) ggsave("temp/g_points_rating_group.png", g_points_rating_group, width = 12, height = 26, bg = "white")
+
+```
+
+# Overview of Participation  
+
+## Over 5,300 contestants from 47 states participated in the 2025 SuperNationals VIII
+
+* 4,600 K-12 students competed across 26 sections
+* 1,100 contestants (23% of the 4,600) played in the six championship sections
+* Additionally, 700 players took part in the Blitz tournament  
+
+```{r, fig.width = 8, fig.height = 6}
+US_map_participant
+```
+
+The 26 sections covering K-12 grades attracted over 4,600 attendees from `r combined_data[, uniqueN(St)]` states. There are 1,174 attendees (25%) from New York, followed by Florida with 910 attendees (20%) and Texas with 523 attendees (11%). Over half of the attendees are from these three states.
+
+
+# Structure of the Tournament
+  
+One major difference between the 2025 SuperNationals and the 2024 Nationals is how the sections are organized. While the 2024 Nationals featured 13 sections divided solely by grade (K through 12), the 2025 SuperNationals divided players by both grade and rating, resulting in 26 sections. [See the previous article - analysis of the 2024 Nationals](https://liuyanguu.github.io/post/2024/12/15/2024-national-k-12-does-a-higher-rating-lead-to-a-higher-standing/).  
+
+## Interesting highlights
+* Championship sections were offered for six grade groups: K1, K3, K5, K6, K8, and K12—with K5 having only one Championship section
+
+* The K12 U1600 section had the highest number of players, with over 300 participants  
+
+* In the K8 grade group, sections U700, U900, U1100, and U1400 all attracted a similar number of contestants
+  
+The number of attendees by broad grade group and the sections available to each group   
+```{r, fig.width = 10, fig.height = 6}
+
+knitr::kable(dt_section_summary)
+g_bar_section
+```
+  
+  
+When pooling all the attendees, **Grade 5** stands out as the grade with the highest number of participants, distributed across various sections.
+  
+```{r, fig.width = 6, fig.height = 3.5}
+g_bar
+```
+
+## Which sections are students from each grade playing in?
+
+* The heatmap below displays the number of attendees from each grade in every section (counts are shown within the cells)  
+
+* Notably, the **K12 Championship** section includes players from Grade 3 through Grade 12!   
+  
+```{r, fig.width = 8, fig.height = 6}
+g_count_heatmap
+```
+
+# Rating and Standing  
+
+* Among the more than 4,300 rated participants (excluding unrated players), the average rating is 976, with a median of 933 and a standard deviation of 493  
+* Approximately 90% of players have ratings between 230 and 1,901  
+* Unrated players are shown as 0 in the histogram below, though they are excluded from the summary statistics  
+
+```{r, fig.width = 6, fig.height = 3}
+# summary(combined_data[!is.na(Rate), Rate])
+# sd(combined_data[!is.na(Rate), Rate])
+# quantile(combined_data[!is.na(Rate), Rate], probs = seq(0, 1, 0.05))
+hist_rate
+```
+
+
+The plot below presents the distribution of ratings across grades (including all sections). The red bar indicates the mean, while the black bar in each boxplot marks the median. The overall distribution is only slightly right-skewed, with the mean close to the median—especially in the lower grades.  
+
+```{r, fig.width = 10, fig.height = 6}
+g_rating_grade
+```
+
+## Rating by section  
+
+* In the K3, K6, K8, and K12 groups, there is a clear clustering of ratings based on the bounded sections. For example, in K3, a child with a 1000 rating placed in the Championship section is likely to face very challenging competition  
+
+* The average ratings of the K6, K8, and K12 Championship sections are relatively close. Interestingly, the K12 Championship section has an average rating quite similar to that of the K8 Championship  
+
+```{r, fig.width = 12, fig.height = 6}
+g_rating_section
+```
+
+## Rating by section and grade
+
+* As expected, players from different grades in bounded sections (e.g., U600, U1000) tend to have similar mean ratings and general distribution  
+
+* In the K3 Championship, Grade 3 players generally have slightly higher ratings than Grade 2 players, though the difference is not very significant  
+
+* In the K5 Championship, Grade 4 and Grade 5 players show similar rating distributions, with Grade 4’s mean rating being slightly higher  
+
+* _(Only grades with at least 10 attendees per section are plotted below)_
+
+
+```{r, fig.width = 12, fig.height = 5}
+g_rating_K1
+```
+
+ 
+* Most Grade 5 players who chose to compete in a championship section opted for K5 Championship, resulting in only 15 Grade 5 participants in the K6 Championship  
+
+```{r, fig.width = 12, fig.height = 5}
+g_rating_K6
+```
+
+* A number of Grade 6 players (though not a large number) chose to compete in the K8 sections rather than K6
+
+```{r, fig.width = 12, fig.height = 5}
+g_rating_K8
+```
+
+* The K12 Championship is the largest championship section, as it includes players from Grades 9 through 12. Its average rating is only slightly higher than that of the K8 or K6 Championship sections  
+
+```{r, fig.width = 12, fig.height = 5}
+g_rating_K12
+```
+
+
+## Does a higher rating guarantee a higher standing?  
+
+The reasonably strong association between standing and rating percentiles within each section is observed only in the Championship sections. The R-squared value from a fitted linear regression is approximately 0.71.
+As discussed in the [previous article for 2024 Nationals](https://liuyanguu.github.io/post/2024/12/15/2024-national-k-12-does-a-higher-rating-lead-to-a-higher-standing/), the R-squared value was similarly high at 0.75.
+
+Again, this indicates that the relationship isn’t as robust as it might initially appear. There is substantial variation in standing within each rating percentile. Outliers—such as cases where a high-ranked player drops out mid-match—further weaken the correlation.
+
+The red lines in the chart represent a LOESS curve, providing a non-linear fit.
+
+```{r, fig.width = 6, fig.height = 4}
+p_scatter_percentile
+```
+
+
+## An interactive app
+
+```{r, echo = FALSE}
+knitr::include_app("https://liuyanguu.shinyapps.io/K12_SuperNational_2025/",
+  height = "600px")
+  
+```
+

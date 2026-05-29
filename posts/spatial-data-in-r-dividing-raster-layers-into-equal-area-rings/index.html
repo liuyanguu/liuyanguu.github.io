@@ -1,0 +1,1576 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.36">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Yang Liu">
+<meta name="dcterms.date" content="2018-07-20">
+<meta name="description" content="Saturation in ten cities with equal-area rings R Code for one city Results for the ring saturations Average saturation in each ring Methodology Original Code This data visualization example include: * Import .img file a…">
+
+<title>Spatial data in R: Dividing raster layers into equal-area rings – Yang Liu</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../assets/me.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-a0f9fd0d421825b736dc1bbcbcba2219.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../../assets/me.png" alt="" class="navbar-logo light-content">
+    <img src="../../assets/me.png" alt="" class="navbar-logo dark-content">
+    </a>
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Yang Liu</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../posts/index.html"> 
+<span class="menu-text">Posts</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/liuyanguu"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://www.linkedin.com/in/liuyangbaruch/"> 
+<span class="menu-text">LinkedIn</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Spatial data in R: Dividing raster layers into equal-area rings</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
+  <div class="quarto-categories">
+    <div class="quarto-category">Data Visualization</div>
+    <div class="quarto-category">Spatial Data</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    Saturation in ten cities with equal-area rings R Code for one city Results for the ring saturations Average saturation in each ring Methodology Original Code This data visualization example include: * Import .img file a…
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Yang Liu </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">July 20, 2018</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>This migrated post preserves the original rendered output. The original R Markdown source is available as <a href="source.Rmd">source.Rmd</a>.</p>
+</div>
+</div>
+</div>
+<div id="TOC">
+<ul>
+<li>
+<a href="#saturation-in-ten-cities-with-equal-area-rings">Saturation in ten cities with equal-area rings</a>
+</li>
+<li>
+<a href="#r-code-for-one-city">R Code for one city</a>
+</li>
+<li>
+<a href="#results-for-the-ring-saturations">Results for the ring saturations</a>
+</li>
+<li>
+<a href="#average-saturation-in-each-ring">Average saturation in each ring</a>
+</li>
+<li>
+<a href="#methodology">Methodology</a>
+</li>
+<li>
+<a href="#original-code">Original Code</a>
+</li>
+</ul>
+</div>
+<p>
+<strong>This data visualization example include:</strong><br> * Import <code>.img</code> file as a raster<br> * Turn raster into a <em>data.frame</em> of points (coordinates) and values<br> * Dividing the points into 100 equal-area rings<br> * Calculate <em>Built-up Area/Urban Extent</em> for each ring<br> * Turn dataframe into raster<br> * Plot multiple figures on the same color scale
+</p>
+<section id="saturation-in-ten-cities-with-equal-area-rings" class="level2">
+<h2 class="anchored" data-anchor-id="saturation-in-ten-cities-with-equal-area-rings">
+Saturation in ten cities with equal-area rings
+</h2>
+<ul>
+<li>
+The 1000 rings have a minimum saturation of 30.5% and a maximum of 99.9%<br>
+</li>
+<li>
+Same color scale for every map, with a boundary of [0.3, 1]<br>
+</li>
+<li>
+Dark green corresponds to a ring saturation of 0.3, and dark red corresponds to 1
+</li>
+</ul>
+<p>
+<img src="2018-07-19-spatial-data-in-r-dividing-raster-layers-into-equal-area-rings_files/ten cities 100 rings.jpeg">
+</p>
+</section>
+<section id="r-code-for-one-city" class="level2">
+<h2 class="anchored" data-anchor-id="r-code-for-one-city">
+R Code for one city
+</h2>
+<ul>
+<li>
+The setting of the code can loop around several different cities, here we only load one city.
+</li>
+</ul>
+<pre class="r"><code>list.of.packages &lt;- c("raster", "rgdal", "Hmisc", "plyr", "RColorBrewer", "googledrive")
+new.packages &lt;- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+
+suppressPackageStartupMessages({
+library('raster')   # obtain raster from GIS image file, and plot
+library('rgdal')    # readOGR: read ArcGIS vector maps into Spatial objects
+library('Hmisc')    # cut2: cut vector into equal-length
+library('plyr')     # join
+library('RColorBrewer') # for `brewer.pal` in ggplot2
+library('knitr')    # kable
+})
+options(digits = 4)</code></pre>
+<ul>
+<li>
+The local version:
+</li>
+</ul>
+<pre class="r"><code># Where are all the data files located:
+parent_dir &lt;- c("D:/OneDrive - nyu.edu/NYU Marron/180716_Draw Circle/Data/")
+# Get all the folder names (names of the cities) in the directory, used to scan all the cities
+city_list &lt;- list.files(parent_dir)
+
+# If use Hong Kong as an example
+  city1 &lt;- city_list[6]
+  newdir &lt;- paste(parent_dir, city1, sep = "")
+  image &lt;- raster(paste(newdir, c("./city_urbFootprint_clp_t3.img"), sep = ""))
+    
+  # A point that shows the center of the city
+  cbd &lt;-  readOGR(dsn = newdir, layer = paste(city1, "_CBD_Project", sep=""))</code></pre>
+<pre><code>## OGR data source with driver: ESRI Shapefile 
+## Source: "D:\OneDrive - nyu.edu\NYU Marron\180716_Draw Circle\Data\Hong_Kong", layer: "Hong_Kong_CBD_Project"
+## with 1 features
+## It has 6 fields
+## Integer64 fields read as strings:  Id</code></pre>
+<pre class="r"><code>  cbdpoint &lt;- SpatialPoints(cbd)</code></pre>
+<ul>
+<li>
+In this blog data is downloaded from googledrive
+</li>
+</ul>
+<pre class="r"><code>city1 &lt;-"Hong_Kong"
+library(googledrive)
+temp &lt;- tempfile(fileext = ".zip")
+dl &lt;- drive_download(as_id("1z-aD2orN2k2BINkDD6whEhHFga_4HIu8"), path = temp, overwrite = TRUE)
+out &lt;- unzip(temp, exdir = tempdir())
+image &lt;- raster(out[1])
+cbdpoint &lt;- SpatialPoints(readOGR(dsn = paste(tempdir(),"\\Hong_Kong",sep = ""),
+                                  layer = "Hong_Kong_CBD_Project"))</code></pre>
+<ul>
+<li>
+Read raster as points: <code>rasterToPoints</code>
+</li>
+</ul>
+<pre class="r"><code>  # mydata_HK contains coordinate (x,y) and category (type)
+  mydata_HK &lt;- as.data.frame(rasterToPoints(image))
+  names(mydata_HK) &lt;- c("x", "y", "type")</code></pre>
+<ul>
+<li>
+Divide points into ten equal-size rings<br>
+</li>
+<li>
+Calculate distances using <code>sp::spDistsN1</code>
+</li>
+</ul>
+<pre class="r"><code>  # calculate distance to the cbd from every point
+  pts &lt;- as.matrix(mydata_HK[,1:2])
+  mydata_HK$cbd_dist &lt;- spDistsN1(pts, cbdpoint, longlat = F)
+  
+  # library('Hmisc') # cut2
+  mydata_HK$ring &lt;- as.numeric(cut2(mydata_HK$cbd_dist,g = 100)) # get 1:100
+  mydata_HK$type &lt;- as.factor(mydata_HK$type)
+  mydata_HK$ring &lt;- as.factor(mydata_HK$ring)
+
+  # Function to get saturation, as the raster have 7 layers, 1 to 3 belong to built-up area
+  get_sat &lt;- function(x){
+    x &lt;- as.factor(x)
+    # (1 + 2 + 3) / (1 + 2 + 3 + 4 + 5 + 6 + 7)
+    sum(x==1|x==2|x==3)/length(x)
+  }
+
+  # get saturation by rings
+  sat_output &lt;- aggregate(mydata_HK$type, by = list(mydata_HK$ring), FUN = get_sat)
+  names(sat_output) &lt;- c("ring", "ring_saturation")
+  # join back to mydata_HK2 so we can later plot by values of ring_saturation
+  mydata_HK2 &lt;- join(mydata_HK, sat_output, by = "ring")
+  kable(head(mydata_HK2))  </code></pre>
+<table class="table">
+<thead>
+<tr class="header">
+<th align="right">
+x
+</th>
+<th align="right">
+y
+</th>
+<th align="left">
+type
+</th>
+<th align="right">
+cbd_dist
+</th>
+<th align="left">
+ring
+</th>
+<th align="right">
+ring_saturation
+</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">
+203936
+</td>
+<td align="right">
+2478244
+</td>
+<td align="left">
+3
+</td>
+<td align="right">
+11970
+</td>
+<td align="left">
+94
+</td>
+<td align="right">
+0.5318
+</td>
+</tr>
+<tr class="even">
+<td align="right">
+203966
+</td>
+<td align="right">
+2478244
+</td>
+<td align="left">
+4
+</td>
+<td align="right">
+11961
+</td>
+<td align="left">
+94
+</td>
+<td align="right">
+0.5318
+</td>
+</tr>
+<tr class="odd">
+<td align="right">
+203996
+</td>
+<td align="right">
+2478244
+</td>
+<td align="left">
+4
+</td>
+<td align="right">
+11952
+</td>
+<td align="left">
+93
+</td>
+<td align="right">
+0.5721
+</td>
+</tr>
+<tr class="even">
+<td align="right">
+204026
+</td>
+<td align="right">
+2478244
+</td>
+<td align="left">
+3
+</td>
+<td align="right">
+11944
+</td>
+<td align="left">
+93
+</td>
+<td align="right">
+0.5721
+</td>
+</tr>
+<tr class="odd">
+<td align="right">
+204056
+</td>
+<td align="right">
+2478244
+</td>
+<td align="left">
+4
+</td>
+<td align="right">
+11935
+</td>
+<td align="left">
+93
+</td>
+<td align="right">
+0.5721
+</td>
+</tr>
+<tr class="even">
+<td align="right">
+204086
+</td>
+<td align="right">
+2478244
+</td>
+<td align="left">
+4
+</td>
+<td align="right">
+11926
+</td>
+<td align="left">
+93
+</td>
+<td align="right">
+0.5721
+</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>
+Turn dataframe (<code>mydata_HK2</code>) into raster using <code>rasterFromXYZ</code><br>
+</li>
+<li>
+Numeric columns are automatically assigned as values in the raster, and if we plot it directly:
+</li>
+</ul>
+<pre class="r"><code>  r1 &lt;- rasterFromXYZ(mydata_HK2)
+  plot(r1)</code></pre>
+<p>
+<img src="2018-07-19-spatial-data-in-r-dividing-raster-layers-into-equal-area-rings_files/figure-html/unnamed-chunk-5-1.png" width="672">
+</p>
+<pre class="r"><code>  # choose a color scale from `RColorBrewer`
+  color_scale &lt;- brewer.pal(n = 10, name = "RdYlGn")
+  myPalette &lt;- colorRampPalette(rev(color_scale)) # reverse the order so highly value ~ dark red
+  # set col and breaks to align color scale across figures
+  plot(r1$ring_saturation, col=myPalette(70), breaks = c(30:100)/100,
+       legend=FALSE,  main = city1)
+  plot(cbdpoint, add = TRUE, size = 3) # drawn on top of a map using `add = TRUE`</code></pre>
+<p>
+<img src="2018-07-19-spatial-data-in-r-dividing-raster-layers-into-equal-area-rings_files/figure-html/unnamed-chunk-5-2.png" width="672">
+</p>
+<pre class="r"><code>  # if need to output the raster
+  # writeRaster(r1, paste(raster_dir, city1, sep = ""), format = "HFA", overwrite=TRUE)
+
+  # To preview the color panel:
+  # display.brewer.pal(n = 12, name = 'RdYlGn')</code></pre>
+</section>
+<section id="results-for-the-ring-saturations" class="level2">
+<h2 class="anchored" data-anchor-id="results-for-the-ring-saturations">
+Results for the ring saturations
+</h2>
+<ul>
+<li>
+I run the code using a loop for ten cities<br>
+</li>
+<li>
+Ring saturation in the 10 cities has a minimum of 30.5% and a maximum of 99.9%:
+</li>
+</ul>
+<pre class="r"><code>#   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#  0.305   0.545   0.646   0.656   0.771   0.999 </code></pre>
+</section>
+<section id="average-saturation-in-each-ring" class="level2">
+<h2 class="anchored" data-anchor-id="average-saturation-in-each-ring">
+Average saturation in each ring
+</h2>
+<ul>
+<li>
+There is a clear declining trend in saturation as we move towards the boundary of the cities<br> <img src="2018-07-19-spatial-data-in-r-dividing-raster-layers-into-equal-area-rings_files/figure-html/unnamed-chunk-8-1.png" width="672">
+</li>
+</ul>
+</section>
+<section id="methodology" class="level2">
+<h2 class="anchored" data-anchor-id="methodology">
+Methodology
+</h2>
+<p>
+(Summarized by Alejandro Blei, my colleague)<br> 1. Take the file: <code>city_urbFootprint_clp_t3.img</code>. This file is made up of many pixels. Pixels with values 1-3 = built up, pixels with values 4-6 = open space, and pixels with value 7 = water. In other words, 1 - 3 = built up, and 4 - 7 = not built.<br> 2. Convert the pixels to points. This operation preserves the value associated with the pixel.<br> 3. Calculate the distance from each point to the CBD.<br> 4. Create 10 groups from these pixels, where each group has the same area. These groups radiate outward from the CBD. Since each pixel has the same size, all we need are ten groups with the same number of pixels, where the pixels in one group are closer to the CBD than the pixels in the next group.<br> 5. Once we have the groups, we can calculate the saturation value in each group. Saturation is Built Up / (Built Up - Open Space), in other words, saturation is Pixels (1 + 2 + 3) / (1 + 2 + 3 + 4 + 5 + 6 + 7). Each of the ten groups now has a saturation value associated with it.
+</p>
+</section>
+<section id="original-code" class="level2">
+<h2 class="anchored" data-anchor-id="original-code">
+Original Code
+</h2>
+<ul>
+<li>
+Local version, loop over ten cities
+</li>
+</ul>
+<pre class="r"><code># Fragmentation: Saturation  (Built-up Area/Urban Extent) in each ring
+# how about 100 rings
+
+# install.packages('raster')
+library('raster')   # obtain raster from GIS image file, and plot
+library('rgdal')    # readOGR: read ArcGIS vector maps into Spatial objects
+library('Hmisc')    # cut2
+library('plyr')     # join
+library('RColorBrewer') # for `brewer.pal` in ggplot2
+library('knitr')    # kable
+options(digits = 4)
+
+# get saturation
+get_sat &lt;- function(x){
+  x &lt;- as.factor(x)
+  # (1 + 2 + 3) / (1 + 2 + 3 + 4 + 5 + 6 + 7)
+  sum(x==1|x==2|x==3)/length(x)
+}
+
+parent_dir &lt;- c("D:/OneDrive - nyu.edu/NYU Marron/180716_Draw Circle/Data/")
+# Get all the folder names (names of the cities) in the directory
+city_list &lt;- list.files(parent_dir)
+
+sat_out &lt;- data.frame()
+par(mar = c(1,2,1,0), bty="n") # c(bottom, left, top, right)
+layout(matrix(c(1:10),ncol=2, byrow = T))
+# length(city_list)
+for (i in 1:10){
+  city1 &lt;- city_list[i]
+  newdir &lt;- paste(parent_dir, city1, sep = "")
+  image &lt;- raster(paste(newdir, c("./city_urbFootprint_clp_t3.img"), sep = ""))
+  # mydata: df that contains coordinate and category
+  mydata &lt;- as.data.frame(rasterToPoints(image))
+  names(mydata) &lt;- c("x", "y", "type")
+  pts &lt;- as.matrix(mydata[,1:2])
+  
+  # cbd
+  cbd &lt;-  readOGR(dsn = newdir, layer = paste(city1, "_CBD_Project", sep=""))
+  cbdpoint &lt;- SpatialPoints(cbd)
+
+  # distance to the cbd
+  mydata$cbd_dist &lt;- spDistsN1(pts, cbdpoint, longlat = F)
+  # library('Hmisc') # cut2
+  mydata$ring &lt;- as.numeric(cut2(mydata$cbd_dist,g = 100))
+  mydata$type &lt;- as.factor(mydata$type)
+  mydata$ring &lt;- as.factor(mydata$ring)
+
+  
+  sat_output &lt;- aggregate(mydata$type, by = list(mydata$ring), FUN = get_sat)
+  sat_output$City &lt;- city1
+  sat_output$City_Saturation &lt;- get_sat(mydata$type)
+  names(sat_output) &lt;- c("ring", "ring_saturation","city", "city_saturation")
+  sat_out &lt;- rbind(sat_out, sat_output)
+  
+
+  # draw the figure ---------------------------------------------------------
+  
+  mydata2 &lt;- join(mydata, sat_output, by = "ring")
+  r1 &lt;- rasterFromXYZ(mydata2)
+  # writeRaster(r1, paste(raster_dir, city1, sep = ""), format = "HFA", overwrite=TRUE)
+
+  # To preview the color panel:
+  # display.brewer.pal(n = 12, name = 'RdYlGn')
+  color_scale &lt;- brewer.pal(n = 10, name = "RdYlGn")
+  myPalette &lt;- colorRampPalette(rev(color_scale))
+
+  plot(r1$ring_saturation, col=myPalette(70), breaks = c(30:100)/100,
+       legend=FALSE,  main = city1)
+  plot(cbdpoint, add = TRUE, size = 3) # drawn on top of a map using `add = TRUE`
+
+}
+
+
+# Some visulization options -----------------------------------------------------------
+id &lt;- "1DNyQLX0apRVWmRC1xKhpqZLE6SLcQF5p" # google file ID
+sat &lt;- read.csv(sprintf("https://docs.google.com/uc?id=%s&amp;export=download", id))
+sat$idx &lt;- rep(c(1:100),10)
+
+# linear regression smoothing
+ggplot(sat, aes(x=idx, y=ring_saturation)) +
+  geom_point(size = 0.5, color = 'blue') +  
+  geom_smooth(method = 'lm')+
+  theme_classic() + 
+  geom_hline(yintercept = 0) +
+  scale_y_continuous(limits = c(0,1)) +
+  labs(x = "Equal-Area Rings from CBD", y = "Average Built-up Area/Urban Extent") +
+  ggtitle("Average Saturation in the 100 Rings")
+
+## some other options
+# one plot for each city
+par(mar = rep(2,4), bty="n")
+layout(matrix(c(1:10),ncol=2, byrow = T))
+for (i in 1:10){
+  sat_sub &lt;- subset(sat, city == city_list[i])
+  plot(x = sat_sub$idx, y = sat_sub$ring_saturation, type = "l",
+       xlab=c("Ring from CBD"), ylab =c("Built-up Area/Urban Extent"),
+       main = city_list[i])
+}
+
+# a barchart for each ring?
+sat$weight_blank &lt;- 1
+source("D:/OneDrive - nyu.edu/NYU Marron/R/Get Weighted SE and CI.R")
+Mean_byGroup &lt;- get_WM_and_CI2(sat, "idx", "ring_saturation", "weight_blank") 
+bar_width &lt;- 0.8
+ggplot(Mean_byGroup, aes(x=idx, y=wm, 
+                         ymin=CI_low, ymax=CI_high)) +
+  geom_bar(stat='identity', position = position_dodge(), width = bar_width, alpha=0.8)+
+  geom_errorbar (width=bar_width-0.1, lwd=1, position=position_dodge(bar_width))+
+  labs(x = "Ten Rings from CBD", y = "Average Built-up Area/Urban Extent") +
+  ggtitle("Average Saturation in Each Ring")+
+  theme_classic()  +  
+  geom_hline(yintercept = 0)
+
+# scatterplot all the points for ten cities 
+ggplot(sat, aes(x=idx, y=ring_saturation, color = city)) +
+  geom_point(size = 1) 
+  labs(x = "Ten Rings from CBD", y = "Built-up Area/Urban Extent") +
+  ggtitle("Saturation in Each Ring of Ten Cities")+
+  theme_classic() </code></pre>
+</section>
+
+
+<!-- -->
+
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/liuyanguu\.github\.io");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Spatial data in R: Dividing raster layers into equal-area rings"</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Yang Liu"</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "2018-07-20"</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> "Saturation in ten cities with equal-area rings R Code for one city Results for the ring saturations Average saturation in each ring Methodology Original Code This data visualization example include: * Import .img file a..."</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="an">categories:</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">  - "Data Visualization"</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">  - "Spatial Data"</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="an">tags:</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">  - "R"</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co">  - "Geographic"</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co">  - "Spatial"</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="an">page-layout:</span><span class="co"> article</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="an">execute:</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co">  freeze: true</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co">  eval: false</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="an">resources:</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">  - "source.Rmd"</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co">  - "index_files/**"</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">  - "images/**"</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co">  - "temp/**"</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="co">  - "2018-07-19-spatial-data-in-r-dividing-raster-layers-into-equal-area-rings_files/**"</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="co">  - "*.png"</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="co">  - "*.jpg"</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="co">  - "*.jpeg"</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="co">  - "*.JPG"</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="co">  - "*.PNG"</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="co">  - "*.gif"</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="co">  - "*.svg"</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="co">  - "*.rds"</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="co">  - "*.csv"</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="co">  - "*.xlsx"</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>::: {.callout-note appearance="simple"}</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>This migrated post preserves the original rendered output. The original R Markdown source is available as <span class="co">[</span><span class="ot">source.Rmd</span><span class="co">](source.Rmd)</span>.</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> id</span><span class="op">=</span><span class="st">"TOC"</span><span class="dt">&gt;</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">"#saturation-in-ten-cities-with-equal-area-rings"</span><span class="dt">&gt;</span>Saturation in ten cities with equal-area rings<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">"#r-code-for-one-city"</span><span class="dt">&gt;</span>R Code for one city<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">"#results-for-the-ring-saturations"</span><span class="dt">&gt;</span>Results for the ring saturations<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">"#average-saturation-in-each-ring"</span><span class="dt">&gt;</span>Average saturation in each ring<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">"#methodology"</span><span class="dt">&gt;</span>Methodology<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">"#original-code"</span><span class="dt">&gt;</span>Original Code<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;&lt;</span><span class="kw">strong</span><span class="dt">&gt;</span>This data visualization example include:<span class="dt">&lt;/</span><span class="kw">strong</span><span class="dt">&gt;&lt;</span><span class="kw">br</span><span class="ot"> </span><span class="dt">/&gt;</span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Import <span class="dt">&lt;</span><span class="kw">code</span><span class="dt">&gt;</span>.img<span class="dt">&lt;/</span><span class="kw">code</span><span class="dt">&gt;</span> file as a raster<span class="dt">&lt;</span><span class="kw">br</span><span class="ot"> </span><span class="dt">/&gt;</span></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Turn raster into a <span class="dt">&lt;</span><span class="kw">em</span><span class="dt">&gt;</span>data.frame<span class="dt">&lt;/</span><span class="kw">em</span><span class="dt">&gt;</span> of points (coordinates) and values<span class="dt">&lt;</span><span class="kw">br</span><span class="ot"> </span><span class="dt">/&gt;</span></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Dividing the points into 100 equal-area rings<span class="dt">&lt;</span><span class="kw">br</span><span class="ot"> </span><span class="dt">/&gt;</span></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Calculate <span class="dt">&lt;</span><span class="kw">em</span><span class="dt">&gt;</span>Built-up Area/Urban Extent<span class="dt">&lt;/</span><span class="kw">em</span><span class="dt">&gt;</span> for each ring<span class="dt">&lt;</span><span class="kw">br</span><span class="ot"> </span><span class="dt">/&gt;</span></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Turn dataframe into raster<span class="dt">&lt;</span><span class="kw">br</span><span class="ot"> </span><span class="dt">/&gt;</span></span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Plot multiple figures on the same color scale<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> id</span><span class="op">=</span><span class="st">"saturation-in-ten-cities-with-equal-area-rings"</span><span class="ot"> class</span><span class="op">=</span><span class="st">"section level2"</span><span class="dt">&gt;</span></span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">h2</span><span class="dt">&gt;</span>Saturation in ten cities with equal-area rings<span class="dt">&lt;/</span><span class="kw">h2</span><span class="dt">&gt;</span></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>The 1000 rings have a minimum saturation of 30.5% and a maximum of 99.9%<span class="dt">&lt;</span><span class="kw">br</span><span class="ot"> </span><span class="dt">/&gt;</span></span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>Same color scale for every map, with a boundary of <span class="co">[</span><span class="ot">0.3, 1</span><span class="co">]</span><span class="dt">&lt;</span><span class="kw">br</span><span class="ot"> </span><span class="dt">/&gt;</span></span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>Dark green corresponds to a ring saturation of 0.3, and dark red corresponds to 1<span class="dt">&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;&lt;</span><span class="kw">img</span><span class="ot"> src</span><span class="op">=</span><span class="st">"2018-07-19-spatial-data-in-r-dividing-raster-layers-into-equal-area-rings_files/ten%20cities%20100%20rings.jpeg"</span><span class="ot"> </span><span class="dt">/&gt;&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> id</span><span class="op">=</span><span class="st">"r-code-for-one-city"</span><span class="ot"> class</span><span class="op">=</span><span class="st">"section level2"</span><span class="dt">&gt;</span></span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">h2</span><span class="dt">&gt;</span>R Code for one city<span class="dt">&lt;/</span><span class="kw">h2</span><span class="dt">&gt;</span></span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>The setting of the code can loop around several different cities, here we only load one city.<span class="dt">&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">pre</span><span class="ot"> class</span><span class="op">=</span><span class="st">"r"</span><span class="dt">&gt;&lt;</span><span class="kw">code</span><span class="dt">&gt;</span>list.of.packages <span class="dv">&amp;lt;</span>- c(<span class="dv">&amp;quot;</span>raster<span class="dv">&amp;quot;</span>, <span class="dv">&amp;quot;</span>rgdal<span class="dv">&amp;quot;</span>, <span class="dv">&amp;quot;</span>Hmisc<span class="dv">&amp;quot;</span>, <span class="dv">&amp;quot;</span>plyr<span class="dv">&amp;quot;</span>, <span class="dv">&amp;quot;</span>RColorBrewer<span class="dv">&amp;quot;</span>, <span class="dv">&amp;quot;</span>googledrive<span class="dv">&amp;quot;</span>)</span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a>new.packages <span class="dv">&amp;lt;</span>- list.of.packages<span class="co">[</span><span class="ot">!(list.of.packages %in% installed.packages()[,&amp;quot;Package&amp;quot;])</span><span class="co">]</span></span>
+<span id="cb1-77"><a href="#cb1-77" aria-hidden="true" tabindex="-1"></a>if(length(new.packages)) install.packages(new.packages)</span>
+<span id="cb1-78"><a href="#cb1-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-79"><a href="#cb1-79" aria-hidden="true" tabindex="-1"></a>suppressPackageStartupMessages({</span>
+<span id="cb1-80"><a href="#cb1-80" aria-hidden="true" tabindex="-1"></a>library(<span class="dv">&amp;#39;</span>raster<span class="dv">&amp;#39;</span>)   # obtain raster from GIS image file, and plot</span>
+<span id="cb1-81"><a href="#cb1-81" aria-hidden="true" tabindex="-1"></a>library(<span class="dv">&amp;#39;</span>rgdal<span class="dv">&amp;#39;</span>)    # readOGR: read ArcGIS vector maps into Spatial objects</span>
+<span id="cb1-82"><a href="#cb1-82" aria-hidden="true" tabindex="-1"></a>library(<span class="dv">&amp;#39;</span>Hmisc<span class="dv">&amp;#39;</span>)    # cut2: cut vector into equal-length</span>
+<span id="cb1-83"><a href="#cb1-83" aria-hidden="true" tabindex="-1"></a>library(<span class="dv">&amp;#39;</span>plyr<span class="dv">&amp;#39;</span>)     # join</span>
+<span id="cb1-84"><a href="#cb1-84" aria-hidden="true" tabindex="-1"></a>library(<span class="dv">&amp;#39;</span>RColorBrewer<span class="dv">&amp;#39;</span>) # for <span class="in">`brewer.pal`</span> in ggplot2</span>
+<span id="cb1-85"><a href="#cb1-85" aria-hidden="true" tabindex="-1"></a>library(<span class="dv">&amp;#39;</span>knitr<span class="dv">&amp;#39;</span>)    # kable</span>
+<span id="cb1-86"><a href="#cb1-86" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb1-87"><a href="#cb1-87" aria-hidden="true" tabindex="-1"></a>options(digits = 4)<span class="dt">&lt;/</span><span class="kw">code</span><span class="dt">&gt;&lt;/</span><span class="kw">pre</span><span class="dt">&gt;</span></span>
+<span id="cb1-88"><a href="#cb1-88" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb1-89"><a href="#cb1-89" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>The local version:<span class="dt">&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb1-90"><a href="#cb1-90" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb1-91"><a href="#cb1-91" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">pre</span><span class="ot"> class</span><span class="op">=</span><span class="st">"r"</span><span class="dt">&gt;&lt;</span><span class="kw">code</span><span class="dt">&gt;</span># Where are all the data files located:</span>
+<span id="cb1-92"><a href="#cb1-92" aria-hidden="true" tabindex="-1"></a>parent_dir <span class="dv">&amp;lt;</span>- c(<span class="dv">&amp;quot;</span>D:/OneDrive - nyu.edu/NYU Marron/180716_Draw Circle/Data/<span class="dv">&amp;quot;</span>)</span>
+<span id="cb1-93"><a href="#cb1-93" aria-hidden="true" tabindex="-1"></a><span class="fu"># Get all the folder names (names of the cities) in the directory, used to scan all the cities</span></span>
+<span id="cb1-94"><a href="#cb1-94" aria-hidden="true" tabindex="-1"></a>city_list <span class="dv">&amp;lt;</span>- list.files(parent_dir)</span>
+<span id="cb1-95"><a href="#cb1-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-96"><a href="#cb1-96" aria-hidden="true" tabindex="-1"></a><span class="fu"># If use Hong Kong as an example</span></span>
+<span id="cb1-97"><a href="#cb1-97" aria-hidden="true" tabindex="-1"></a>  city1 <span class="dv">&amp;lt;</span>- city_list<span class="co">[</span><span class="ot">6</span><span class="co">]</span></span>
+<span id="cb1-98"><a href="#cb1-98" aria-hidden="true" tabindex="-1"></a>  newdir <span class="dv">&amp;lt;</span>- paste(parent_dir, city1, sep = <span class="dv">&amp;quot;&amp;quot;</span>)</span>
+<span id="cb1-99"><a href="#cb1-99" aria-hidden="true" tabindex="-1"></a>  image <span class="dv">&amp;lt;</span>- raster(paste(newdir, c(<span class="dv">&amp;quot;</span>./city_urbFootprint_clp_t3.img<span class="dv">&amp;quot;</span>), sep = <span class="dv">&amp;quot;&amp;quot;</span>))</span>
+<span id="cb1-100"><a href="#cb1-100" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-101"><a href="#cb1-101" aria-hidden="true" tabindex="-1"></a>  # A point that shows the center of the city</span>
+<span id="cb1-102"><a href="#cb1-102" aria-hidden="true" tabindex="-1"></a>  cbd <span class="dv">&amp;lt;</span>-  readOGR(dsn = newdir, layer = paste(city1, <span class="dv">&amp;quot;</span>_CBD_Project<span class="dv">&amp;quot;</span>, sep=<span class="dv">&amp;quot;&amp;quot;</span>))<span class="dt">&lt;/</span><span class="kw">code</span><span class="dt">&gt;&lt;/</span><span class="kw">pre</span><span class="dt">&gt;</span></span>
+<span id="cb1-103"><a href="#cb1-103" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">pre</span><span class="dt">&gt;&lt;</span><span class="kw">code</span><span class="dt">&gt;</span>## OGR data source with driver: ESRI Shapefile </span>
+<span id="cb1-104"><a href="#cb1-104" aria-hidden="true" tabindex="-1"></a><span class="fu">## Source: &amp;quot;D:\OneDrive - nyu.edu\NYU Marron\180716_Draw Circle\Data\Hong_Kong&amp;quot;, layer: &amp;quot;Hong_Kong_CBD_Project&amp;quot;</span></span>
+<span id="cb1-105"><a href="#cb1-105" aria-hidden="true" tabindex="-1"></a><span class="fu">## with 1 features</span></span>
+<span id="cb1-106"><a href="#cb1-106" aria-hidden="true" tabindex="-1"></a><span class="fu">## It has 6 fields</span></span>
+<span id="cb1-107"><a href="#cb1-107" aria-hidden="true" tabindex="-1"></a><span class="fu">## Integer64 fields read as strings:  Id&lt;/code&gt;&lt;/pre&gt;</span></span>
+<span id="cb1-108"><a href="#cb1-108" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">pre</span><span class="ot"> class</span><span class="op">=</span><span class="st">"r"</span><span class="dt">&gt;&lt;</span><span class="kw">code</span><span class="dt">&gt;</span>  cbdpoint <span class="dv">&amp;lt;</span>- SpatialPoints(cbd)<span class="dt">&lt;/</span><span class="kw">code</span><span class="dt">&gt;&lt;/</span><span class="kw">pre</span><span class="dt">&gt;</span></span>
+<span id="cb1-109"><a href="#cb1-109" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb1-110"><a href="#cb1-110" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>In this blog data is downloaded from googledrive<span class="dt">&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb1-111"><a href="#cb1-111" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb1-112"><a href="#cb1-112" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">pre</span><span class="ot"> class</span><span class="op">=</span><span class="st">"r"</span><span class="dt">&gt;&lt;</span><span class="kw">code</span><span class="dt">&gt;</span>city1 <span class="dv">&amp;lt;</span>-<span class="dv">&amp;quot;</span>Hong_Kong<span class="dv">&amp;quot;</span></span>
+<span id="cb1-113"><a href="#cb1-113" aria-hidden="true" tabindex="-1"></a>library(googledrive)</span>
+<span id="cb1-114"><a href="#cb1-114" aria-hidden="true" tabindex="-1"></a>temp <span class="dv">&amp;lt;</span>- tempfile(fileext = <span class="dv">&amp;quot;</span>.zip<span class="dv">&amp;quot;</span>)</span>
+<span id="cb1-115"><a href="#cb1-115" aria-hidden="true" tabindex="-1"></a>dl <span class="dv">&amp;lt;</span>- drive_download(as_id(<span class="dv">&amp;quot;</span>1z-aD2orN2k2BINkDD6whEhHFga_4HIu8<span class="dv">&amp;quot;</span>), path = temp, overwrite = TRUE)</span>
+<span id="cb1-116"><a href="#cb1-116" aria-hidden="true" tabindex="-1"></a>out <span class="dv">&amp;lt;</span>- unzip(temp, exdir = tempdir())</span>
+<span id="cb1-117"><a href="#cb1-117" aria-hidden="true" tabindex="-1"></a>image <span class="dv">&amp;lt;</span>- raster(out<span class="co">[</span><span class="ot">1</span><span class="co">]</span>)</span>
+<span id="cb1-118"><a href="#cb1-118" aria-hidden="true" tabindex="-1"></a>cbdpoint <span class="dv">&amp;lt;</span>- SpatialPoints(readOGR(dsn = paste(tempdir(),<span class="dv">&amp;quot;</span><span class="sc">\\</span>Hong_Kong<span class="dv">&amp;quot;</span>,sep = <span class="dv">&amp;quot;&amp;quot;</span>),</span>
+<span id="cb1-119"><a href="#cb1-119" aria-hidden="true" tabindex="-1"></a>                                  layer = <span class="dv">&amp;quot;</span>Hong_Kong_CBD_Project<span class="dv">&amp;quot;</span>))<span class="dt">&lt;/</span><span class="kw">code</span><span class="dt">&gt;&lt;/</span><span class="kw">pre</span><span class="dt">&gt;</span></span>
+<span id="cb1-120"><a href="#cb1-120" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb1-121"><a href="#cb1-121" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>Read raster as points: <span class="dt">&lt;</span><span class="kw">code</span><span class="dt">&gt;</span>rasterToPoints<span class="dt">&lt;/</span><span class="kw">code</span><span class="dt">&gt;&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb1-122"><a href="#cb1-122" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb1-123"><a href="#cb1-123" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">pre</span><span class="ot"> class</span><span class="op">=</span><span class="st">"r"</span><span class="dt">&gt;&lt;</span><span class="kw">code</span><span class="dt">&gt;</span>  # mydata_HK contains coordinate (x,y) and category (type)</span>
+<span id="cb1-124"><a href="#cb1-124" aria-hidden="true" tabindex="-1"></a>  mydata_HK <span class="dv">&amp;lt;</span>- as.data.frame(rasterToPoints(image))</span>
+<span id="cb1-125"><a href="#cb1-125" aria-hidden="true" tabindex="-1"></a>  names(mydata_HK) <span class="dv">&amp;lt;</span>- c(<span class="dv">&amp;quot;</span>x<span class="dv">&amp;quot;</span>, <span class="dv">&amp;quot;</span>y<span class="dv">&amp;quot;</span>, <span class="dv">&amp;quot;</span>type<span class="dv">&amp;quot;</span>)<span class="dt">&lt;/</span><span class="kw">code</span><span class="dt">&gt;&lt;/</span><span class="kw">pre</span><span class="dt">&gt;</span></span>
+<span id="cb1-126"><a href="#cb1-126" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb1-127"><a href="#cb1-127" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>Divide points into ten equal-size rings<span class="dt">&lt;</span><span class="kw">br</span><span class="ot"> </span><span class="dt">/&gt;</span></span>
+<span id="cb1-128"><a href="#cb1-128" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb1-129"><a href="#cb1-129" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>Calculate distances using <span class="dt">&lt;</span><span class="kw">code</span><span class="dt">&gt;</span>sp::spDistsN1<span class="dt">&lt;/</span><span class="kw">code</span><span class="dt">&gt;&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb1-130"><a href="#cb1-130" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb1-131"><a href="#cb1-131" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">pre</span><span class="ot"> class</span><span class="op">=</span><span class="st">"r"</span><span class="dt">&gt;&lt;</span><span class="kw">code</span><span class="dt">&gt;</span>  # calculate distance to the cbd from every point</span>
+<span id="cb1-132"><a href="#cb1-132" aria-hidden="true" tabindex="-1"></a>  pts <span class="dv">&amp;lt;</span>- as.matrix(mydata_HK<span class="co">[</span><span class="ot">,1:2</span><span class="co">]</span>)</span>
+<span id="cb1-133"><a href="#cb1-133" aria-hidden="true" tabindex="-1"></a>  mydata_HK$cbd_dist <span class="dv">&amp;lt;</span>- spDistsN1(pts, cbdpoint, longlat = F)</span>
+<span id="cb1-134"><a href="#cb1-134" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-135"><a href="#cb1-135" aria-hidden="true" tabindex="-1"></a>  # library(<span class="dv">&amp;#39;</span>Hmisc<span class="dv">&amp;#39;</span>) # cut2</span>
+<span id="cb1-136"><a href="#cb1-136" aria-hidden="true" tabindex="-1"></a>  mydata_HK$ring <span class="dv">&amp;lt;</span>- as.numeric(cut2(mydata_HK$cbd_dist,g = 100)) # get 1:100</span>
+<span id="cb1-137"><a href="#cb1-137" aria-hidden="true" tabindex="-1"></a>  mydata_HK$type <span class="dv">&amp;lt;</span>- as.factor(mydata_HK$type)</span>
+<span id="cb1-138"><a href="#cb1-138" aria-hidden="true" tabindex="-1"></a>  mydata_HK$ring <span class="dv">&amp;lt;</span>- as.factor(mydata_HK$ring)</span>
+<span id="cb1-139"><a href="#cb1-139" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-140"><a href="#cb1-140" aria-hidden="true" tabindex="-1"></a>  # Function to get saturation, as the raster have 7 layers, 1 to 3 belong to built-up area</span>
+<span id="cb1-141"><a href="#cb1-141" aria-hidden="true" tabindex="-1"></a>  get_sat <span class="dv">&amp;lt;</span>- function(x){</span>
+<span id="cb1-142"><a href="#cb1-142" aria-hidden="true" tabindex="-1"></a>    x <span class="dv">&amp;lt;</span>- as.factor(x)</span>
+<span id="cb1-143"><a href="#cb1-143" aria-hidden="true" tabindex="-1"></a>    # (1 + 2 + 3) / (1 + 2 + 3 + 4 + 5 + 6 + 7)</span>
+<span id="cb1-144"><a href="#cb1-144" aria-hidden="true" tabindex="-1"></a>    sum(x<span class="al">==1|x==2|x==</span>3)/length(x)</span>
+<span id="cb1-145"><a href="#cb1-145" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-146"><a href="#cb1-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-147"><a href="#cb1-147" aria-hidden="true" tabindex="-1"></a>  # get saturation by rings</span>
+<span id="cb1-148"><a href="#cb1-148" aria-hidden="true" tabindex="-1"></a>  sat_output <span class="dv">&amp;lt;</span>- aggregate(mydata_HK$type, by = list(mydata_HK$ring), FUN = get_sat)</span>
+<span id="cb1-149"><a href="#cb1-149" aria-hidden="true" tabindex="-1"></a>  names(sat_output) <span class="dv">&amp;lt;</span>- c(<span class="dv">&amp;quot;</span>ring<span class="dv">&amp;quot;</span>, <span class="dv">&amp;quot;</span>ring_saturation<span class="dv">&amp;quot;</span>)</span>
+<span id="cb1-150"><a href="#cb1-150" aria-hidden="true" tabindex="-1"></a>  # join back to mydata_HK2 so we can later plot by values of ring_saturation</span>
+<span id="cb1-151"><a href="#cb1-151" aria-hidden="true" tabindex="-1"></a>  mydata_HK2 <span class="dv">&amp;lt;</span>- join(mydata_HK, sat_output, by = <span class="dv">&amp;quot;</span>ring<span class="dv">&amp;quot;</span>)</span>
+<span id="cb1-152"><a href="#cb1-152" aria-hidden="true" tabindex="-1"></a>  kable(head(mydata_HK2))  <span class="dt">&lt;/</span><span class="kw">code</span><span class="dt">&gt;&lt;/</span><span class="kw">pre</span><span class="dt">&gt;</span></span>
+<span id="cb1-153"><a href="#cb1-153" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">table</span><span class="dt">&gt;</span></span>
+<span id="cb1-154"><a href="#cb1-154" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">thead</span><span class="dt">&gt;</span></span>
+<span id="cb1-155"><a href="#cb1-155" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">tr</span><span class="ot"> class</span><span class="op">=</span><span class="st">"header"</span><span class="dt">&gt;</span></span>
+<span id="cb1-156"><a href="#cb1-156" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">th</span><span class="ot"> align</span><span class="op">=</span><span class="st">"right"</span><span class="dt">&gt;</span>x<span class="dt">&lt;/</span><span class="kw">th</span><span class="dt">&gt;</span></span>
+<span id="cb1-157"><a href="#cb1-157" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">th</span><span class="ot"> align</span><span class="op">=</span><span class="st">"right"</span><span class="dt">&gt;</span>y<span class="dt">&lt;/</span><span class="kw">th</span><span class="dt">&gt;</span></span>
+<span id="cb1-158"><a href="#cb1-158" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">th</span><span class="ot"> align</span><span class="op">=</span><span class="st">"left"</span><span class="dt">&gt;</span>type<span class="dt">&lt;/</span><span class="kw">th</span><span class="dt">&gt;</span></span>
+<span id="cb1-159"><a href="#cb1-159" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">th</span><span class="ot"> align</span><span class="op">=</span><span class="st">"right"</span><span class="dt">&gt;</span>cbd_dist<span class="dt">&lt;/</span><span class="kw">th</span><span class="dt">&gt;</span></span>
+<span id="cb1-160"><a href="#cb1-160" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">th</span><span class="ot"> align</span><span class="op">=</span><span class="st">"left"</span><span class="dt">&gt;</span>ring<span class="dt">&lt;/</span><span class="kw">th</span><span class="dt">&gt;</span></span>
+<span id="cb1-161"><a href="#cb1-161" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">th</span><span class="ot"> align</span><span class="op">=</span><span class="st">"right"</span><span class="dt">&gt;</span>ring_saturation<span class="dt">&lt;/</span><span class="kw">th</span><span class="dt">&gt;</span></span>
+<span id="cb1-162"><a href="#cb1-162" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">tr</span><span class="dt">&gt;</span></span>
+<span id="cb1-163"><a href="#cb1-163" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">thead</span><span class="dt">&gt;</span></span>
+<span id="cb1-164"><a href="#cb1-164" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">tbody</span><span class="dt">&gt;</span></span>
+<span id="cb1-165"><a href="#cb1-165" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">tr</span><span class="ot"> class</span><span class="op">=</span><span class="st">"odd"</span><span class="dt">&gt;</span></span>
+<span id="cb1-166"><a href="#cb1-166" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"right"</span><span class="dt">&gt;</span>203936<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-167"><a href="#cb1-167" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"right"</span><span class="dt">&gt;</span>2478244<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-168"><a href="#cb1-168" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"left"</span><span class="dt">&gt;</span>3<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-169"><a href="#cb1-169" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"right"</span><span class="dt">&gt;</span>11970<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-170"><a href="#cb1-170" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"left"</span><span class="dt">&gt;</span>94<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-171"><a href="#cb1-171" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"right"</span><span class="dt">&gt;</span>0.5318<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-172"><a href="#cb1-172" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">tr</span><span class="dt">&gt;</span></span>
+<span id="cb1-173"><a href="#cb1-173" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">tr</span><span class="ot"> class</span><span class="op">=</span><span class="st">"even"</span><span class="dt">&gt;</span></span>
+<span id="cb1-174"><a href="#cb1-174" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"right"</span><span class="dt">&gt;</span>203966<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-175"><a href="#cb1-175" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"right"</span><span class="dt">&gt;</span>2478244<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-176"><a href="#cb1-176" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"left"</span><span class="dt">&gt;</span>4<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-177"><a href="#cb1-177" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"right"</span><span class="dt">&gt;</span>11961<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-178"><a href="#cb1-178" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"left"</span><span class="dt">&gt;</span>94<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-179"><a href="#cb1-179" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"right"</span><span class="dt">&gt;</span>0.5318<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-180"><a href="#cb1-180" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">tr</span><span class="dt">&gt;</span></span>
+<span id="cb1-181"><a href="#cb1-181" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">tr</span><span class="ot"> class</span><span class="op">=</span><span class="st">"odd"</span><span class="dt">&gt;</span></span>
+<span id="cb1-182"><a href="#cb1-182" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"right"</span><span class="dt">&gt;</span>203996<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-183"><a href="#cb1-183" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"right"</span><span class="dt">&gt;</span>2478244<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-184"><a href="#cb1-184" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"left"</span><span class="dt">&gt;</span>4<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-185"><a href="#cb1-185" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"right"</span><span class="dt">&gt;</span>11952<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-186"><a href="#cb1-186" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"left"</span><span class="dt">&gt;</span>93<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-187"><a href="#cb1-187" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"right"</span><span class="dt">&gt;</span>0.5721<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-188"><a href="#cb1-188" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">tr</span><span class="dt">&gt;</span></span>
+<span id="cb1-189"><a href="#cb1-189" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">tr</span><span class="ot"> class</span><span class="op">=</span><span class="st">"even"</span><span class="dt">&gt;</span></span>
+<span id="cb1-190"><a href="#cb1-190" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"right"</span><span class="dt">&gt;</span>204026<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-191"><a href="#cb1-191" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"right"</span><span class="dt">&gt;</span>2478244<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-192"><a href="#cb1-192" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"left"</span><span class="dt">&gt;</span>3<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-193"><a href="#cb1-193" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"right"</span><span class="dt">&gt;</span>11944<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-194"><a href="#cb1-194" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"left"</span><span class="dt">&gt;</span>93<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-195"><a href="#cb1-195" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"right"</span><span class="dt">&gt;</span>0.5721<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-196"><a href="#cb1-196" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">tr</span><span class="dt">&gt;</span></span>
+<span id="cb1-197"><a href="#cb1-197" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">tr</span><span class="ot"> class</span><span class="op">=</span><span class="st">"odd"</span><span class="dt">&gt;</span></span>
+<span id="cb1-198"><a href="#cb1-198" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"right"</span><span class="dt">&gt;</span>204056<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-199"><a href="#cb1-199" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"right"</span><span class="dt">&gt;</span>2478244<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-200"><a href="#cb1-200" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"left"</span><span class="dt">&gt;</span>4<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-201"><a href="#cb1-201" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"right"</span><span class="dt">&gt;</span>11935<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-202"><a href="#cb1-202" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"left"</span><span class="dt">&gt;</span>93<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-203"><a href="#cb1-203" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"right"</span><span class="dt">&gt;</span>0.5721<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-204"><a href="#cb1-204" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">tr</span><span class="dt">&gt;</span></span>
+<span id="cb1-205"><a href="#cb1-205" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">tr</span><span class="ot"> class</span><span class="op">=</span><span class="st">"even"</span><span class="dt">&gt;</span></span>
+<span id="cb1-206"><a href="#cb1-206" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"right"</span><span class="dt">&gt;</span>204086<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-207"><a href="#cb1-207" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"right"</span><span class="dt">&gt;</span>2478244<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-208"><a href="#cb1-208" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"left"</span><span class="dt">&gt;</span>4<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-209"><a href="#cb1-209" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"right"</span><span class="dt">&gt;</span>11926<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-210"><a href="#cb1-210" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"left"</span><span class="dt">&gt;</span>93<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-211"><a href="#cb1-211" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">td</span><span class="ot"> align</span><span class="op">=</span><span class="st">"right"</span><span class="dt">&gt;</span>0.5721<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb1-212"><a href="#cb1-212" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">tr</span><span class="dt">&gt;</span></span>
+<span id="cb1-213"><a href="#cb1-213" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">tbody</span><span class="dt">&gt;</span></span>
+<span id="cb1-214"><a href="#cb1-214" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">table</span><span class="dt">&gt;</span></span>
+<span id="cb1-215"><a href="#cb1-215" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb1-216"><a href="#cb1-216" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>Turn dataframe (<span class="dt">&lt;</span><span class="kw">code</span><span class="dt">&gt;</span>mydata_HK2<span class="dt">&lt;/</span><span class="kw">code</span><span class="dt">&gt;</span>) into raster using <span class="dt">&lt;</span><span class="kw">code</span><span class="dt">&gt;</span>rasterFromXYZ<span class="dt">&lt;/</span><span class="kw">code</span><span class="dt">&gt;&lt;</span><span class="kw">br</span><span class="ot"> </span><span class="dt">/&gt;</span></span>
+<span id="cb1-217"><a href="#cb1-217" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb1-218"><a href="#cb1-218" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>Numeric columns are automatically assigned as values in the raster, and if we plot it directly:<span class="dt">&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb1-219"><a href="#cb1-219" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb1-220"><a href="#cb1-220" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">pre</span><span class="ot"> class</span><span class="op">=</span><span class="st">"r"</span><span class="dt">&gt;&lt;</span><span class="kw">code</span><span class="dt">&gt;</span>  r1 <span class="dv">&amp;lt;</span>- rasterFromXYZ(mydata_HK2)</span>
+<span id="cb1-221"><a href="#cb1-221" aria-hidden="true" tabindex="-1"></a>  plot(r1)<span class="dt">&lt;/</span><span class="kw">code</span><span class="dt">&gt;&lt;/</span><span class="kw">pre</span><span class="dt">&gt;</span></span>
+<span id="cb1-222"><a href="#cb1-222" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;&lt;</span><span class="kw">img</span><span class="ot"> src</span><span class="op">=</span><span class="st">"2018-07-19-spatial-data-in-r-dividing-raster-layers-into-equal-area-rings_files/figure-html/unnamed-chunk-5-1.png"</span><span class="ot"> width</span><span class="op">=</span><span class="st">"672"</span><span class="ot"> </span><span class="dt">/&gt;&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb1-223"><a href="#cb1-223" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">pre</span><span class="ot"> class</span><span class="op">=</span><span class="st">"r"</span><span class="dt">&gt;&lt;</span><span class="kw">code</span><span class="dt">&gt;</span>  # choose a color scale from <span class="in">`RColorBrewer`</span></span>
+<span id="cb1-224"><a href="#cb1-224" aria-hidden="true" tabindex="-1"></a>  color_scale <span class="dv">&amp;lt;</span>- brewer.pal(n = 10, name = <span class="dv">&amp;quot;</span>RdYlGn<span class="dv">&amp;quot;</span>)</span>
+<span id="cb1-225"><a href="#cb1-225" aria-hidden="true" tabindex="-1"></a>  myPalette <span class="dv">&amp;lt;</span>- colorRampPalette(rev(color_scale)) # reverse the order so highly value ~ dark red</span>
+<span id="cb1-226"><a href="#cb1-226" aria-hidden="true" tabindex="-1"></a>  # set col and breaks to align color scale across figures</span>
+<span id="cb1-227"><a href="#cb1-227" aria-hidden="true" tabindex="-1"></a>  plot(r1$ring_saturation, col=myPalette(70), breaks = c(30:100)/100,</span>
+<span id="cb1-228"><a href="#cb1-228" aria-hidden="true" tabindex="-1"></a>       legend=FALSE,  main = city1)</span>
+<span id="cb1-229"><a href="#cb1-229" aria-hidden="true" tabindex="-1"></a>  plot(cbdpoint, add = TRUE, size = 3) # drawn on top of a map using <span class="in">`add = TRUE`</span><span class="dt">&lt;/</span><span class="kw">code</span><span class="dt">&gt;&lt;/</span><span class="kw">pre</span><span class="dt">&gt;</span></span>
+<span id="cb1-230"><a href="#cb1-230" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;&lt;</span><span class="kw">img</span><span class="ot"> src</span><span class="op">=</span><span class="st">"2018-07-19-spatial-data-in-r-dividing-raster-layers-into-equal-area-rings_files/figure-html/unnamed-chunk-5-2.png"</span><span class="ot"> width</span><span class="op">=</span><span class="st">"672"</span><span class="ot"> </span><span class="dt">/&gt;&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb1-231"><a href="#cb1-231" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">pre</span><span class="ot"> class</span><span class="op">=</span><span class="st">"r"</span><span class="dt">&gt;&lt;</span><span class="kw">code</span><span class="dt">&gt;</span>  # if need to output the raster</span>
+<span id="cb1-232"><a href="#cb1-232" aria-hidden="true" tabindex="-1"></a>  # writeRaster(r1, paste(raster_dir, city1, sep = <span class="dv">&amp;quot;&amp;quot;</span>), format = <span class="dv">&amp;quot;</span>HFA<span class="dv">&amp;quot;</span>, overwrite=TRUE)</span>
+<span id="cb1-233"><a href="#cb1-233" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-234"><a href="#cb1-234" aria-hidden="true" tabindex="-1"></a>  # To preview the color panel:</span>
+<span id="cb1-235"><a href="#cb1-235" aria-hidden="true" tabindex="-1"></a>  # display.brewer.pal(n = 12, name = <span class="dv">&amp;#39;</span>RdYlGn<span class="dv">&amp;#39;</span>)<span class="dt">&lt;/</span><span class="kw">code</span><span class="dt">&gt;&lt;/</span><span class="kw">pre</span><span class="dt">&gt;</span></span>
+<span id="cb1-236"><a href="#cb1-236" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb1-237"><a href="#cb1-237" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> id</span><span class="op">=</span><span class="st">"results-for-the-ring-saturations"</span><span class="ot"> class</span><span class="op">=</span><span class="st">"section level2"</span><span class="dt">&gt;</span></span>
+<span id="cb1-238"><a href="#cb1-238" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">h2</span><span class="dt">&gt;</span>Results for the ring saturations<span class="dt">&lt;/</span><span class="kw">h2</span><span class="dt">&gt;</span></span>
+<span id="cb1-239"><a href="#cb1-239" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb1-240"><a href="#cb1-240" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>I run the code using a loop for ten cities<span class="dt">&lt;</span><span class="kw">br</span><span class="ot"> </span><span class="dt">/&gt;</span></span>
+<span id="cb1-241"><a href="#cb1-241" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb1-242"><a href="#cb1-242" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>Ring saturation in the 10 cities has a minimum of 30.5% and a maximum of 99.9%:<span class="dt">&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb1-243"><a href="#cb1-243" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb1-244"><a href="#cb1-244" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">pre</span><span class="ot"> class</span><span class="op">=</span><span class="st">"r"</span><span class="dt">&gt;&lt;</span><span class="kw">code</span><span class="dt">&gt;</span>#   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span>
+<span id="cb1-245"><a href="#cb1-245" aria-hidden="true" tabindex="-1"></a><span class="fu">#  0.305   0.545   0.646   0.656   0.771   0.999 &lt;/code&gt;&lt;/pre&gt;</span></span>
+<span id="cb1-246"><a href="#cb1-246" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb1-247"><a href="#cb1-247" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> id</span><span class="op">=</span><span class="st">"average-saturation-in-each-ring"</span><span class="ot"> class</span><span class="op">=</span><span class="st">"section level2"</span><span class="dt">&gt;</span></span>
+<span id="cb1-248"><a href="#cb1-248" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">h2</span><span class="dt">&gt;</span>Average saturation in each ring<span class="dt">&lt;/</span><span class="kw">h2</span><span class="dt">&gt;</span></span>
+<span id="cb1-249"><a href="#cb1-249" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb1-250"><a href="#cb1-250" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>There is a clear declining trend in saturation as we move towards the boundary of the cities<span class="dt">&lt;</span><span class="kw">br</span><span class="ot"> </span><span class="dt">/&gt;</span></span>
+<span id="cb1-251"><a href="#cb1-251" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">img</span><span class="ot"> src</span><span class="op">=</span><span class="st">"2018-07-19-spatial-data-in-r-dividing-raster-layers-into-equal-area-rings_files/figure-html/unnamed-chunk-8-1.png"</span><span class="ot"> width</span><span class="op">=</span><span class="st">"672"</span><span class="ot"> </span><span class="dt">/&gt;&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb1-252"><a href="#cb1-252" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb1-253"><a href="#cb1-253" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb1-254"><a href="#cb1-254" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> id</span><span class="op">=</span><span class="st">"methodology"</span><span class="ot"> class</span><span class="op">=</span><span class="st">"section level2"</span><span class="dt">&gt;</span></span>
+<span id="cb1-255"><a href="#cb1-255" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">h2</span><span class="dt">&gt;</span>Methodology<span class="dt">&lt;/</span><span class="kw">h2</span><span class="dt">&gt;</span></span>
+<span id="cb1-256"><a href="#cb1-256" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>(Summarized by Alejandro Blei, my colleague)<span class="dt">&lt;</span><span class="kw">br</span><span class="ot"> </span><span class="dt">/&gt;</span></span>
+<span id="cb1-257"><a href="#cb1-257" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Take the file: <span class="dt">&lt;</span><span class="kw">code</span><span class="dt">&gt;</span>city_urbFootprint_clp_t3.img<span class="dt">&lt;/</span><span class="kw">code</span><span class="dt">&gt;</span>. This file is made up of many pixels. Pixels with values 1-3 = built up, pixels with values 4-6 = open space, and pixels with value 7 = water. In other words, 1 - 3 = built up, and 4 - 7 = not built.<span class="dt">&lt;</span><span class="kw">br</span><span class="ot"> </span><span class="dt">/&gt;</span></span>
+<span id="cb1-258"><a href="#cb1-258" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Convert the pixels to points. This operation preserves the value associated with the pixel.<span class="dt">&lt;</span><span class="kw">br</span><span class="ot"> </span><span class="dt">/&gt;</span></span>
+<span id="cb1-259"><a href="#cb1-259" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Calculate the distance from each point to the CBD.<span class="dt">&lt;</span><span class="kw">br</span><span class="ot"> </span><span class="dt">/&gt;</span></span>
+<span id="cb1-260"><a href="#cb1-260" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>Create 10 groups from these pixels, where each group has the same area. These groups radiate outward from the CBD. Since each pixel has the same size, all we need are ten groups with the same number of pixels, where the pixels in one group are closer to the CBD than the pixels in the next group.<span class="dt">&lt;</span><span class="kw">br</span><span class="ot"> </span><span class="dt">/&gt;</span></span>
+<span id="cb1-261"><a href="#cb1-261" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>Once we have the groups, we can calculate the saturation value in each group. Saturation is Built Up / (Built Up - Open Space), in other words, saturation is Pixels (1 + 2 + 3) / (1 + 2 + 3 + 4 + 5 + 6 + 7). Each of the ten groups now has a saturation value associated with it.<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb1-262"><a href="#cb1-262" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb1-263"><a href="#cb1-263" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> id</span><span class="op">=</span><span class="st">"original-code"</span><span class="ot"> class</span><span class="op">=</span><span class="st">"section level2"</span><span class="dt">&gt;</span></span>
+<span id="cb1-264"><a href="#cb1-264" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">h2</span><span class="dt">&gt;</span>Original Code<span class="dt">&lt;/</span><span class="kw">h2</span><span class="dt">&gt;</span></span>
+<span id="cb1-265"><a href="#cb1-265" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb1-266"><a href="#cb1-266" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;</span>Local version, loop over ten cities<span class="dt">&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb1-267"><a href="#cb1-267" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb1-268"><a href="#cb1-268" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">pre</span><span class="ot"> class</span><span class="op">=</span><span class="st">"r"</span><span class="dt">&gt;&lt;</span><span class="kw">code</span><span class="dt">&gt;</span># Fragmentation: Saturation  (Built-up Area/Urban Extent) in each ring</span>
+<span id="cb1-269"><a href="#cb1-269" aria-hidden="true" tabindex="-1"></a><span class="fu"># how about 100 rings</span></span>
+<span id="cb1-270"><a href="#cb1-270" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-271"><a href="#cb1-271" aria-hidden="true" tabindex="-1"></a><span class="fu"># install.packages(&amp;#39;raster&amp;#39;)</span></span>
+<span id="cb1-272"><a href="#cb1-272" aria-hidden="true" tabindex="-1"></a>library(<span class="dv">&amp;#39;</span>raster<span class="dv">&amp;#39;</span>)   # obtain raster from GIS image file, and plot</span>
+<span id="cb1-273"><a href="#cb1-273" aria-hidden="true" tabindex="-1"></a>library(<span class="dv">&amp;#39;</span>rgdal<span class="dv">&amp;#39;</span>)    # readOGR: read ArcGIS vector maps into Spatial objects</span>
+<span id="cb1-274"><a href="#cb1-274" aria-hidden="true" tabindex="-1"></a>library(<span class="dv">&amp;#39;</span>Hmisc<span class="dv">&amp;#39;</span>)    # cut2</span>
+<span id="cb1-275"><a href="#cb1-275" aria-hidden="true" tabindex="-1"></a>library(<span class="dv">&amp;#39;</span>plyr<span class="dv">&amp;#39;</span>)     # join</span>
+<span id="cb1-276"><a href="#cb1-276" aria-hidden="true" tabindex="-1"></a>library(<span class="dv">&amp;#39;</span>RColorBrewer<span class="dv">&amp;#39;</span>) # for <span class="in">`brewer.pal`</span> in ggplot2</span>
+<span id="cb1-277"><a href="#cb1-277" aria-hidden="true" tabindex="-1"></a>library(<span class="dv">&amp;#39;</span>knitr<span class="dv">&amp;#39;</span>)    # kable</span>
+<span id="cb1-278"><a href="#cb1-278" aria-hidden="true" tabindex="-1"></a>options(digits = 4)</span>
+<span id="cb1-279"><a href="#cb1-279" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-280"><a href="#cb1-280" aria-hidden="true" tabindex="-1"></a><span class="fu"># get saturation</span></span>
+<span id="cb1-281"><a href="#cb1-281" aria-hidden="true" tabindex="-1"></a>get_sat <span class="dv">&amp;lt;</span>- function(x){</span>
+<span id="cb1-282"><a href="#cb1-282" aria-hidden="true" tabindex="-1"></a>  x <span class="dv">&amp;lt;</span>- as.factor(x)</span>
+<span id="cb1-283"><a href="#cb1-283" aria-hidden="true" tabindex="-1"></a>  # (1 + 2 + 3) / (1 + 2 + 3 + 4 + 5 + 6 + 7)</span>
+<span id="cb1-284"><a href="#cb1-284" aria-hidden="true" tabindex="-1"></a>  sum(x<span class="al">==1|x==2|x==</span>3)/length(x)</span>
+<span id="cb1-285"><a href="#cb1-285" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-286"><a href="#cb1-286" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-287"><a href="#cb1-287" aria-hidden="true" tabindex="-1"></a>parent_dir <span class="dv">&amp;lt;</span>- c(<span class="dv">&amp;quot;</span>D:/OneDrive - nyu.edu/NYU Marron/180716_Draw Circle/Data/<span class="dv">&amp;quot;</span>)</span>
+<span id="cb1-288"><a href="#cb1-288" aria-hidden="true" tabindex="-1"></a><span class="fu"># Get all the folder names (names of the cities) in the directory</span></span>
+<span id="cb1-289"><a href="#cb1-289" aria-hidden="true" tabindex="-1"></a>city_list <span class="dv">&amp;lt;</span>- list.files(parent_dir)</span>
+<span id="cb1-290"><a href="#cb1-290" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-291"><a href="#cb1-291" aria-hidden="true" tabindex="-1"></a>sat_out <span class="dv">&amp;lt;</span>- data.frame()</span>
+<span id="cb1-292"><a href="#cb1-292" aria-hidden="true" tabindex="-1"></a>par(mar = c(1,2,1,0), bty=<span class="dv">&amp;quot;</span>n<span class="dv">&amp;quot;</span>) # c(bottom, left, top, right)</span>
+<span id="cb1-293"><a href="#cb1-293" aria-hidden="true" tabindex="-1"></a>layout(matrix(c(1:10),ncol=2, byrow = T))</span>
+<span id="cb1-294"><a href="#cb1-294" aria-hidden="true" tabindex="-1"></a><span class="fu"># length(city_list)</span></span>
+<span id="cb1-295"><a href="#cb1-295" aria-hidden="true" tabindex="-1"></a>for (i in 1:10){</span>
+<span id="cb1-296"><a href="#cb1-296" aria-hidden="true" tabindex="-1"></a>  city1 <span class="dv">&amp;lt;</span>- city_list<span class="co">[</span><span class="ot">i</span><span class="co">]</span></span>
+<span id="cb1-297"><a href="#cb1-297" aria-hidden="true" tabindex="-1"></a>  newdir <span class="dv">&amp;lt;</span>- paste(parent_dir, city1, sep = <span class="dv">&amp;quot;&amp;quot;</span>)</span>
+<span id="cb1-298"><a href="#cb1-298" aria-hidden="true" tabindex="-1"></a>  image <span class="dv">&amp;lt;</span>- raster(paste(newdir, c(<span class="dv">&amp;quot;</span>./city_urbFootprint_clp_t3.img<span class="dv">&amp;quot;</span>), sep = <span class="dv">&amp;quot;&amp;quot;</span>))</span>
+<span id="cb1-299"><a href="#cb1-299" aria-hidden="true" tabindex="-1"></a>  # mydata: df that contains coordinate and category</span>
+<span id="cb1-300"><a href="#cb1-300" aria-hidden="true" tabindex="-1"></a>  mydata <span class="dv">&amp;lt;</span>- as.data.frame(rasterToPoints(image))</span>
+<span id="cb1-301"><a href="#cb1-301" aria-hidden="true" tabindex="-1"></a>  names(mydata) <span class="dv">&amp;lt;</span>- c(<span class="dv">&amp;quot;</span>x<span class="dv">&amp;quot;</span>, <span class="dv">&amp;quot;</span>y<span class="dv">&amp;quot;</span>, <span class="dv">&amp;quot;</span>type<span class="dv">&amp;quot;</span>)</span>
+<span id="cb1-302"><a href="#cb1-302" aria-hidden="true" tabindex="-1"></a>  pts <span class="dv">&amp;lt;</span>- as.matrix(mydata<span class="co">[</span><span class="ot">,1:2</span><span class="co">]</span>)</span>
+<span id="cb1-303"><a href="#cb1-303" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-304"><a href="#cb1-304" aria-hidden="true" tabindex="-1"></a>  # cbd</span>
+<span id="cb1-305"><a href="#cb1-305" aria-hidden="true" tabindex="-1"></a>  cbd <span class="dv">&amp;lt;</span>-  readOGR(dsn = newdir, layer = paste(city1, <span class="dv">&amp;quot;</span>_CBD_Project<span class="dv">&amp;quot;</span>, sep=<span class="dv">&amp;quot;&amp;quot;</span>))</span>
+<span id="cb1-306"><a href="#cb1-306" aria-hidden="true" tabindex="-1"></a>  cbdpoint <span class="dv">&amp;lt;</span>- SpatialPoints(cbd)</span>
+<span id="cb1-307"><a href="#cb1-307" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-308"><a href="#cb1-308" aria-hidden="true" tabindex="-1"></a>  # distance to the cbd</span>
+<span id="cb1-309"><a href="#cb1-309" aria-hidden="true" tabindex="-1"></a>  mydata$cbd_dist <span class="dv">&amp;lt;</span>- spDistsN1(pts, cbdpoint, longlat = F)</span>
+<span id="cb1-310"><a href="#cb1-310" aria-hidden="true" tabindex="-1"></a>  # library(<span class="dv">&amp;#39;</span>Hmisc<span class="dv">&amp;#39;</span>) # cut2</span>
+<span id="cb1-311"><a href="#cb1-311" aria-hidden="true" tabindex="-1"></a>  mydata$ring <span class="dv">&amp;lt;</span>- as.numeric(cut2(mydata$cbd_dist,g = 100))</span>
+<span id="cb1-312"><a href="#cb1-312" aria-hidden="true" tabindex="-1"></a>  mydata$type <span class="dv">&amp;lt;</span>- as.factor(mydata$type)</span>
+<span id="cb1-313"><a href="#cb1-313" aria-hidden="true" tabindex="-1"></a>  mydata$ring <span class="dv">&amp;lt;</span>- as.factor(mydata$ring)</span>
+<span id="cb1-314"><a href="#cb1-314" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-315"><a href="#cb1-315" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-316"><a href="#cb1-316" aria-hidden="true" tabindex="-1"></a>  sat_output <span class="dv">&amp;lt;</span>- aggregate(mydata$type, by = list(mydata$ring), FUN = get_sat)</span>
+<span id="cb1-317"><a href="#cb1-317" aria-hidden="true" tabindex="-1"></a>  sat_output$City <span class="dv">&amp;lt;</span>- city1</span>
+<span id="cb1-318"><a href="#cb1-318" aria-hidden="true" tabindex="-1"></a>  sat_output$City_Saturation <span class="dv">&amp;lt;</span>- get_sat(mydata$type)</span>
+<span id="cb1-319"><a href="#cb1-319" aria-hidden="true" tabindex="-1"></a>  names(sat_output) <span class="dv">&amp;lt;</span>- c(<span class="dv">&amp;quot;</span>ring<span class="dv">&amp;quot;</span>, <span class="dv">&amp;quot;</span>ring_saturation<span class="dv">&amp;quot;</span>,<span class="dv">&amp;quot;</span>city<span class="dv">&amp;quot;</span>, <span class="dv">&amp;quot;</span>city_saturation<span class="dv">&amp;quot;</span>)</span>
+<span id="cb1-320"><a href="#cb1-320" aria-hidden="true" tabindex="-1"></a>  sat_out <span class="dv">&amp;lt;</span>- rbind(sat_out, sat_output)</span>
+<span id="cb1-321"><a href="#cb1-321" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-322"><a href="#cb1-322" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-323"><a href="#cb1-323" aria-hidden="true" tabindex="-1"></a>  # draw the figure ---------------------------------------------------------</span>
+<span id="cb1-324"><a href="#cb1-324" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-325"><a href="#cb1-325" aria-hidden="true" tabindex="-1"></a>  mydata2 <span class="dv">&amp;lt;</span>- join(mydata, sat_output, by = <span class="dv">&amp;quot;</span>ring<span class="dv">&amp;quot;</span>)</span>
+<span id="cb1-326"><a href="#cb1-326" aria-hidden="true" tabindex="-1"></a>  r1 <span class="dv">&amp;lt;</span>- rasterFromXYZ(mydata2)</span>
+<span id="cb1-327"><a href="#cb1-327" aria-hidden="true" tabindex="-1"></a>  # writeRaster(r1, paste(raster_dir, city1, sep = <span class="dv">&amp;quot;&amp;quot;</span>), format = <span class="dv">&amp;quot;</span>HFA<span class="dv">&amp;quot;</span>, overwrite=TRUE)</span>
+<span id="cb1-328"><a href="#cb1-328" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-329"><a href="#cb1-329" aria-hidden="true" tabindex="-1"></a>  # To preview the color panel:</span>
+<span id="cb1-330"><a href="#cb1-330" aria-hidden="true" tabindex="-1"></a>  # display.brewer.pal(n = 12, name = <span class="dv">&amp;#39;</span>RdYlGn<span class="dv">&amp;#39;</span>)</span>
+<span id="cb1-331"><a href="#cb1-331" aria-hidden="true" tabindex="-1"></a>  color_scale <span class="dv">&amp;lt;</span>- brewer.pal(n = 10, name = <span class="dv">&amp;quot;</span>RdYlGn<span class="dv">&amp;quot;</span>)</span>
+<span id="cb1-332"><a href="#cb1-332" aria-hidden="true" tabindex="-1"></a>  myPalette <span class="dv">&amp;lt;</span>- colorRampPalette(rev(color_scale))</span>
+<span id="cb1-333"><a href="#cb1-333" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-334"><a href="#cb1-334" aria-hidden="true" tabindex="-1"></a>  plot(r1$ring_saturation, col=myPalette(70), breaks = c(30:100)/100,</span>
+<span id="cb1-335"><a href="#cb1-335" aria-hidden="true" tabindex="-1"></a>       legend=FALSE,  main = city1)</span>
+<span id="cb1-336"><a href="#cb1-336" aria-hidden="true" tabindex="-1"></a>  plot(cbdpoint, add = TRUE, size = 3) # drawn on top of a map using <span class="in">`add = TRUE`</span></span>
+<span id="cb1-337"><a href="#cb1-337" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-338"><a href="#cb1-338" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-339"><a href="#cb1-339" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-340"><a href="#cb1-340" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-341"><a href="#cb1-341" aria-hidden="true" tabindex="-1"></a><span class="fu"># Some visulization options -----------------------------------------------------------</span></span>
+<span id="cb1-342"><a href="#cb1-342" aria-hidden="true" tabindex="-1"></a>id <span class="dv">&amp;lt;</span>- <span class="dv">&amp;quot;</span>1DNyQLX0apRVWmRC1xKhpqZLE6SLcQF5p<span class="dv">&amp;quot;</span> # google file ID</span>
+<span id="cb1-343"><a href="#cb1-343" aria-hidden="true" tabindex="-1"></a>sat <span class="dv">&amp;lt;</span>- read.csv(sprintf(<span class="dv">&amp;quot;</span>https://docs.google.com/uc?id=%s&amp;amp;export=download&amp;quot;, id))</span>
+<span id="cb1-344"><a href="#cb1-344" aria-hidden="true" tabindex="-1"></a>sat$idx <span class="dv">&amp;lt;</span>- rep(c(1:100),10)</span>
+<span id="cb1-345"><a href="#cb1-345" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-346"><a href="#cb1-346" aria-hidden="true" tabindex="-1"></a><span class="fu"># linear regression smoothing</span></span>
+<span id="cb1-347"><a href="#cb1-347" aria-hidden="true" tabindex="-1"></a>ggplot(sat, aes(x=idx, y=ring_saturation)) +</span>
+<span id="cb1-348"><a href="#cb1-348" aria-hidden="true" tabindex="-1"></a>  geom_point(size = 0.5, color = <span class="dv">&amp;#39;</span>blue<span class="dv">&amp;#39;</span>) +  </span>
+<span id="cb1-349"><a href="#cb1-349" aria-hidden="true" tabindex="-1"></a>  geom_smooth(method = <span class="dv">&amp;#39;</span>lm<span class="dv">&amp;#39;</span>)+</span>
+<span id="cb1-350"><a href="#cb1-350" aria-hidden="true" tabindex="-1"></a>  theme_classic() + </span>
+<span id="cb1-351"><a href="#cb1-351" aria-hidden="true" tabindex="-1"></a>  geom_hline(yintercept = 0) +</span>
+<span id="cb1-352"><a href="#cb1-352" aria-hidden="true" tabindex="-1"></a>  scale_y_continuous(limits = c(0,1)) +</span>
+<span id="cb1-353"><a href="#cb1-353" aria-hidden="true" tabindex="-1"></a>  labs(x = <span class="dv">&amp;quot;</span>Equal-Area Rings from CBD<span class="dv">&amp;quot;</span>, y = <span class="dv">&amp;quot;</span>Average Built-up Area/Urban Extent<span class="dv">&amp;quot;</span>) +</span>
+<span id="cb1-354"><a href="#cb1-354" aria-hidden="true" tabindex="-1"></a>  ggtitle(<span class="dv">&amp;quot;</span>Average Saturation in the 100 Rings<span class="dv">&amp;quot;</span>)</span>
+<span id="cb1-355"><a href="#cb1-355" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-356"><a href="#cb1-356" aria-hidden="true" tabindex="-1"></a><span class="fu">## some other options</span></span>
+<span id="cb1-357"><a href="#cb1-357" aria-hidden="true" tabindex="-1"></a><span class="fu"># one plot for each city</span></span>
+<span id="cb1-358"><a href="#cb1-358" aria-hidden="true" tabindex="-1"></a>par(mar = rep(2,4), bty=<span class="dv">&amp;quot;</span>n<span class="dv">&amp;quot;</span>)</span>
+<span id="cb1-359"><a href="#cb1-359" aria-hidden="true" tabindex="-1"></a>layout(matrix(c(1:10),ncol=2, byrow = T))</span>
+<span id="cb1-360"><a href="#cb1-360" aria-hidden="true" tabindex="-1"></a>for (i in 1:10){</span>
+<span id="cb1-361"><a href="#cb1-361" aria-hidden="true" tabindex="-1"></a>  sat_sub <span class="dv">&amp;lt;</span>- subset(sat, city == city_list<span class="co">[</span><span class="ot">i</span><span class="co">]</span>)</span>
+<span id="cb1-362"><a href="#cb1-362" aria-hidden="true" tabindex="-1"></a>  plot(x = sat_sub$idx, y = sat_sub$ring_saturation, type = <span class="dv">&amp;quot;</span>l<span class="dv">&amp;quot;</span>,</span>
+<span id="cb1-363"><a href="#cb1-363" aria-hidden="true" tabindex="-1"></a>       xlab=c(<span class="dv">&amp;quot;</span>Ring from CBD<span class="dv">&amp;quot;</span>), ylab =c(<span class="dv">&amp;quot;</span>Built-up Area/Urban Extent<span class="dv">&amp;quot;</span>),</span>
+<span id="cb1-364"><a href="#cb1-364" aria-hidden="true" tabindex="-1"></a>       main = city_list<span class="co">[</span><span class="ot">i</span><span class="co">]</span>)</span>
+<span id="cb1-365"><a href="#cb1-365" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-366"><a href="#cb1-366" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-367"><a href="#cb1-367" aria-hidden="true" tabindex="-1"></a><span class="fu"># a barchart for each ring?</span></span>
+<span id="cb1-368"><a href="#cb1-368" aria-hidden="true" tabindex="-1"></a>sat$weight_blank <span class="dv">&amp;lt;</span>- 1</span>
+<span id="cb1-369"><a href="#cb1-369" aria-hidden="true" tabindex="-1"></a>source(<span class="dv">&amp;quot;</span>D:/OneDrive - nyu.edu/NYU Marron/R/Get Weighted SE and CI.R<span class="dv">&amp;quot;</span>)</span>
+<span id="cb1-370"><a href="#cb1-370" aria-hidden="true" tabindex="-1"></a>Mean_byGroup <span class="dv">&amp;lt;</span>- get_WM_and_CI2(sat, <span class="dv">&amp;quot;</span>idx<span class="dv">&amp;quot;</span>, <span class="dv">&amp;quot;</span>ring_saturation<span class="dv">&amp;quot;</span>, <span class="dv">&amp;quot;</span>weight_blank<span class="dv">&amp;quot;</span>) </span>
+<span id="cb1-371"><a href="#cb1-371" aria-hidden="true" tabindex="-1"></a>bar_width <span class="dv">&amp;lt;</span>- 0.8</span>
+<span id="cb1-372"><a href="#cb1-372" aria-hidden="true" tabindex="-1"></a>ggplot(Mean_byGroup, aes(x=idx, y=wm, </span>
+<span id="cb1-373"><a href="#cb1-373" aria-hidden="true" tabindex="-1"></a>                         ymin=CI_low, ymax=CI_high)) +</span>
+<span id="cb1-374"><a href="#cb1-374" aria-hidden="true" tabindex="-1"></a>  geom_bar(stat=<span class="dv">&amp;#39;</span>identity<span class="dv">&amp;#39;</span>, position = position_dodge(), width = bar_width, alpha=0.8)+</span>
+<span id="cb1-375"><a href="#cb1-375" aria-hidden="true" tabindex="-1"></a>  geom_errorbar (width=bar_width-0.1, lwd=1, position=position_dodge(bar_width))+</span>
+<span id="cb1-376"><a href="#cb1-376" aria-hidden="true" tabindex="-1"></a>  labs(x = <span class="dv">&amp;quot;</span>Ten Rings from CBD<span class="dv">&amp;quot;</span>, y = <span class="dv">&amp;quot;</span>Average Built-up Area/Urban Extent<span class="dv">&amp;quot;</span>) +</span>
+<span id="cb1-377"><a href="#cb1-377" aria-hidden="true" tabindex="-1"></a>  ggtitle(<span class="dv">&amp;quot;</span>Average Saturation in Each Ring<span class="dv">&amp;quot;</span>)+</span>
+<span id="cb1-378"><a href="#cb1-378" aria-hidden="true" tabindex="-1"></a>  theme_classic()  +  </span>
+<span id="cb1-379"><a href="#cb1-379" aria-hidden="true" tabindex="-1"></a>  geom_hline(yintercept = 0)</span>
+<span id="cb1-380"><a href="#cb1-380" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-381"><a href="#cb1-381" aria-hidden="true" tabindex="-1"></a><span class="fu"># scatterplot all the points for ten cities </span></span>
+<span id="cb1-382"><a href="#cb1-382" aria-hidden="true" tabindex="-1"></a>ggplot(sat, aes(x=idx, y=ring_saturation, color = city)) +</span>
+<span id="cb1-383"><a href="#cb1-383" aria-hidden="true" tabindex="-1"></a>  geom_point(size = 1) </span>
+<span id="cb1-384"><a href="#cb1-384" aria-hidden="true" tabindex="-1"></a>  labs(x = <span class="dv">&amp;quot;</span>Ten Rings from CBD<span class="dv">&amp;quot;</span>, y = <span class="dv">&amp;quot;</span>Built-up Area/Urban Extent<span class="dv">&amp;quot;</span>) +</span>
+<span id="cb1-385"><a href="#cb1-385" aria-hidden="true" tabindex="-1"></a>  ggtitle(<span class="dv">&amp;quot;</span>Saturation in Each Ring of Ten Cities<span class="dv">&amp;quot;</span>)+</span>
+<span id="cb1-386"><a href="#cb1-386" aria-hidden="true" tabindex="-1"></a>  theme_classic() <span class="dt">&lt;/</span><span class="kw">code</span><span class="dt">&gt;&lt;/</span><span class="kw">pre</span><span class="dt">&gt;</span></span>
+<span id="cb1-387"><a href="#cb1-387" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<ol start="3" type="a">
+<li>2026 Yang Liu</li>
+</ol>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Built with Quarto and R</p>
+</div>
+  </div>
+</footer>
+
+
+
+
+<script src="../../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

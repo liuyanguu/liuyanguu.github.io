@@ -1,0 +1,265 @@
+---
+title: ggplot US state and China province heatmap
+author: Yang Liu
+date: '2020-06-12'
+slug: ggplot-us-state-and-china-province-heatmap
+categories:
+  - Data Visualization
+tags:
+  - Heatmap
+  - Geodata
+output:
+  blogdown::html_page:
+    toc: true
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE,
+                      error = FALSE, fig.width = 10, fig.height = 6)
+```
+
+(Updated on 2020-06-12, First posted on 2019-04-17)
+
+It sounds easy but turned out not as straight-forward as I thought. 
+I will show:
+
+1. 50-state (including Alaska and Hawaii) United States thematic map, with map scale and with state abbreviations 
+
+2. China thematic map, with map scale, with names of provinces in either English or Chinese  
+
+# 1. US Map by state  
+
+The `dt1` below can be used by both methods, but using `usmap` only need two variables: state names and value to plot.  
+
+```{r}
+suppressPackageStartupMessages({
+library(ggplot2)
+library(maps)
+library(usmap)
+library(rgeos) # for rgeos::gCentroid
+library(data.table)
+library(ggsn) # for adding map scale bar `ggsn::scalebar`
+library(shadowtext) # for adding label
+library(ggrepel) # if need to repel labels
+})
+# A sample dataset of 77 states: 
+dt1 <- as.data.table(copy(state.x77))
+dt1$state <- tolower(rownames(state.x77))
+dt1 <- dt1[,.(state, Population)]
+setkey(dt1, state)
+
+states <- setDT(ggplot2::map_data("state"))
+setkey(states, region)
+# join data to map: left join states to dt1
+dt1 <- dt1[states]
+# 
+rmarkdown::paged_table(dt1[1:50,])
+```
+
+## Method 1.  Use `usmap`
+
+The easiest way is to use the package `usmap`, in which adding abbraviation or not is an option in the `usmap::plot_usmap` function. Easy to get started but hard to further finetune details.
+
+```{r}
+dt1_simple <- unique(dt1[,.(state, Population)])
+usmap::plot_usmap(data = dt1_simple, values = "Population", labels = TRUE) +
+  labs(fill = 'State Population (1975)') + 
+  scale_fill_gradientn(colours = RColorBrewer::brewer.pal(9, "GnBu"),
+                       na.value = "grey90",
+                       guide = guide_colourbar(barwidth = 25, 
+                                               barheight = 0.4,
+                                               #put legend title on top of legend 
+                                               title.position = "top")) +
+  # put legend at the bottom, adjust legend title and text font sizes
+  theme(legend.position = "bottom",
+        legend.title=element_text(size=12), 
+        legend.text=element_text(size=10))
+```
+
+The `plot_usmap` returns a ggplot object so it is possible to further revise by just adding more layers.  
+
+## Method 2. Use `map_data` and build from shape files  
+
+Could fine-tune the location of states'label as I did in the China map later. Now it is just the center of the states (mean(lon), min(lat))
+
+
+```{r}
+# create labels
+# incl `Population` (the value to plot) in the label dataset, if want to fill with color. 
+#' get centroids from a shp file dataset
+get.centroids <- function(
+  data = dt1, 
+  long = "long", lat = "lat", 
+  by_var = "state",  # the grouping variable, e.g. state: get centroid by state
+  fill_var = NULL # the variable to plot 
+  ){
+  data <- data[!is.na(data[[by_var]]),]
+  data[[by_var]] <- as.character(data[[by_var]]) # sometimes there is empty factor level
+  dt1_df <- sp::SpatialPointsDataFrame(coords = data[, c(long, lat), with = FALSE], data = data)
+  dt1_geo <- by(dt1_df, dt1_df[[by_var]], function(x) {sp::Polygon(x[c(long, lat)])@labpt})
+  centroids <- stats::setNames(do.call("rbind.data.frame", dt1_geo), c(long, lat))
+  centroids$name <- names(dt1_geo) 
+  if(!is.null(fill_var)){ # if need to join fill value 
+    setkeyv(setDT(centroids), "name")
+    dt_var <- unique(data[,c(by_var, fill_var), with = FALSE])
+    setkeyv(dt_var, by_var)
+    centroids <- dt_var[centroids]
+  }
+  return(centroids)
+}
+centroids <- get.centroids(data = dt1, long = "long", lat = "lat", by_var = "state", fill_var = "Population")
+# join short state names (e.g. VA, SC)
+abb_names <- data.table(state = tolower(state.name), abb = state.abb) # these are R dataset
+setkey(setDT(centroids), state)
+setkey(abb_names, state)
+centroids <- abb_names[centroids]
+head(centroids, 3)
+
+x_boundary = -77
+ggplot(data = dt1, aes(x = long, y = lat, group = group))+
+  geom_polygon(aes(fill = Population))+
+  geom_path()+ 
+  scale_fill_gradientn(colours = RColorBrewer::brewer.pal(9, "GnBu"), 
+                       na.value = "grey90",
+                       guide = guide_colourbar(barwidth = 25, barheight = 0.4,
+                                               #put legend title on top of legend
+                                               title.position = "top")) +
+  # shadowtext::geom_shadowtext(data = centroids,
+  #                             aes(x = long, y = lat, label = abb),
+  #                             size = 3,
+  #                             inherit.aes = FALSE) + 
+  # if need to repel labels... could further finetune
+  ggrepel::geom_label_repel(data = centroids[long >= x_boundary,],
+                   aes(x = long, y = lat, label = abb, fill = Population),
+    force = 1, size = 3,
+    inherit.aes = F
+  ) +
+  # the normal labels:
+  geom_text(data=centroids[long < x_boundary,],
+            aes(x = long, y = lat, label = abb),
+            size = 3, inherit.aes=F) +
+  labs(fill = "Population", x = "Longitude", y = "Latitude") + 
+  coord_map() + 
+  # map scale
+  ggsn::scalebar(data = dt1, dist = 500, dist_unit = "km",
+           border.size = 0.4, st.size = 4,
+           box.fill = c('black','white'),
+           transform = TRUE, model = "WGS84") + 
+  theme_void() + 
+  # put legend at the bottom, adjust legend title and text font sizes
+  theme(legend.position = "bottom",
+        legend.title=element_text(size=12),  # font size of the legend 
+        legend.text=element_text(size=10))
+# 
+# ggsave("us_example.png", width = 10, height = 6)
+```
+
+# 2. China map by province
+## Method 1. China map by province using downloaded shap files 
+
+The map of China is more complicated. The related articles are all from several years ago. [This blog by Zhang, Zhen](http://imzhen.com/note/2015/09/16/20150916/) is among the best, it has referred some very good resources, expecially this one on Capital Of Statistics (CH)](https://cosx.org/2009/07/drawing-china-map-using-r). This is a blog from 10 years ago. So far I haven't noticed any map package **published on cran** for China like `usmap`, but it is not too complicated after having the shape files.
+
+The shape files can be downloaded from [the "Capital of Statistics" webiste](https://uploads.cosx.org/2009/07/chinaprovinceborderdata_tar_gz.zip), the zip file contains three files: `bou2_4p.dbf`, `bou2_4p.shp`, and `bou2_4p.shx`, we will only need the `bou2_4p.shp` file later.  
+For a quick download: you can also download from my Github repo of `blogdown`: [Blogdown/blogData/China.shp](https://github.com/liuyanguu/Blogdown/)
+
+**Update 2020/06** 
+There is a [`chinamap`](https://github.com/GuangchuangYu/chinamap) package created by Guangchuang Yu (and his team), who is also the author of the package [`nCov2019`](https://github.com/GuangchuangYu/nCov2019). 
+
+Another very good source is the [GADM website](https://gadm.org/), which has admin1 and admin2 shp files for every country. (Notice that China and Taiwan are downloaded seperately.)
+
+**On character encoding**
+Showing Chinese is indeed sometimes a problem. The key is to make sure in the datafile all the province names are coded in UTF-8. In the markdown file below you can see province names shown as UTF-8 code. But if in the map (plot) they are rendered as Chinese characters. And if your system can show Chinese, they read as Chinese in the console too.
+
+In Chinese (一点额外说明):
+在Windows系统上，只要RStudio中显示中文没有问题好像Markdown的时候就没有问题。关键是要统一数据中的中文都是UTF-8编码的，不要从网站上拷贝中文进Rstudio，会产生各种问题。不需要特别调整Rstudio或者Markdown的设置。
+所以虽然我下面的数据中显示UTF-8，在Console和最后在地图上都是显示为中文。
+
+```{r}
+# China -------------------------------------------------------------------
+china_map <- rgdal::readOGR(here::here("../Data/China.shp/bou2_4p.shp")) # read it locally
+# extract province information from shap file
+china_map_data = data.table::setDT(china_map@data)
+data.table::setnames(china_map_data, "NAME", "province")
+
+# transform to UTF-8 coding format
+china_map_data[, province:=iconv(province, from = "GBK", to = "UTF-8")] 
+# create id to join province back to lat and long, id = 0 ~ 924
+china_map_data[, id:= .I-1] # id = 0, 1, 2, ... , used to match to `dt_china`
+# there are more shapes for one province due to small islands
+china_map_data[, province:= as.factor(province)]
+china_map_data <- china_map_data[!is.na(province)]
+china_map_data <- china_map_data[AREA > 0.1]
+head(china_map_data, 3)
+# 
+dt_china = setDT(fortify(china_map))
+head(dt_china, 3)
+dt_china[, id:= as.numeric(id)]
+setkey(china_map_data, id); setkey(dt_china, id)
+dt_china <- china_map_data[dt_china]
+
+# add the province EN, CH label file
+province_CH <- china_map_data[, levels(province)] # the CH are in UTF-8 code
+province_EN <- c("Shanghai", "Yunnan", "Inner Mongolia", "Beijing", "Taiwan",
+"Jilin", "Sichuan", "Tianjin", "Ningxia", "Anhui",
+"Shandong", "Shanxi", "Guangdong", "Guangxi", "Xinjiang",
+"Jiangsu", "Jiangxi", "Hebei", "Henan", "Zhejiang",
+"Hainan", "Hubei", "Hunan", "Gansu", "Fujian",
+"Tibet", "Guizhou", "Liaoning", "Chongqing", "Shaanxi",
+"Qinghai", "Hong Kong", "Heilongjiang"
+)
+# some value to plot (from years ago too)
+value <- c(8893483, 12695396,  8470472,  7355291, 23193638,  9162183, 26383458,  3963604,  1945064, 19322432, 30794664, 10654162, 32222752, 13467663,  6902850, 25635291, 11847841, 20813492, 26404973, 20060115, 2451819, 17253385, 19029894,  7113833, 11971873, 689521, 10745630, 15334912, 10272559, 11084516, 1586635,  7026400, 13192935)
+input_data <- data.table(province_CH, province_EN, value)
+setkey(input_data, province_CH)
+setkey(dt_china, province)
+
+dt_china <- input_data[dt_china, nomatch = 0]
+# saveRDS(dt_china, file = "D:/liuyanguu/Blogdown/Data/dt_china.rds")
+# create label file of province `label_dt`
+centroids_cn <- get.centroids(data = dt_china, by_var = "province_CH")
+centroids_en <- get.centroids(data = dt_china, by_var = "province_EN")
+
+# plot
+gg_cn <- ggplot(dt_china, aes(x = long, y = lat, group = group, fill = value)) +
+  labs(fill = "Population")+
+  geom_polygon()+
+  scale_fill_gradientn(colours = RColorBrewer::brewer.pal(9, "GnBu"), 
+                       na.value = "grey90",
+                       guide = guide_colourbar(barwidth = 25, barheight = 0.4,
+                                               #put legend title on top of legend
+                                               title.position = "top")) + 
+  labs(fill = "Population", x = "Longitude", y = "Latitude") + 
+  coord_map() + 
+  # map scale
+  ggsn::scalebar(data = dt_china, dist = 500, dist_unit = "km",
+           border.size = 0.4, st.size = 4,
+           box.fill = c('black','white'),
+           transform = TRUE, model = "WGS84") + 
+  theme_void() +
+  theme(legend.position = "bottom",
+        legend.title=element_text(size=12),  # font size of the legend 
+        legend.text=element_text(size=10))
+
+# In Chinese
+gg_cn +  shadowtext::geom_shadowtext(data = centroids_cn, aes(x = long, y = lat, label = name), inherit.aes = FALSE)
+
+# In English
+gg_cn +  shadowtext::geom_shadowtext(data = centroids_en, aes(x = long, y = lat, label = name), inherit.aes = FALSE)
+
+```
+
+## Method 2. Using geojsonMap (leaflet)
+
+Just saw it on [cosx.org blog](https://cosx.org/2017/03/air-quality-visualization/).
+It is an interactive map built on `leaflet`.
+
+```{r}
+library(leafletCN)
+dt_china <- as.data.frame(dt_china)
+geojsonMap(dat = dt_china, mapName = "china",
+           # namevar = ~ province_EN, 
+           valuevar = ~ value, 
+           popup =  paste0(dt_china$province_EN),
+           palette = RColorBrewer::brewer.pal(9, "GnBu"), legendTitle = "Population")
+```
+

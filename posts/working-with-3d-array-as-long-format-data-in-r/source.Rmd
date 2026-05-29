@@ -1,0 +1,116 @@
+---
+title: Working with 3D array as long-format data in R
+author: Yang Liu
+date: '2020-01-11'
+slug: working-with-3d-array-as-long-format-data-in-r
+categories:
+  - Data Engineering
+tags:
+  - Array
+output:
+  blogdown::html_page:
+    toc: true
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE, fig.width = 4, fig.height = 4)
+```
+
+```{r}
+check.and.install.pkgs <- function(pkgs){
+  new.packages <- pkgs[!pkgs %in% installed.packages()[,"Package"]]
+  if(length(new.packages)) install.packages(new.packages, dependencies = TRUE)
+  suppressPackageStartupMessages(invisible(lapply(pkgs, library, character.only = TRUE)))
+}
+check.and.install.pkgs(c("data.table", "reshape2", "scatterplot3d"))
+```
+
+**Happy New Year!**  
+
+Recently I spent some time working with array in R.   
+I believe it is a bad idea to work with array using `for` loop, which is both slow and error-prone. We can just melt it into a long data, do the work, and arrange back into array in the end if needed.   
+
+## Example: a 3-D array with dimension **4x3x2**    
+
+Notice how the values (`1:24`) fill into the three dimentions, The values `1:12` go into the 1st 4x3 matrix by column, then the rest go into the 2nd 4x3 matrix.  
+```{r}
+arr = array(1:24, dim=c(4,3,2), dimnames = list(group = LETTERS[1:4],  year = 2001:2003, sex = c("F", "M")))
+arr
+```
+
+## Melt into long  
+
+Melt directly, and in the long-format data, the values are sorted exactly from 1 to 24  
+
+```{r}
+arr_long <- reshape2::melt(arr)
+rmarkdown::paged_table(arr_long)
+```
+
+Thus if we create an array with the same dimension, it reverts back to the original one  
+```{r}
+arr2 <- array(data = arr_long$value,
+                     dim = c(4,3,2))
+identical(unname(arr), arr2) # since I did not set dimnames for arr2, I need `unname`
+```
+
+## Recover the array  
+
+But the problem is we usually need to work on the data and the row orders will change.  
+For example, to add another year of data. And in many other cases, it is just easier to work with the long-format data.    
+```{r}
+arr_long_extra <- expand.grid(group = LETTERS[1:4], year = 2004, sex = c("F", "M"))
+arr_long_extra$value <- 100 + 1:8
+arr_long_extra
+arr_long_new <- rbind(arr_long, arr_long_extra)
+```
+
+**Set the rows in the right order is the key to produce the right array**  
+
+Since the original dimension **4x3x2** corresponds to _group_ x _year_ x _sex_, the array should be ordered by _sex_, _year_, and _group_ if we want to recover the original array. (Thus the arr_long is in the right order if we don't resort it.)
+
+```{r}
+# order by sex, year, group
+arr_long_new <- arr_long_new[with(arr_long_new, order(sex, year, group)),]
+
+# create new array with 4 groups x 4 years x 2 sex categories
+# The order of the values will fill into the dimensions correctly:
+arr_long_new$value
+array(arr_long_new$value, dim=c(4,4,2), dimnames = list(group = LETTERS[1:4],  year = 2001:2004, sex = c("F", "M")))
+```
+Notice that the extra values from `arr_long_extra` have been added correctly into the array.  
+  
+```{r}
+# Alternatively, if you use data.table, this does the same thing:
+data.table::setorder(arr_long_new, sex, year, group)
+```
+
+
+Similarly, we can **set one dimension of the array by a specific order or using another vector.**  
+Suppose I want to reorder the `year` variable as `year_order`:  
+```{r}
+year_order <- c("2003", "2001", "2002")
+arr_long2 <- arr_long[with(arr_long, order(sex, match(year, year_order), group)),]
+# notice that the new dimnames need to be assigned correctly (manually)
+# as the array arranges the values correctly, there is no name automatically linked to the value
+arr3 <- array(arr_long2$value, dim=c(4,3,2), dimnames = list(group = LETTERS[1:4],  year = year_order, sex = c("F", "M")))
+arr3
+```
+
+It is the same as reordering the 2nd dimension of array:  
+```{r}
+identical(arr3,
+          arr[, order(match(dimnames(arr)[[2]], year_order)),]
+          )
+```
+
+To visualize the array, the long data is required as well  
+```{r}
+library("scatterplot3d")
+shapes  <-  15:18
+shapes <- shapes[as.numeric(arr_long$group)]
+# haven't figured out how to round the axis annotation 
+scatterplot3d(arr_long, pch = shapes, cex.symbols = 2,
+              xlab = "Group", ylab = "Year", zlab = "Sex",
+              highlight.3d = TRUE)
+```
+

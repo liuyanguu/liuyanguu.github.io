@@ -1,0 +1,146 @@
+:root {
+  --research-ink: #102a43;
+  --research-muted: #52606d;
+  --research-line: #d9e2ec;
+  --research-soft: #f7fafc;
+  --research-accent: #0f766e;
+  --research-accent-dark: #115e59;
+  --research-warm: #b45309;
+}
+
+body {
+  background: var(--research-soft);
+  color: var(--research-ink);
+}
+
+.navbar {
+  border-bottom: 1px solid var(--research-line);
+  box-shadow: 0 8px 24px rgba(16, 42, 67, 0.04);
+}
+
+.navbar-brand img {
+  border-radius: 50%;
+}
+
+.quarto-title-banner {
+  background: #ffffff;
+  border-bottom: 1px solid var(--research-line);
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(260px, 0.8fr);
+  gap: 2rem;
+  align-items: center;
+  margin: 1.5rem 0 2rem;
+  padding: 2rem 0 2.5rem;
+  border-bottom: 1px solid var(--research-line);
+}
+
+.hero-copy h2 {
+  font-size: clamp(2rem, 5vw, 4.2rem);
+  line-height: 1.05;
+  margin-bottom: 1rem;
+  letter-spacing: 0;
+}
+
+.hero-copy p {
+  max-width: 760px;
+  font-size: 1.1rem;
+  color: var(--research-muted);
+}
+
+.hero-card {
+  border-left: 4px solid var(--research-accent);
+  padding: 0.5rem 0 0.5rem 1.25rem;
+  color: var(--research-muted);
+}
+
+.hero-card ul {
+  margin-bottom: 0;
+}
+
+.hero-card li::marker {
+  color: var(--research-warm);
+}
+
+.quarto-grid-item,
+.listing-default .listing-item {
+  background: #ffffff;
+  border: 1px solid var(--research-line);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.listing-title,
+.quarto-grid-item .card-title {
+  color: var(--research-ink);
+  font-weight: 700;
+}
+
+.listing-description,
+.listing-date,
+.listing-author,
+.listing-categories {
+  color: var(--research-muted);
+}
+
+.category,
+.listing-category {
+  border: 1px solid #b6d4f0;
+  background: #f0fdfa;
+  color: var(--research-accent-dark);
+  border-radius: 999px;
+  padding: 0.15rem 0.5rem;
+}
+
+main.content {
+  background: #ffffff;
+  border: 1px solid var(--research-line);
+  border-radius: 8px;
+  padding: min(4vw, 2.25rem);
+  box-shadow: 0 16px 36px rgba(16, 42, 67, 0.06);
+}
+
+.page-layout-full main.content {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+}
+
+.callout-note {
+  border-left-color: var(--research-accent);
+}
+
+pre,
+code {
+  font-size: 0.92em;
+}
+
+pre {
+  border: 1px solid var(--research-line);
+  border-radius: 8px;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+table {
+  font-size: 0.95rem;
+}
+
+@media (max-width: 800px) {
+  .hero {
+    grid-template-columns: 1fr;
+    padding: 1rem 0;
+  }
+
+  main.content {
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+}

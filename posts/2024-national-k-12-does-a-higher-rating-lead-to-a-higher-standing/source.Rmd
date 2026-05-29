@@ -1,0 +1,342 @@
+---
+title: '2024 National K-12: Does a Higher Rating Lead to a Higher Standing?'
+author: Yang Liu
+date: '2024-12-15'
+slug: 2024-national-k-12-does-a-higher-rating-lead-to-a-higher-standing
+categories:
+  - Blog
+tags:
+  - Chess
+---
+
+<div style="text-align: center;">
+**Statistics of 2024 National K-12 Grades Championship**    
+https://www.uschess.org/results/2024/k12/
+
+Update: An interactive chart of all players has been added
+</div>
+
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE,
+                      error = FALSE, fig.width = 12, fig.height = 6)
+# error=TRUE allows error
+```
+
+```{r}
+library("data.table")
+library("ggplot2")
+library("ggforce")
+library("cowplot")
+library("ggh4x")
+library("readxl")
+
+SAVE_png <- FALSE # if I want to save charts locally
+
+# Path to input data
+excel_file <- here::here("../Data/2024 Final standing.xlsx")
+
+# Get the names of all sheets in the Excel file
+sheet_names <- excel_sheets(excel_file)
+
+# Read all sheets and combine them into one data.table
+combined_data <- rbindlist(
+  lapply(sheet_names, function(sheet) {
+    # Read the current sheet as a data.table
+    sheet_data <- as.data.table(read_excel(excel_file, sheet = sheet))
+    # Add a column for the sheet name
+    sheet_data[, sheet_name := sheet]
+    return(sheet_data)
+  }),
+  use.names = TRUE, fill = TRUE
+)
+
+combined_data[, Grade:= gsub("Grade", "", sheet_name)]
+combined_data[, Grade:= factor(as.factor(Grade), levels = c("K", as.character(1:12)))]
+combined_data[, Grade_full := factor(as.factor(sheet_name), levels = sheet_names)]
+
+# Add a new column for Rate category based on the given ranges
+combined_data[, RateCategory := cut(
+  Rate,
+  breaks = c(0, 500, 1000, 1500, 2000, Inf),
+  labels = c("0-500", "500-1000", "1000-1500", "1500-2000", ">2000"),
+  right = FALSE
+)]
+combined_data[is.na(RateCategory), RateCategory := "unrated"]
+
+# Add standing percentiles
+# Function to calculate percentiles within each Grade
+calculate_percentile <- function(data, value_col, group_col, var_new = "Percentile") {
+  if(var_new %in% colnames(data)) {
+    data[, (var_new) := NULL]
+  }
+  data[!is.na(get(value_col)), Percentile := 100 * frank(get(value_col), ties.method = "average") / .N, by = group_col]
+  setnames(data, "Percentile", var_new)
+  return(data)
+}
+
+# Calculate percentile of "No." by "Grade"
+combined_data <- calculate_percentile(combined_data, value_col = "No.", group_col = "Grade",
+                                      var_new = "Percentile_standing")
+# Calculate percentile of "Rating" by "Grade"
+combined_data <- calculate_percentile(combined_data, value_col = "Rate", group_col = "Grade", 
+                                      var_new = "Percentile_rating")
+
+# general theme for plotting
+mytheme1 <- theme_minimal() + 
+    theme(panel.grid = element_blank(),
+          axis.line.x = element_line(color = "black"),
+              axis.title.x = element_text(size = 14), # Enlarges x-axis label
+    axis.title.y = element_text(size = 14), # Enlarges y-axis label
+    axis.text = element_text(size = 12), # Enlarges axis text
+    plot.title = element_text(hjust = 0.5, size = 14, face = "bold") # Enlarged title size
+    )
+
+custom_colors <- c(
+  "0-500" = "#FFC20E",
+  "500-1000" = "#80BD41",
+  "1000-1500" = "#00833D",
+  "1500-2000" = "#1CABE2",
+  ">2000" = "#0058AB"
+)
+
+#0. map of participants by state -------------------------------------------------------
+source(here::here("Code/COVID_make_map.R"))
+dt_US <- combined_data[, .(N = .N), by = St]
+US_map_participant <- make_heatmap(data = dt_US, 
+            geo_data = get_state_name(),
+            state_var = "St", fill_var = "N", label_var = "abb", 
+            fill_var_label = "Number of participants")
+
+if (SAVE_png) ggsave("temp/US_map_participant.png", US_map_participant, width = 8, height = 6, bg = "white")
+
+
+#1. bar of participants by grade ------------------------------------------------------
+g_bar <-
+  # Create a bar chart from combined_data
+  ggplot(combined_data, aes(x = Grade)) +
+    geom_bar(width = 0.7, fill = "#1CABE2") +
+    geom_text(stat = "count", aes(label = ..count..), vjust = -0.5, size = 4) +
+    labs(title = "Number of Participants by Grade", x = "Grade", y = "Count") +
+    scale_y_continuous(expand = c(0, 0), limits = c(0, 400)) +
+    mytheme1
+if (SAVE_png) ggsave("temp/barplot.png", g_bar, width = 6, height = 4, bg = "white")
+
+
+#2. Grade vs Rating  ---------------------------------------------------------------
+
+hist_rate <- ggplot(combined_data, aes(x = Rate)) +
+  geom_histogram(binwidth = 100, fill = "#1CABE2", color = "white") +
+  labs(title = "Distribution of Rating", x = "Rating", y = "Count") +
+      scale_y_continuous(expand = c(0, 0), limits = c(0, NA)) +
+  mytheme1
+if (SAVE_png) ggsave("temp/hist_rate.png", hist_rate, width = 6, height = 3, bg = "white")
+
+dt_mean <- combined_data[, .(MeanRate = mean(Rate, na.rm = TRUE)), by = Grade]
+dt_mean[, label:= round(MeanRate, 0)]
+# calculate the difference between each grade, e.g. 1 - K, 2 - 1
+dt_mean[, diff:= c(NA, diff(MeanRate))]
+
+g_rating <- ggplot(combined_data[,.(Grade, Rate, RateCategory)], 
+                   aes(x = Grade, y = Rate, color = RateCategory)) +
+  geom_sina(aes(group = Grade), alpha = 0.7, size = 2, maxwidth = 1) + # Add sina plot with transparency and point size
+  geom_boxplot(aes(group = Grade), outlier.shape = NA, width = 0.3, alpha = 0.5) + # Boxplot by Grade
+  geom_point(data = dt_mean, aes(x = Grade, y = MeanRate), 
+             size = 9, alpha = 1, colour = "red", shape = 95) +
+  geom_text(data = dt_mean, aes(x = Grade, y = MeanRate, label = label),
+            colour = "red", vjust = -0.5, inherit.aes = FALSE) + # Add mean rating as text
+  labs(title = "Distribution of Rating by Grade", 
+       x = "Grade", y = "Rating", color = "Rating") +
+  scale_color_manual(values = custom_colors, drop = TRUE) + # Use custom colors
+  mytheme1
+
+if (SAVE_png) ggsave("temp/rating.png", g_rating, width = 10, height = 6, bg = "white")
+
+
+
+#3. Percentile vs Rating ------------------------------------------------------
+model <- lm(Percentile_standing ~ Percentile_rating, data = combined_data)
+r2 <- summary(model)$r.squared
+
+# Step 2: Create the scatter plot with marginal histograms
+p_scatter_percentile <- ggplot(combined_data, aes(x = Percentile_rating, y = Percentile_standing)) +
+  geom_point(aes(color = Grade), size = 2, alpha = 0.5) + # Scatter plot
+  # Smooth regression line
+    geom_smooth(method = "lm", se = FALSE, color = "#333333", linewidth = 0.8, alpha = 0.6) + 
+    geom_smooth(method = "loess",  se = FALSE, color = "#F26A21", linewidth = 1, alpha = 0.8) + 
+  scale_y_reverse() +                 # Reverse the y-axis
+  labs(title = "Standing vs. Rating (Percentile within each Grade)",,
+       x = "Percentile of rating", y = "Percentile of standing", color = "Grade" ) +
+  mytheme1 + theme(legend.position = "none") + 
+  ggpubr::stat_cor(method = "pearson")
+
+# if use rate directly 
+p_scatter <- ggplot(combined_data, aes(x = Rate, y = Percentile_standing)) +
+  geom_point(aes(color = Grade), size = 2, alpha = 0.5) + # Scatter plot
+  # Smooth regression line
+    geom_smooth(method = "lm", se = FALSE, color = "#333333", linewidth = 0.8, alpha = 0.6) + 
+    geom_smooth(method = "loess",  se = FALSE, color = "#F26A21", linewidth = 1, alpha = 0.8) + 
+  scale_y_reverse() +                 # Reverse the y-axis
+  labs(title = "Percentile of Standing vs. Rating",,
+       x = "Rating", y = "Percentile of standing", color = "Grade" ) +
+  mytheme1 + theme(legend.position = "none") + 
+  ggpubr::stat_cor(method = "pearson")
+
+p_scatter_all <- ggExtra::ggMarginal(p_scatter, type = "histogram", margins = c("x"),
+                                     bins = 50, size = 10, color = "white", fill = "grey")
+
+if (SAVE_png) ggsave("temp/p_scatter_percentile.png", p_scatter_percentile, width = 8, height = 6, bg = "white")
+if (SAVE_png) ggsave("temp/p_scatter_all.png", p_scatter_all, width = 8, height = 6, bg = "white")
+
+
+# scatterplot by grade
+p_scatter_group <- ggplot(combined_data, aes(x = Rate, y = Percentile_standing)) +
+  geom_point(aes(color = RateCategory), size = 2, alpha = 0.5) + # Scatter plot
+  geom_smooth(method = "lm", se = FALSE, color = "#333333", linewidth = 0.8, alpha = 0.6) +
+  geom_smooth(method = "loess",  se = FALSE, color = "#F26A21", linewidth = 1, alpha = 0.8) + 
+  scale_y_reverse() +                 # Reverse the y-axis
+  scale_color_manual(values = custom_colors) + # Use custom colors
+
+  labs(title = "Percentile of Standing vs. Rating", 
+       x = "Rating", y = "Percentile of standing", color = "Rating" ) +
+  mytheme1 + 
+  theme(legend.position = "bottom") + 
+  guides(color = guide_legend(nrow = 1)) + 
+  ggpubr::stat_cor(method = "pearson") + 
+  ggh4x::facet_wrap2(~ Grade_full, ncol = 2, axes = "all", scales = "free")
+if (SAVE_png) ggsave("temp/scatter_facet.png", p_scatter_group, width = 12, height = 26, bg = "white")
+
+
+#4. Pts vs rating  ------------------------------------------------------
+unique_pts <- sort(unique(combined_data$Pts))
+dt_mean_pts <- combined_data[, .(MeanRate = mean(Rate, na.rm = TRUE)), by = Pts]
+dt_mean_pts[, label:= round(MeanRate, 0)]
+
+g_points_rating0 <- ggplot(combined_data, aes(x = Pts , y = Rate, color = Grade)) +
+  geom_sina(aes(group = Pts), alpha = 0.7, size = 2, maxwidth = 1) + # Add sina plot with transparency and point size
+  geom_boxplot(aes(group = Pts), outlier.shape = NA, width = 0.3, alpha = 0.5) + # Boxplot by Grade
+  # geom_point(data = dt_mean, aes(x = Grade, y = MeanRate), 
+  #            size = 9, alpha = 1, colour = "red", shape = 95) +
+  labs( y = "Rating", x = "Points achieved", color = "Grade" ) + 
+    scale_x_continuous(breaks = unique_pts) +  # Set x-axis ticks to unique Pts values
+  geom_point(data = dt_mean_pts, aes(x = Pts, y = MeanRate), 
+             size = 9, alpha = 1, colour = "red", shape = 95) +
+  geom_text(data = dt_mean_pts, aes(x = Pts, y = MeanRate, label = label),
+            colour = "red", vjust = -0.5, inherit.aes = FALSE) + # Add mean rating as text
+  mytheme1
+
+
+g_points_rating <- ggExtra::ggMarginal(g_points_rating0, type = "histogram", bins = 30, size = 10, color = "white", fill = "grey")
+if (SAVE_png) ggsave("temp/g_points_rating.png", g_points_rating, width = 10, height = 6, bg = "white")
+
+
+g_points_rating_group <- ggplot(combined_data, aes(x = Pts , y = Rate, color = RateCategory)) +
+  geom_sina(aes(group = Pts), alpha = 0.7, size = 2, maxwidth = 1) + # Add sina plot with transparency and point size
+  geom_boxplot(aes(group = Pts), outlier.shape = NA, width = 0.3, alpha = 0.5) + # Boxplot by Grade
+  scale_color_manual(values = custom_colors) + # Use custom colors
+
+  labs( y = "Rating", x = "Points achieved", color = "Rating" ) + 
+    scale_x_continuous(breaks = unique_pts) +  # Set x-axis ticks to unique Pts values
+  mytheme1 + 
+  theme(legend.position = "bottom", axis.text = element_text(size = 8)) +
+  guides(color = guide_legend(nrow = 1)) + 
+  ggh4x::facet_wrap2(~ Grade_full, ncol = 2, axes = "all", scales = "free_y")
+
+if (SAVE_png) ggsave("temp/g_points_rating_group.png", g_points_rating_group, width = 12, height = 26, bg = "white")
+
+```
+
+
+# Over 2,600 contestants from 43 states participated in the 2024 National K-12 Grades Championship
+
+```{r, fig.width = 8, fig.height = 6}
+US_map_participant
+
+```
+
+
+The 2024 National K-12 Grades Championship attracted a total of `r formatC(combined_data[,.N], format = "d", big.mark = ",")` participants from `r combined_data[, uniqueN(St)]` states. More than 1,000 participants (40%) came from New York, followed by Virginia with 250 participants (9%) and New Jersey with 218 participants (8%).
+
+## Fourth grade (age 9) is the most competitive, with nearly 350 participants.
+
+Grades 3, 4, and 5 have the highest number of participants, while Grade K has the fewest.
+
+```{r, fig.width = 6, fig.height = 4}
+g_bar
+```
+
+## 11th Grade boasts the highest average rating of 1,600.
+
+The average rating of more than 2,600 participants is 1,115, with a median of 1,062 and a standard deviation of 514. Ninety percent of the participants have ratings between 300 and 1,989.  
+
+```{r, fig.width = 6, fig.height = 3}
+hist_rate
+```
+
+
+The plot below shows the distribution of ratings across grades. The mean is indicated by the red bar, and the black bars in the boxplot represent the median. 
+
+```{r, fig.width = 10, fig.height = 6}
+g_rating
+```
+
+## Does a higher rating guarantee a higher standing?  
+
+Not necessarily! To make the data comparable across grades, we standardized the standings by calculating the percentile within each grade, scaling the values from 0 to 100. Similarly, we calculated the rating percentile within each grade. (This additional standardization for rating is not necessary when examining each grade separately.)
+
+The plot below illustrates the relationship between standing and rating, both standardized within each grade, with different colors representing different grades.
+
+While the correlation between standardized rating and percentile is indeed strong, it may not be as strong as some might expect. Although the correlation is statistically significant due to the large sample size, the R-squared value (from a fitted linear regression) is only `r round(r2, 2)`. This indicates that the relationship isn’t as robust as it might initially appear. There is substantial variation in standing within each rating percentile. Outliers—such as cases where a high-ranked player drops out mid-match—further weaken the correlation.
+
+The red lines in the chart represent a LOESS (locally estimated scatterplot smoothing) curve, providing a non-linear fit.
+
+
+```{r, fig.width = 8, fig.height = 6}
+p_scatter_percentile
+```
+
+### If plot rating without standardization
+
+
+```{r, fig.width = 8, fig.height = 6}
+p_scatter_all
+```
+
+
+## Percentile of standing vs. Rating by Grade!  
+
+```{r, echo = FALSE}
+knitr::include_app("https://liuyanguu.shinyapps.io/K12_National_Standing_vs_Rating/",
+  height = "600px")
+  
+```
+  
+### Colored by rating category  
+
+```{r, fig.width = 12, fig.height = 26}
+p_scatter_group
+```
+
+## Points Achieved vs. Rating  
+
+Points achieved determined the final standings. This provides another perspective on the variation in ratings among participants who achieved the same number of points.
+
+**The histogram at the top also shows that most kids achieved 3 or 4 points.**
+
+```{r, fig.width = 10, fig.height = 6}
+g_points_rating
+```
+
+## Points Achieved vs. Rating by Grade!
+
+```{r, fig.width = 12, fig.height = 26}
+g_points_rating_group
+```
+
+
+```{r}
+# add the tweet link
+blogdown::shortcode(
+  "tweet", user = "liuyanguu", id = "1868839933550694629"
+)
+```
