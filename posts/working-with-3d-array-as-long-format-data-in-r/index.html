@@ -8,7 +8,7 @@
 
 <meta name="author" content="Yang Liu">
 <meta name="dcterms.date" content="2020-01-11">
-<meta name="description" content="Example: a 3-D array with dimension 4x3x2 Melt into long Recover the array check.and.install.pkgs <- function(pkgs){ new.packages <- pkgs[!pkgs %in% installed.packages()[,“Package”]] if(length(new.packages)) install.pac…">
+<meta name="description" content="A compact R example for melting a 3D array into long-format data, modifying it, and rebuilding the array in the correct dimension order.">
 
 <title>Working with 3D array as long-format data in R – Yang Liu</title>
 <style>
@@ -185,7 +185,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <div>
   <div class="description">
-    Example: a 3-D array with dimension 4x3x2 Melt into long Recover the array check.and.install.pkgs &lt;- function(pkgs){ new.packages &lt;- pkgs[!pkgs %in% installed.packages()[,“Package”]] if(length(new.packages)) install.pac…
+    A compact R example for melting a 3D array into long-format data, modifying it, and rebuilding the array in the correct dimension order.
   </div>
 </div>
 
@@ -229,6 +229,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
 </ul>
 </div>
+<p>
+This compact example shows how to reshape a 3D array into long-format data, work with it as a table, and then rebuild the array in the correct dimension order.
+</p>
 <pre class="r"><code>check.and.install.pkgs &lt;- function(pkgs){
   new.packages &lt;- pkgs[!pkgs %in% installed.packages()[,"Package"]]
   if(length(new.packages)) install.packages(new.packages, dependencies = TRUE)
@@ -236,17 +239,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 }
 check.and.install.pkgs(c("data.table", "reshape2", "scatterplot3d"))</code></pre>
 <p>
-<strong>Happy New Year!</strong>
-</p>
-<p>
-Recently I spent some time working with array in R.<br> I believe it is a bad idea to work with array using <code>for</code> loop, which is both slow and error-prone. We can just melt it into a long data, do the work, and arrange back into array in the end if needed.
+Recently I spent some time working with arrays in R.<br> For many tasks, working directly with arrays through <code>for</code> loops is slow and error-prone. It is often easier to melt the array into long-format data, do the work, and arrange it back into an array at the end if needed.
 </p>
 <section id="example-a-3-d-array-with-dimension-4x3x2" class="level2">
 <h2 class="anchored" data-anchor-id="example-a-3-d-array-with-dimension-4x3x2">
 Example: a 3-D array with dimension <strong>4x3x2</strong>
 </h2>
 <p>
-Notice how the values (<code>1:24</code>) fill into the three dimentions, The values <code>1:12</code> go into the 1st 4x3 matrix by column, then the rest go into the 2nd 4x3 matrix.
+Notice how the values (<code>1:24</code>) fill into the three dimensions. The values <code>1:12</code> go into the first 4x3 matrix by column, then the rest go into the second 4x3 matrix.
 </p>
 <pre class="r"><code>arr = array(1:24, dim=c(4,3,2), dimnames = list(group = LETTERS[1:4],  year = 2001:2003, sex = c("F", "M")))
 arr</code></pre>
@@ -311,10 +311,10 @@ arr_long_extra</code></pre>
 ## 8     D 2004   M   108</code></pre>
 <pre class="r"><code>arr_long_new &lt;- rbind(arr_long, arr_long_extra)</code></pre>
 <p>
-<strong>Set the rows in the right order is the key to produce the right array</strong>
+<strong>Setting the rows in the right order is the key to producing the right array.</strong>
 </p>
 <p>
-Since the original dimension <strong>4x3x2</strong> corresponds to <em>group</em> x <em>year</em> x <em>sex</em>, the array should be ordered by <em>sex</em>, <em>year</em>, and <em>group</em> if we want to recover the original array. (Thus the arr_long is in the right order if we don’t resort it.)
+Since the original dimension <strong>4x3x2</strong> corresponds to <em>group</em> x <em>year</em> x <em>sex</em>, the array should be ordered by <em>sex</em>, <em>year</em>, and <em>group</em> if we want to recover the original array. Thus <code>arr_long</code> is already in the right order if we do not reorder it.
 </p>
 <pre class="r"><code># order by sex, year, group
 arr_long_new &lt;- arr_long_new[with(arr_long_new, order(sex, year, group)),]
@@ -860,7 +860,7 @@ scatterplot3d(arr_long, pch = shapes, cex.symbols = 2,
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Working with 3D array as long-format data in R"</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Yang Liu"</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "2020-01-11"</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> "Example: a 3-D array with dimension 4x3x2 Melt into long Recover the array check.and.install.pkgs &lt;- function(pkgs){ new.packages &lt;- pkgs[!pkgs %in% installed.packages()[,\"Package\"]] if(length(new.packages)) install.pac..."</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> "A compact R example for melting a 3D array into long-format data, modifying it, and rebuilding the array in the correct dimension order."</span></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="an">categories:</span></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">  - "Data Engineering"</span></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="an">tags:</span></span>
@@ -900,18 +900,18 @@ scatterplot3d(arr_long, pch = shapes, cex.symbols = 2,
 <span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
 <span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
 <span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">pre</span><span class="ot"> class</span><span class="op">=</span><span class="st">"r"</span><span class="dt">&gt;&lt;</span><span class="kw">code</span><span class="dt">&gt;</span>check.and.install.pkgs <span class="dv">&amp;lt;</span>- function(pkgs){</span>
-<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>  new.packages <span class="dv">&amp;lt;</span>- pkgs<span class="co">[</span><span class="ot">!pkgs %in% installed.packages()[,&amp;quot;Package&amp;quot;]</span><span class="co">]</span></span>
-<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>  if(length(new.packages)) install.packages(new.packages, dependencies = TRUE)</span>
-<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>  suppressPackageStartupMessages(invisible(lapply(pkgs, library, character.only = TRUE)))</span>
-<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>check.and.install.pkgs(c(<span class="dv">&amp;quot;</span>data.table<span class="dv">&amp;quot;</span>, <span class="dv">&amp;quot;</span>reshape2<span class="dv">&amp;quot;</span>, <span class="dv">&amp;quot;</span>scatterplot3d<span class="dv">&amp;quot;</span>))<span class="dt">&lt;/</span><span class="kw">code</span><span class="dt">&gt;&lt;/</span><span class="kw">pre</span><span class="dt">&gt;</span></span>
-<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;&lt;</span><span class="kw">strong</span><span class="dt">&gt;</span>Happy New Year!<span class="dt">&lt;/</span><span class="kw">strong</span><span class="dt">&gt;&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
-<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>Recently I spent some time working with array in R.<span class="dt">&lt;</span><span class="kw">br</span><span class="ot"> </span><span class="dt">/&gt;</span></span>
-<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>I believe it is a bad idea to work with array using <span class="dt">&lt;</span><span class="kw">code</span><span class="dt">&gt;</span>for<span class="dt">&lt;/</span><span class="kw">code</span><span class="dt">&gt;</span> loop, which is both slow and error-prone. We can just melt it into a long data, do the work, and arrange back into array in the end if needed.<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>This compact example shows how to reshape a 3D array into long-format data, work with it as a table, and then rebuild the array in the correct dimension order.<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">pre</span><span class="ot"> class</span><span class="op">=</span><span class="st">"r"</span><span class="dt">&gt;&lt;</span><span class="kw">code</span><span class="dt">&gt;</span>check.and.install.pkgs <span class="dv">&amp;lt;</span>- function(pkgs){</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>  new.packages <span class="dv">&amp;lt;</span>- pkgs<span class="co">[</span><span class="ot">!pkgs %in% installed.packages()[,&amp;quot;Package&amp;quot;]</span><span class="co">]</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>  if(length(new.packages)) install.packages(new.packages, dependencies = TRUE)</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>  suppressPackageStartupMessages(invisible(lapply(pkgs, library, character.only = TRUE)))</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>check.and.install.pkgs(c(<span class="dv">&amp;quot;</span>data.table<span class="dv">&amp;quot;</span>, <span class="dv">&amp;quot;</span>reshape2<span class="dv">&amp;quot;</span>, <span class="dv">&amp;quot;</span>scatterplot3d<span class="dv">&amp;quot;</span>))<span class="dt">&lt;/</span><span class="kw">code</span><span class="dt">&gt;&lt;/</span><span class="kw">pre</span><span class="dt">&gt;</span></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>Recently I spent some time working with arrays in R.<span class="dt">&lt;</span><span class="kw">br</span><span class="ot"> </span><span class="dt">/&gt;</span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>For many tasks, working directly with arrays through <span class="dt">&lt;</span><span class="kw">code</span><span class="dt">&gt;</span>for<span class="dt">&lt;/</span><span class="kw">code</span><span class="dt">&gt;</span> loops is slow and error-prone. It is often easier to melt the array into long-format data, do the work, and arrange it back into an array at the end if needed.<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
 <span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> id</span><span class="op">=</span><span class="st">"example-a-3-d-array-with-dimension-4x3x2"</span><span class="ot"> class</span><span class="op">=</span><span class="st">"section level2"</span><span class="dt">&gt;</span></span>
 <span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">h2</span><span class="dt">&gt;</span>Example: a 3-D array with dimension <span class="dt">&lt;</span><span class="kw">strong</span><span class="dt">&gt;</span>4x3x2<span class="dt">&lt;/</span><span class="kw">strong</span><span class="dt">&gt;&lt;/</span><span class="kw">h2</span><span class="dt">&gt;</span></span>
-<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>Notice how the values (<span class="dt">&lt;</span><span class="kw">code</span><span class="dt">&gt;</span>1:24<span class="dt">&lt;/</span><span class="kw">code</span><span class="dt">&gt;</span>) fill into the three dimentions, The values <span class="dt">&lt;</span><span class="kw">code</span><span class="dt">&gt;</span>1:12<span class="dt">&lt;/</span><span class="kw">code</span><span class="dt">&gt;</span> go into the 1st 4x3 matrix by column, then the rest go into the 2nd 4x3 matrix.<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>Notice how the values (<span class="dt">&lt;</span><span class="kw">code</span><span class="dt">&gt;</span>1:24<span class="dt">&lt;/</span><span class="kw">code</span><span class="dt">&gt;</span>) fill into the three dimensions. The values <span class="dt">&lt;</span><span class="kw">code</span><span class="dt">&gt;</span>1:12<span class="dt">&lt;/</span><span class="kw">code</span><span class="dt">&gt;</span> go into the first 4x3 matrix by column, then the rest go into the second 4x3 matrix.<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
 <span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">pre</span><span class="ot"> class</span><span class="op">=</span><span class="st">"r"</span><span class="dt">&gt;&lt;</span><span class="kw">code</span><span class="dt">&gt;</span>arr = array(1:24, dim=c(4,3,2), dimnames = list(group = LETTERS<span class="co">[</span><span class="ot">1:4</span><span class="co">]</span>,  year = 2001:2003, sex = c(<span class="dv">&amp;quot;</span>F<span class="dv">&amp;quot;</span>, <span class="dv">&amp;quot;</span>M<span class="dv">&amp;quot;</span>)))</span>
 <span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>arr<span class="dt">&lt;/</span><span class="kw">code</span><span class="dt">&gt;&lt;/</span><span class="kw">pre</span><span class="dt">&gt;</span></span>
 <span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">pre</span><span class="dt">&gt;&lt;</span><span class="kw">code</span><span class="dt">&gt;</span>## , , sex = F</span>
@@ -965,8 +965,8 @@ scatterplot3d(arr_long, pch = shapes, cex.symbols = 2,
 <span id="cb1-107"><a href="#cb1-107" aria-hidden="true" tabindex="-1"></a><span class="fu">## 7     C 2004   M   107</span></span>
 <span id="cb1-108"><a href="#cb1-108" aria-hidden="true" tabindex="-1"></a><span class="fu">## 8     D 2004   M   108&lt;/code&gt;&lt;/pre&gt;</span></span>
 <span id="cb1-109"><a href="#cb1-109" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">pre</span><span class="ot"> class</span><span class="op">=</span><span class="st">"r"</span><span class="dt">&gt;&lt;</span><span class="kw">code</span><span class="dt">&gt;</span>arr_long_new <span class="dv">&amp;lt;</span>- rbind(arr_long, arr_long_extra)<span class="dt">&lt;/</span><span class="kw">code</span><span class="dt">&gt;&lt;/</span><span class="kw">pre</span><span class="dt">&gt;</span></span>
-<span id="cb1-110"><a href="#cb1-110" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;&lt;</span><span class="kw">strong</span><span class="dt">&gt;</span>Set the rows in the right order is the key to produce the right array<span class="dt">&lt;/</span><span class="kw">strong</span><span class="dt">&gt;&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
-<span id="cb1-111"><a href="#cb1-111" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>Since the original dimension <span class="dt">&lt;</span><span class="kw">strong</span><span class="dt">&gt;</span>4x3x2<span class="dt">&lt;/</span><span class="kw">strong</span><span class="dt">&gt;</span> corresponds to <span class="dt">&lt;</span><span class="kw">em</span><span class="dt">&gt;</span>group<span class="dt">&lt;/</span><span class="kw">em</span><span class="dt">&gt;</span> x <span class="dt">&lt;</span><span class="kw">em</span><span class="dt">&gt;</span>year<span class="dt">&lt;/</span><span class="kw">em</span><span class="dt">&gt;</span> x <span class="dt">&lt;</span><span class="kw">em</span><span class="dt">&gt;</span>sex<span class="dt">&lt;/</span><span class="kw">em</span><span class="dt">&gt;</span>, the array should be ordered by <span class="dt">&lt;</span><span class="kw">em</span><span class="dt">&gt;</span>sex<span class="dt">&lt;/</span><span class="kw">em</span><span class="dt">&gt;</span>, <span class="dt">&lt;</span><span class="kw">em</span><span class="dt">&gt;</span>year<span class="dt">&lt;/</span><span class="kw">em</span><span class="dt">&gt;</span>, and <span class="dt">&lt;</span><span class="kw">em</span><span class="dt">&gt;</span>group<span class="dt">&lt;/</span><span class="kw">em</span><span class="dt">&gt;</span> if we want to recover the original array. (Thus the arr_long is in the right order if we don’t resort it.)<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb1-110"><a href="#cb1-110" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;&lt;</span><span class="kw">strong</span><span class="dt">&gt;</span>Setting the rows in the right order is the key to producing the right array.<span class="dt">&lt;/</span><span class="kw">strong</span><span class="dt">&gt;&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb1-111"><a href="#cb1-111" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>Since the original dimension <span class="dt">&lt;</span><span class="kw">strong</span><span class="dt">&gt;</span>4x3x2<span class="dt">&lt;/</span><span class="kw">strong</span><span class="dt">&gt;</span> corresponds to <span class="dt">&lt;</span><span class="kw">em</span><span class="dt">&gt;</span>group<span class="dt">&lt;/</span><span class="kw">em</span><span class="dt">&gt;</span> x <span class="dt">&lt;</span><span class="kw">em</span><span class="dt">&gt;</span>year<span class="dt">&lt;/</span><span class="kw">em</span><span class="dt">&gt;</span> x <span class="dt">&lt;</span><span class="kw">em</span><span class="dt">&gt;</span>sex<span class="dt">&lt;/</span><span class="kw">em</span><span class="dt">&gt;</span>, the array should be ordered by <span class="dt">&lt;</span><span class="kw">em</span><span class="dt">&gt;</span>sex<span class="dt">&lt;/</span><span class="kw">em</span><span class="dt">&gt;</span>, <span class="dt">&lt;</span><span class="kw">em</span><span class="dt">&gt;</span>year<span class="dt">&lt;/</span><span class="kw">em</span><span class="dt">&gt;</span>, and <span class="dt">&lt;</span><span class="kw">em</span><span class="dt">&gt;</span>group<span class="dt">&lt;/</span><span class="kw">em</span><span class="dt">&gt;</span> if we want to recover the original array. Thus <span class="dt">&lt;</span><span class="kw">code</span><span class="dt">&gt;</span>arr_long<span class="dt">&lt;/</span><span class="kw">code</span><span class="dt">&gt;</span> is already in the right order if we do not reorder it.<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
 <span id="cb1-112"><a href="#cb1-112" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">pre</span><span class="ot"> class</span><span class="op">=</span><span class="st">"r"</span><span class="dt">&gt;&lt;</span><span class="kw">code</span><span class="dt">&gt;</span># order by sex, year, group</span>
 <span id="cb1-113"><a href="#cb1-113" aria-hidden="true" tabindex="-1"></a>arr_long_new <span class="dv">&amp;lt;</span>- arr_long_new<span class="co">[</span><span class="ot">with(arr_long_new, order(sex, year, group)),</span><span class="co">]</span></span>
 <span id="cb1-114"><a href="#cb1-114" aria-hidden="true" tabindex="-1"></a></span>

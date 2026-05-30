@@ -8,9 +8,9 @@
 
 <meta name="author" content="Yang Liu">
 <meta name="dcterms.date" content="2020-06-14">
-<meta name="description" content="US China Compared to lung cancer mortality Similar to the last heatmap post I just revised , here I wrapped up the function and showing COVID-19 data just downloaded from JHU CSSE GitHub page . The function can take a g…">
+<meta name="description" content="R examples for mapping COVID-19 mortality and incidence rates across US states and Chinese provinces, with a comparison to lung cancer maps.">
 
-<title>US and China Admin1 COVID19 mortality and incidence rate – Yang Liu</title>
+<title>US and China Admin1 COVID-19 mortality and incidence rate – Yang Liu</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -177,7 +177,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<div class="quarto-title-block"><div><h1 class="title">US and China Admin1 COVID19 mortality and incidence rate</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
+<div class="quarto-title-block"><div><h1 class="title">US and China Admin1 COVID-19 mortality and incidence rate</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
   <div class="quarto-categories">
     <div class="quarto-category">Data Visualization</div>
   </div>
@@ -185,7 +185,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <div>
   <div class="description">
-    US China Compared to lung cancer mortality Similar to the last heatmap post I just revised , here I wrapped up the function and showing COVID-19 data just downloaded from JHU CSSE GitHub page . The function can take a g…
+    R examples for mapping COVID-19 mortality and incidence rates across US states and Chinese provinces, with a comparison to lung cancer maps.
   </div>
 </div>
 
@@ -228,10 +228,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 </div>
 <p>
-Similar to the last <a href="https://liuyanguu.github.io/post/2020/06/14/ggplot-us-state-and-china-province-heatmap/">heatmap post I just revised</a>, here I wrapped up the function and showing COVID-19 data just downloaded from <a href="https://github.com/CSSEGISandData/COVID-19">JHU CSSE GitHub page</a>. The function can take a given dataset and plot designated variable.
+This post builds on my earlier <a href="../../posts/ggplot-us-state-and-china-province-heatmap/">US state and China province heatmap</a> examples. Here I wrap the mapping code into a reusable function and apply it to COVID-19 data from the <a href="https://github.com/CSSEGISandData/COVID-19">JHU CSSE GitHub repository</a>. The function can take a given dataset and plot a designated variable.
 </p>
 <p>
-Code hosted on my <a href="https://github.com/liuyanguu/Blogdown/tree/master/hugo-xmag/Code">GitHub repo</a>.
+The original code is hosted in my <a href="https://github.com/liuyanguu/Blogdown/tree/master/hugo-xmag/Code">GitHub repo</a>.
 </p>
 <section id="us" class="level2">
 <h2 class="anchored" data-anchor-id="us">
@@ -761,10 +761,10 @@ Age-adjusted mortality rate (A) and crude mortality rate (B) in the US by state 
   });
   </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "US and China Admin1 COVID19 mortality and incidence rate"</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "US and China Admin1 COVID-19 mortality and incidence rate"</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Yang Liu"</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "2020-06-14"</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> "US China Compared to lung cancer mortality Similar to the last heatmap post I just revised , here I wrapped up the function and showing COVID-19 data just downloaded from JHU CSSE GitHub page . The function can take a g..."</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> "R examples for mapping COVID-19 mortality and incidence rates across US states and Chinese provinces, with a comparison to lung cancer maps."</span></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="an">categories:</span></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">  - "Data Visualization"</span></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="an">tags:</span></span>
@@ -802,8 +802,8 @@ Age-adjusted mortality rate (A) and crude mortality rate (B) in the US by state 
 <span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
 <span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
 <span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>Similar to the last <span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">"https://liuyanguu.github.io/post/2020/06/14/ggplot-us-state-and-china-province-heatmap/"</span><span class="dt">&gt;</span>heatmap post I just revised<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;</span>, here I wrapped up the function and showing COVID-19 data just downloaded from <span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">"https://github.com/CSSEGISandData/COVID-19"</span><span class="dt">&gt;</span>JHU CSSE GitHub page<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;</span>. The function can take a given dataset and plot designated variable.<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
-<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>Code hosted on my <span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">"https://github.com/liuyanguu/Blogdown/tree/master/hugo-xmag/Code"</span><span class="dt">&gt;</span>GitHub repo<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;</span>.<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>This post builds on my earlier <span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">"/posts/ggplot-us-state-and-china-province-heatmap/"</span><span class="dt">&gt;</span>US state and China province heatmap<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;</span> examples. Here I wrap the mapping code into a reusable function and apply it to COVID-19 data from the <span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">"https://github.com/CSSEGISandData/COVID-19"</span><span class="dt">&gt;</span>JHU CSSE GitHub repository<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;</span>. The function can take a given dataset and plot a designated variable.<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>The original code is hosted in my <span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">"https://github.com/liuyanguu/Blogdown/tree/master/hugo-xmag/Code"</span><span class="dt">&gt;</span>GitHub repo<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;</span>.<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
 <span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> id</span><span class="op">=</span><span class="st">"us"</span><span class="ot"> class</span><span class="op">=</span><span class="st">"section level2"</span><span class="dt">&gt;</span></span>
 <span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">h2</span><span class="dt">&gt;</span>US<span class="dt">&lt;/</span><span class="kw">h2</span><span class="dt">&gt;</span></span>
 <span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">pre</span><span class="ot"> class</span><span class="op">=</span><span class="st">"r"</span><span class="dt">&gt;&lt;</span><span class="kw">code</span><span class="dt">&gt;</span># major function, can download from GitHub repo Blogdown/hugo-xmag/Code</span>
