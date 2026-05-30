@@ -2,23 +2,23 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://liuyanguu.github.io/posts/working-with-3d-array-as-long-format-data-in-r/index.html</loc>
-    <lastmod>2026-05-29T21:37:36.428Z</lastmod>
+    <lastmod>2026-05-30T04:19:26.136Z</lastmod>
   </url>
   <url>
     <loc>https://liuyanguu.github.io/posts/study-shrinkage-and-dart-in-xgboost-modeling-using-a-simple-dataset/index.html</loc>
-    <lastmod>2026-05-29T21:37:36.335Z</lastmod>
+    <lastmod>2026-05-30T04:19:26.128Z</lastmod>
   </url>
   <url>
     <loc>https://liuyanguu.github.io/posts/shiny-in-blogdown/index.html</loc>
-    <lastmod>2026-05-29T21:37:36.363Z</lastmod>
+    <lastmod>2026-05-30T04:19:26.122Z</lastmod>
   </url>
   <url>
     <loc>https://liuyanguu.github.io/posts/shap-for-xgboost-in-r-shapforxgboost/index.html</loc>
-    <lastmod>2026-05-29T21:37:36.413Z</lastmod>
+    <lastmod>2026-05-30T04:19:26.116Z</lastmod>
   </url>
   <url>
     <loc>https://liuyanguu.github.io/posts/plot-multiple-countries-on-the-world-map/index.html</loc>
-    <lastmod>2026-05-29T21:37:36.484Z</lastmod>
+    <lastmod>2026-05-30T04:23:03.549Z</lastmod>
   </url>
   <url>
     <loc>https://liuyanguu.github.io/posts/index.html</loc>
@@ -26,19 +26,19 @@
   </url>
   <url>
     <loc>https://liuyanguu.github.io/posts/how-many-children-under-5-worldwide/index.html</loc>
-    <lastmod>2026-05-29T21:37:36.493Z</lastmod>
+    <lastmod>2026-05-30T04:22:00.863Z</lastmod>
   </url>
   <url>
     <loc>https://liuyanguu.github.io/posts/extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting/index.html</loc>
-    <lastmod>2026-05-29T21:37:36.241Z</lastmod>
+    <lastmod>2026-05-30T04:19:26.097Z</lastmod>
   </url>
   <url>
     <loc>https://liuyanguu.github.io/posts/catalog-of-my-old-blog/index.html</loc>
-    <lastmod>2026-05-29T21:37:36.288Z</lastmod>
+    <lastmod>2026-05-30T04:19:26.088Z</lastmod>
   </url>
   <url>
     <loc>https://liuyanguu.github.io/posts/2024-national-k-12-does-a-higher-rating-lead-to-a-higher-standing/index.html</loc>
-    <lastmod>2026-05-29T21:37:36.505Z</lastmod>
+    <lastmod>2026-05-30T04:32:40.609Z</lastmod>
   </url>
   <url>
     <loc>https://liuyanguu.github.io/post/2024/12/15/2024-national-k-12-does-a-higher-rating-lead-to-a-higher-standing/index.html</loc>
@@ -122,38 +122,38 @@
   </url>
   <url>
     <loc>https://liuyanguu.github.io/posts/2025-supernationals-viii-a-once-in-four-years-chess-spectacle/index.html</loc>
-    <lastmod>2026-05-29T21:37:36.517Z</lastmod>
+    <lastmod>2026-05-30T04:23:21.661Z</lastmod>
   </url>
   <url>
     <loc>https://liuyanguu.github.io/posts/drake-powerful-tool-for-automatic-reproducible-workflow/index.html</loc>
-    <lastmod>2026-05-29T21:37:36.420Z</lastmod>
+    <lastmod>2026-05-30T04:19:26.094Z</lastmod>
   </url>
   <url>
     <loc>https://liuyanguu.github.io/posts/ggplot-us-state-and-china-province-heatmap/index.html</loc>
-    <lastmod>2026-05-29T21:37:36.387Z</lastmod>
+    <lastmod>2026-05-30T04:19:26.100Z</lastmod>
   </url>
   <url>
     <loc>https://liuyanguu.github.io/posts/how-to-draw-heatmap-with-colorful-dendrogram/index.html</loc>
-    <lastmod>2026-05-29T21:37:36.257Z</lastmod>
+    <lastmod>2026-05-30T04:19:26.104Z</lastmod>
   </url>
   <url>
     <loc>https://liuyanguu.github.io/posts/notes-on-writing-an-r-package/index.html</loc>
-    <lastmod>2026-05-29T21:37:36.416Z</lastmod>
+    <lastmod>2026-05-30T04:19:26.106Z</lastmod>
   </url>
   <url>
     <loc>https://liuyanguu.github.io/posts/r-markdown-to-github-pages/index.html</loc>
-    <lastmod>2026-05-29T21:37:36.458Z</lastmod>
+    <lastmod>2026-05-30T04:19:26.109Z</lastmod>
   </url>
   <url>
     <loc>https://liuyanguu.github.io/posts/shap-visualization-in-r-first-post/index.html</loc>
-    <lastmod>2026-05-29T21:37:36.323Z</lastmod>
+    <lastmod>2026-05-30T04:19:26.118Z</lastmod>
   </url>
   <url>
     <loc>https://liuyanguu.github.io/posts/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/index.html</loc>
-    <lastmod>2026-05-29T21:37:36.276Z</lastmod>
+    <lastmod>2026-05-30T04:19:26.125Z</lastmod>
   </url>
   <url>
     <loc>https://liuyanguu.github.io/posts/us-and-china-admin1-covid19-mortality-and-incidence-rate/index.html</loc>
-    <lastmod>2026-05-29T21:37:36.436Z</lastmod>
+    <lastmod>2026-05-30T04:19:26.134Z</lastmod>
   </url>
 </urlset>
