@@ -51,6 +51,24 @@ dt_age_table <- dcast(dt_age[Sex == "Total" & Time %in% c(2015, 2020, CURRENT_YE
                       Age + Population + `Age Group`~ Time, value.var = "valueM")
 dt_age_table[, Age := NULL]
 
+# Africa aggregate (UN location code 903); population is in thousands.
+africa_file <- if (file.exists("Data/WPP2024_Africa_PopulationByAge1GroupSex_Medium.csv")) {
+  "Data/WPP2024_Africa_PopulationByAge1GroupSex_Medium.csv"
+} else {
+  here::here("../Data/WPP2024_Africa_PopulationByAge1GroupSex_Medium.csv")
+}
+dt_wpp_africa <- fread(africa_file)
+dt_africa <- rbindlist(lapply(c(5, 10, 15, 18, 20, 25), function(age0) {
+  totals <- dt_wpp_africa[AgeGrpStart < age0,
+    .(valueM = scales::comma(round(sum(PopTotal) / 1E3))), by = Time]
+  totals[, `:=`(Age = age0, Population = paste0("Under ", age0, " years old"),
+                `Age Group` = paste0("0-", age0 - 1))]
+}))
+dt_africa_table <- dcast(dt_africa,
+  Age + Population + `Age Group` ~ Time, value.var = "valueM")
+dt_africa_table[, Age := NULL]
+
+
 p5  <- plot.wpp.data(data_plot = dt_wpp_world_l[AgeGrpStart %in% c(0:4)],  "World population of children Under Age 5 ")
 p10 <- plot.wpp.data(data_plot = dt_wpp_world_l[AgeGrpStart %in% c(0:9)], "World population of children under 10 years old")
 p15 <- plot.wpp.data(data_plot = dt_wpp_world_l[AgeGrpStart %in% c(0:14)], "World population of children under 15 years old")
@@ -79,19 +97,19 @@ gg_world_age1_by_sex <- plot_grid(p5_s, p10_s, p15_s, p18_s, p20_s, p25_s, ncol 
 
 ```
 
-Since these figures are not directly available via Google search, I calculated them using the mid-year population estimates from the World population Prospects (WPP) 2024: 
+I summarized the UN World Population Prospects (WPP) 2024 revision, using 2025 as the reference year. Figures for 2024 onward use the medium projection variant:
 
-**World population:** In 2024, the World population is estimated at 8.2 billion (8,162 million). The population is projected to peak in 2084 at 10.3 billion.
+**World population:** In 2025, the World population is projected at 8.2 billion (8,232 million). The population is projected to peak in 2084 at 10.3 billion.
 
-**Children Under 5 Years Old:** The number of children under 5 is 647 million in 2024. This figure peaked in 2017 at 698 million and is projected to decline to 550 million by 2100.
+**Children Under 5 Years Old:** The number of children under 5 is 644 million in 2025. This figure peaked in 2017 at 698 million and is projected to decline to 550 million by 2100.
 
-**Children Aged 0–14 Years:** The population of children aged 0–14 peaked in 2020 and stands at 2.0 billion in 2024.
+**Children Aged 0–14 Years:** The population of children aged 0–14 peaked in 2020 and stands at 2.0 billion (2,008 million) in 2025.
   
-**Children and Adolescents under 18:** The population of those aged 0–17 years peaked in 2022 and stands at 2.4 billion (2,413 million) in 2024.  
+**Children and Adolescents under 18:** The population of those aged 0–17 years peaked in 2022 and stands at 2.4 billion (2,409 million) in 2025.
   
-**Children and Adolescents under 20:** The population of those aged 0–19 years is 2.7 billion (2,668 million) in 2024, which marks the peak year for this age group.
+**Children and Adolescents under 20:** The population of those aged 0–19 years is 2.7 billion (2,667 million) in 2025, just below its peak in 2024.
 
-**Population Under 25 Years Old (0–24):** The number of people aged 0–24 years is 3.3 billion in 2024. This population is expected to experience a slight increase and peak in 2030.
+**Population Under 25 Years Old (0–24):** The number of people aged 0–24 years is 3.3 billion (3,291 million) in 2025. This population is expected to experience a slight increase and peak in 2030.
 
 ```{r, fig.width = 10, fig.height = 12}
 gg_world_age1
@@ -103,6 +121,17 @@ gg_world_age1
 ```{r}
 knitr::kable(dt_age_table)
 ```
+
+**Africa population under ages 5, 10, 15, 18, 20, and 25 (millions)**
+
+The Africa aggregate covers the entire continent, including Northern Africa.
+
+```{r}
+knitr::kable(dt_africa_table)
+```
+
+Figures are rounded to the nearest million. Values for 2024 onward use the WPP 2024 medium projection variant.
+
 
 
 **Also by sex:  **
