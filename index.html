@@ -83,7 +83,8 @@ ul.task-list li input[type="checkbox"] {
 
     const options = {
       valueNames: ['listing-title','listing-author','listing-date','listing-image','listing-description','listing-categories',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
-      
+      page: 6,
+    pagination: { item: "<li class='page-item'><a class='page page-link' href='#'></a></li>" },
       searchColumns: ["listing-title","listing-author","listing-date","listing-image","listing-description","listing-categories"],
     };
 
@@ -192,7 +193,7 @@ window.Quarto = {
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(18)</span></div><div class="category" data-category="QmxvZw==">Blog <span class="quarto-category-count">(2)</span></div><div class="category" data-category="Q2F0YWxvZw==">Catalog <span class="quarto-category-count">(1)</span></div><div class="category" data-category="RGF0YSUyMEVuZ2luZWVyaW5n">Data Engineering <span class="quarto-category-count">(1)</span></div><div class="category" data-category="RGF0YSUyMFZpc3VhbGl6YXRpb24=">Data Visualization <span class="quarto-category-count">(9)</span></div><div class="category" data-category="R2l0SHVi">GitHub <span class="quarto-category-count">(1)</span></div><div class="category" data-category="TWFjaGluZSUyMExlYXJuaW5n">Machine Learning <span class="quarto-category-count">(4)</span></div><div class="category" data-category="UiUyMHBhY2thZ2U=">R package <span class="quarto-category-count">(2)</span></div><div class="category" data-category="UmVwcm9kdWNpYmxlJTIwV29ya2Zsb3c=">Reproducible Workflow <span class="quarto-category-count">(1)</span></div><div class="category" data-category="U2hpbnk=">Shiny <span class="quarto-category-count">(1)</span></div><div class="category" data-category="U3BhdGlhbCUyMERhdGE=">Spatial Data <span class="quarto-category-count">(2)</span></div></div></div>
+    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(18)</span></div><div class="category" data-category="RGF0YSUyMFZpc3VhbGl6YXRpb24=">Data Visualization <span class="quarto-category-count">(11)</span></div><div class="category" data-category="TWFjaGluZSUyMExlYXJuaW5n">Machine Learning <span class="quarto-category-count">(4)</span></div><div class="category" data-category="UiUyMHBhY2thZ2U=">R package <span class="quarto-category-count">(2)</span></div><div class="category" data-category="UmVwcm9kdWNpYmxlJTIwV29ya2Zsb3c=">Reproducible Workflow <span class="quarto-category-count">(3)</span></div><div class="category" data-category="U3BhdGlhbCUyMERhdGE=">Spatial Data <span class="quarto-category-count">(2)</span></div></div></div>
 <!-- main -->
 <main class="content column-page-left" id="quarto-document-content">
 
@@ -216,8 +217,8 @@ window.Quarto = {
 
 
 <div class="hero">
-<section id="research-notes-in-r-statistics-and-population-data" class="level2 hero-copy">
-<h2 class="anchored" data-anchor-id="research-notes-in-r-statistics-and-population-data">Research notes in R, statistics, and population data</h2>
+<section id="research-notes-in-r-and-statistics" class="level2 hero-copy">
+<h2 class="anchored" data-anchor-id="research-notes-in-r-and-statistics">Research notes in R and statistics</h2>
 <p>I write about data visualization, demography, statistical workflows, maps, R programming, and the occasional chess analysis. This site is a working notebook: polished enough to read, close enough to the code to stay useful.</p>
 </section>
 <div class="hero-card">
@@ -240,17 +241,17 @@ window.Quarto = {
 
 <div class="quarto-listing quarto-listing-container-grid" id="listing-listing">
 <div class="list grid quarto-listing-cols-3">
-<div class="g-col-1" data-index="0" data-categories="QmxvZw==" data-listing-date-sort="1747260000000" data-listing-file-modified-sort="1780115001661" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="899">
+<div class="g-col-1" data-index="0" data-categories="RGF0YSUyMFZpc3VhbGl6YXRpb24=" data-listing-date-sort="1747267200000" data-listing-file-modified-sort="1794488165507" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="899">
 <a href="./posts/2025-supernationals-viii-a-once-in-four-years-chess-spectacle/index.html" class="quarto-grid-link">
 <div class="quarto-grid-item card h-100 card-left">
-<p class="card-img-top"><img loading='lazy' src="posts\2025-supernationals-viii-a-once-in-four-years-chess-spectacle\index_files\figure-html\unnamed-chunk-3-1.png" style="height: 150px;"  class="thumbnail-image card-img"/></p>
+<p class="card-img-top"><img loading='lazy' src="posts/2025-supernationals-viii-a-once-in-four-years-chess-spectacle/index_files/figure-html/unnamed-chunk-3-1.png" style="height: 150px;"  class="thumbnail-image card-img"/></p>
 <div class="card-body post-contents">
 <h5 class="no-anchor card-title listing-title">
 2025 SuperNationals VIII: A Once-in-Four-Years Chess Spectacle
 </h5>
 <div class="listing-categories">
 
-<div class="listing-category" onclick="window.quartoListingCategory('QmxvZw=='); return false;">Blog</div>
+<div class="listing-category" onclick="window.quartoListingCategory('RGF0YSUyMFZpc3VhbGl6YXRpb24='); return false;">Data Visualization</div>
 
 </div>
 <div class="card-text listing-description delink">
@@ -267,17 +268,17 @@ May 15, 2025
 </div>
 </div></a>
 </div>
-<div class="g-col-1" data-index="1" data-categories="QmxvZw==" data-listing-date-sort="1734217200000" data-listing-file-modified-sort="1780115560609" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="473">
+<div class="g-col-1" data-index="1" data-categories="RGF0YSUyMFZpc3VhbGl6YXRpb24=" data-listing-date-sort="1734220800000" data-listing-file-modified-sort="1794488165507" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="473">
 <a href="./posts/2024-national-k-12-does-a-higher-rating-lead-to-a-higher-standing/index.html" class="quarto-grid-link">
 <div class="quarto-grid-item card h-100 card-left">
-<p class="card-img-top"><img loading='lazy' src="posts\2024-national-k-12-does-a-higher-rating-lead-to-a-higher-standing\index_files\figure-html\unnamed-chunk-2-1.png" style="height: 150px;"  class="thumbnail-image card-img"/></p>
+<p class="card-img-top"><img loading='lazy' src="posts/2024-national-k-12-does-a-higher-rating-lead-to-a-higher-standing/index_files/figure-html/unnamed-chunk-2-1.png" style="height: 150px;"  class="thumbnail-image card-img"/></p>
 <div class="card-body post-contents">
 <h5 class="no-anchor card-title listing-title">
 2024 National K-12: Does a Higher Rating Lead to a Higher Standing?
 </h5>
 <div class="listing-categories">
 
-<div class="listing-category" onclick="window.quartoListingCategory('QmxvZw=='); return false;">Blog</div>
+<div class="listing-category" onclick="window.quartoListingCategory('RGF0YSUyMFZpc3VhbGl6YXRpb24='); return false;">Data Visualization</div>
 
 </div>
 <div class="card-text listing-description delink">
@@ -294,10 +295,10 @@ Dec 15, 2024
 </div>
 </div></a>
 </div>
-<div class="g-col-1" data-index="2" data-categories="RGF0YSUyMFZpc3VhbGl6YXRpb24=" data-listing-date-sort="1734044400000" data-listing-file-modified-sort="1780114920863" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="302">
+<div class="g-col-1" data-index="2" data-categories="RGF0YSUyMFZpc3VhbGl6YXRpb24=" data-listing-date-sort="1734048000000" data-listing-file-modified-sort="1794480686975" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="381">
 <a href="./posts/how-many-children-under-5-worldwide/index.html" class="quarto-grid-link">
 <div class="quarto-grid-item card h-100 card-left">
-<p class="card-img-top"><img loading='lazy' src="posts\how-many-children-under-5-worldwide\index_files\figure-html\unnamed-chunk-2-1.png" style="height: 150px;"  class="thumbnail-image card-img"/></p>
+<p class="card-img-top"><img loading='lazy' src="posts/how-many-children-under-5-worldwide/index_files/figure-html/unnamed-chunk-2-1.png" style="height: 150px;"  class="thumbnail-image card-img"/></p>
 <div class="card-body post-contents">
 <h5 class="no-anchor card-title listing-title">
 How many children under 5 worldwide?
@@ -321,10 +322,10 @@ Dec 13, 2024
 </div>
 </div></a>
 </div>
-<div class="g-col-1" data-index="3" data-categories="RGF0YSUyMFZpc3VhbGl6YXRpb24lMkNTcGF0aWFsJTIwRGF0YQ==" data-listing-date-sort="1685311200000" data-listing-file-modified-sort="1780114983549" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="944">
+<div class="g-col-1" data-index="3" data-categories="RGF0YSUyMFZpc3VhbGl6YXRpb24lMkNTcGF0aWFsJTIwRGF0YQ==" data-listing-date-sort="1685318400000" data-listing-file-modified-sort="1794480385340" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="944">
 <a href="./posts/plot-multiple-countries-on-the-world-map/index.html" class="quarto-grid-link">
 <div class="quarto-grid-item card h-100 card-left">
-<p class="card-img-top"><img loading='lazy' src="posts\plot-multiple-countries-on-the-world-map\index_files\figure-html\unnamed-chunk-1-1.png" style="height: 150px;"  class="thumbnail-image card-img"/></p>
+<p class="card-img-top"><img loading='lazy' src="posts/plot-multiple-countries-on-the-world-map/index_files/figure-html/unnamed-chunk-1-1.png" style="height: 150px;"  class="thumbnail-image card-img"/></p>
 <div class="card-body post-contents">
 <h5 class="no-anchor card-title listing-title">
 Plot multiple countries on the world map
@@ -350,7 +351,7 @@ May 29, 2023
 </div>
 </div></a>
 </div>
-<div class="g-col-1" data-index="4" data-categories="R2l0SHVi" data-listing-date-sort="1609887600000" data-listing-file-modified-sort="1780121334610" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="496">
+<div class="g-col-1" data-index="4" data-categories="UmVwcm9kdWNpYmxlJTIwV29ya2Zsb3c=" data-listing-date-sort="1609891200000" data-listing-file-modified-sort="1794488165507" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="496">
 <a href="./posts/r-markdown-to-github-pages/index.html" class="quarto-grid-link">
 <div class="quarto-grid-item card h-100 card-left">
 <p class="card-img-top">
@@ -362,7 +363,7 @@ R Markdown to GitHub Pages
 </h5>
 <div class="listing-categories">
 
-<div class="listing-category" onclick="window.quartoListingCategory('R2l0SHVi'); return false;">GitHub</div>
+<div class="listing-category" onclick="window.quartoListingCategory('UmVwcm9kdWNpYmxlJTIwV29ya2Zsb3c='); return false;">Reproducible Workflow</div>
 
 </div>
 <div class="card-text listing-description delink">
@@ -379,10 +380,10 @@ Jan 6, 2021
 </div>
 </div></a>
 </div>
-<div class="g-col-1" data-index="5" data-categories="RGF0YSUyMFZpc3VhbGl6YXRpb24=" data-listing-date-sort="1592085600000" data-listing-file-modified-sort="1780117027941" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="387">
+<div class="g-col-1" data-index="5" data-categories="RGF0YSUyMFZpc3VhbGl6YXRpb24=" data-listing-date-sort="1592092800000" data-listing-file-modified-sort="1794480385444" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="387">
 <a href="./posts/us-and-china-admin1-covid19-mortality-and-incidence-rate/index.html" class="quarto-grid-link">
 <div class="quarto-grid-item card h-100 card-left">
-<p class="card-img-top"><img loading='lazy' src="posts\us-and-china-admin1-covid19-mortality-and-incidence-rate\2020-06-15-us-and-china-admin1-covid-19-mortality-and-incidence-rate_files\figure-html\unnamed-chunk-1-1.png" style="height: 150px;"  class="thumbnail-image card-img"/></p>
+<p class="card-img-top"><img loading='lazy' src="posts/us-and-china-admin1-covid19-mortality-and-incidence-rate/2020-06-15-us-and-china-admin1-covid-19-mortality-and-incidence-rate_files/figure-html/unnamed-chunk-1-1.png" style="height: 150px;"  class="thumbnail-image card-img"/></p>
 <div class="card-body post-contents">
 <h5 class="no-anchor card-title listing-title">
 US and China Admin1 COVID-19 mortality and incidence rate
@@ -406,8 +407,341 @@ Jun 14, 2020
 </div>
 </div></a>
 </div>
+<div class="g-col-1" data-index="6" data-categories="RGF0YSUyMFZpc3VhbGl6YXRpb24=" data-listing-date-sort="1591920000000" data-listing-file-modified-sort="1794480385285" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-word-count-sort="2520">
+<a href="./posts/ggplot-us-state-and-china-province-heatmap/index.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top"><img loading='lazy' data-src="posts/ggplot-us-state-and-china-province-heatmap/2019-04-17-ggplot-heatmap-us-50-states-map-and-china-province-map_files/figure-html/unnamed-chunk-2-1.png" style="height: 150px;"  class="thumbnail-image card-img"/></p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+ggplot US state and China province heatmap
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('RGF0YSUyMFZpc3VhbGl6YXRpb24='); return false;">Data Visualization</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>R examples for drawing US state and China province heatmaps with ggplot2, usmap, shapefiles, labels, scale bars, and leaflet-based alternatives.</p>
+</div>
+<div class="card-attribution card-text-small justify">
+<div class="listing-author">
+Yang Liu
+</div>
+<div class="listing-date">
+Jun 12, 2020
+</div>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="7" data-categories="UmVwcm9kdWNpYmxlJTIwV29ya2Zsb3c=" data-listing-date-sort="1578700800000" data-listing-file-modified-sort="1794488165507" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1300">
+<a href="./posts/working-with-3d-array-as-long-format-data-in-r/index.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top"><img loading='lazy' data-src="posts/working-with-3d-array-as-long-format-data-in-r/2020-01-11-working-with-r-3d-array-as-long-format-data_files/figure-html/unnamed-chunk-10-1.png" style="height: 150px;"  class="thumbnail-image card-img"/></p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Working with 3D array as long-format data in R
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('UmVwcm9kdWNpYmxlJTIwV29ya2Zsb3c='); return false;">Reproducible Workflow</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>A compact R example for melting a 3D array into long-format data, modifying it, and rebuilding the array in the correct dimension order.</p>
+</div>
+<div class="card-attribution card-text-small justify">
+<div class="listing-author">
+Yang Liu
+</div>
+<div class="listing-date">
+Jan 11, 2020
+</div>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="8" data-categories="UmVwcm9kdWNpYmxlJTIwV29ya2Zsb3c=" data-listing-date-sort="1568505600000" data-listing-file-modified-sort="1794480385267" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="629">
+<a href="./posts/drake-powerful-tool-for-automatic-reproducible-workflow/index.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top"><img loading='lazy' data-src="posts/drake-powerful-tool-for-automatic-reproducible-workflow/2019-09-15-drake-powerful-tool-for-automatic-reproducible-workflow_files/dependency plot.PNG" style="height: 150px;"  class="thumbnail-image card-img"/></p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Drake: powerful tool for automatic reproducible workflow
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('UmVwcm9kdWNpYmxlJTIwV29ya2Zsb3c='); return false;">Reproducible Workflow</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>A legacy R workflow note showing how drake can cache calculations and speed up R Markdown report rendering, with a note on modern targets workflows.</p>
+</div>
+<div class="card-attribution card-text-small justify">
+<div class="listing-author">
+Yang Liu
+</div>
+<div class="listing-date">
+Sep 15, 2019
+</div>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="9" data-categories="UiUyMHBhY2thZ2U=" data-listing-date-sort="1564272000000" data-listing-file-modified-sort="1794480385304" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="624">
+<a href="./posts/notes-on-writing-an-r-package/index.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top"><img loading='lazy' data-src="posts/notes-on-writing-an-r-package/2019-07-28-some-experience-on-writing-r-package_files/the cran page.PNG" style="height: 150px;"  class="thumbnail-image card-img"/></p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Notes on writing an R package
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('UiUyMHBhY2thZ2U='); return false;">R package</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Practical notes from preparing the SHAPforxgboost R package for CRAN, including DESCRIPTION, NAMESPACE, documentation, checks, and reviewer feedback.</p>
+</div>
+<div class="card-attribution card-text-small justify">
+<div class="listing-author">
+Yang Liu
+</div>
+<div class="listing-date">
+Jul 28, 2019
+</div>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="10" data-categories="UiUyMHBhY2thZ2UlMkNNYWNoaW5lJTIwTGVhcm5pbmclMkNEYXRhJTIwVmlzdWFsaXphdGlvbg==" data-listing-date-sort="1563408000000" data-listing-file-modified-sort="1794480385399" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10" data-listing-word-count-sort="1918">
+<a href="./posts/shap-for-xgboost-in-r-shapforxgboost/index.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top"><img loading='lazy' data-src="posts/shap-for-xgboost-in-r-shapforxgboost/2019-07-18-visualization-of-shap-for-xgboost_files/figure-html/unnamed-chunk-8-1.png" style="height: 150px;"  class="thumbnail-image card-img"/></p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+SHAP for XGBoost in R: SHAPforxgboost
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('UiUyMHBhY2thZ2U='); return false;">R package</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('TWFjaGluZSUyMExlYXJuaW5n'); return false;">Machine Learning</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('RGF0YSUyMFZpc3VhbGl6YXRpb24='); return false;">Data Visualization</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>A vignette-style guide to the SHAPforxgboost R package, covering SHAP values, global importance, dependence plots, interaction effects, and force plots.</p>
+</div>
+<div class="card-attribution card-text-small justify">
+<div class="listing-author">
+Yang Liu
+</div>
+<div class="listing-date">
+Jul 18, 2019
+</div>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="11" data-categories="RGF0YSUyMFZpc3VhbGl6YXRpb24=" data-listing-date-sort="1550966400000" data-listing-file-modified-sort="1794488165507" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="207">
+<a href="./posts/shiny-in-blogdown/index.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="listing-item-img-placeholder card-img-top" style="height: 150px;">&nbsp;</div>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Shiny in Blogdown
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('RGF0YSUyMFZpc3VhbGl6YXRpb24='); return false;">Data Visualization</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>A short R note on embedding a hosted Shiny app inside a static blog page using an iframe or knitr helper.</p>
+</div>
+<div class="card-attribution card-text-small justify">
+<div class="listing-author">
+Yang Liu
+</div>
+<div class="listing-date">
+Feb 24, 2019
+</div>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="12" data-categories="TWFjaGluZSUyMExlYXJuaW5n" data-listing-date-sort="1542240000000" data-listing-file-modified-sort="1794480385436" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="26" data-listing-word-count-sort="5190">
+<a href="./posts/study-shrinkage-and-dart-in-xgboost-modeling-using-a-simple-dataset/index.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<div class="listing-item-img-placeholder card-img-top" style="height: 150px;">&nbsp;</div>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Study shrinkage and DART in xgboost modeling using a simple dataset
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('TWFjaGluZSUyMExlYXJuaW5n'); return false;">Machine Learning</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>A small R experiment that illustrates how shrinkage and DART dropout change the behavior of XGBoost trees on a simple toy dataset.</p>
+</div>
+<div class="card-attribution card-text-small justify">
+<div class="listing-author">
+Yang Liu
+</div>
+<div class="listing-date">
+Nov 15, 2018
+</div>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="13" data-categories="TWFjaGluZSUyMExlYXJuaW5nJTJDRGF0YSUyMFZpc3VhbGl6YXRpb24=" data-listing-date-sort="1539475200000" data-listing-file-modified-sort="1794480385408" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1109">
+<a href="./posts/shap-visualization-in-r-first-post/index.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top"><img loading='lazy' data-src="posts/shap-visualization-in-r-first-post/2018-10-05-shap-visualization-for-xgboost_files/figure-html/unnamed-chunk-2-1.png" style="height: 150px;"  class="thumbnail-image card-img"/></p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+SHAP Visualization in R (first post)
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('TWFjaGluZSUyMExlYXJuaW5n'); return false;">Machine Learning</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('RGF0YSUyMFZpc3VhbGl6YXRpb24='); return false;">Data Visualization</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>The original R post on SHAP visualizations for XGBoost, now linked to the later SHAPforxgboost package vignette.</p>
+</div>
+<div class="card-attribution card-text-small justify">
+<div class="listing-author">
+Yang Liu
+</div>
+<div class="listing-date">
+Oct 14, 2018
+</div>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="14" data-categories="RGF0YSUyMFZpc3VhbGl6YXRpb24lMkNTcGF0aWFsJTIwRGF0YQ==" data-listing-date-sort="1532044800000" data-listing-file-modified-sort="1794480385420" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="9" data-listing-word-count-sort="1734">
+<a href="./posts/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/index.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top"><img loading='lazy' data-src="posts/spatial-data-in-r-dividing-raster-layers-into-equal-area-rings/2018-07-19-spatial-data-in-r-dividing-raster-layers-into-equal-area-rings_files/ten cities 100 rings.jpeg" style="height: 150px;"  class="thumbnail-image card-img"/></p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Spatial data in R: Dividing raster layers into equal-area rings
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('RGF0YSUyMFZpc3VhbGl6YXRpb24='); return false;">Data Visualization</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('U3BhdGlhbCUyMERhdGE='); return false;">Spatial Data</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>An R spatial workflow for turning raster layers into equal-area rings, calculating urban saturation, and plotting city comparisons on a shared scale.</p>
+</div>
+<div class="card-attribution card-text-small justify">
+<div class="listing-author">
+Yang Liu
+</div>
+<div class="listing-date">
+Jul 20, 2018
+</div>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="15" data-categories="RGF0YSUyMFZpc3VhbGl6YXRpb24=" data-listing-date-sort="1531699200000" data-listing-file-modified-sort="1794480385300" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10" data-listing-word-count-sort="1858">
+<a href="./posts/how-to-draw-heatmap-with-colorful-dendrogram/index.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top"><img loading='lazy' data-src="posts/how-to-draw-heatmap-with-colorful-dendrogram/2018-07-16-how-to-draw-heatmap-with-colorful-dendrogram_files/figure-html/unnamed-chunk-1-1.png" style="height: 150px;"  class="thumbnail-image card-img"/></p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+How to Draw Heatmap with Colorful Dendrogram
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('RGF0YSUyMFZpc3VhbGl6YXRpb24='); return false;">Data Visualization</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>An R visualization example that builds a clustered heatmap with colorful dendrogram branches and labels using gplots, dendextend, and colorspace.</p>
+</div>
+<div class="card-attribution card-text-small justify">
+<div class="listing-author">
+Yang Liu
+</div>
+<div class="listing-date">
+Jul 16, 2018
+</div>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="16" data-categories="TWFjaGluZSUyMExlYXJuaW5n" data-listing-date-sort="1531094400000" data-listing-file-modified-sort="1794480385270" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="62" data-listing-word-count-sort="12245">
+<a href="./posts/extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting/index.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top"><img loading='lazy' data-src="posts/extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting/2018-07-09-extreme-gradient-boosting-xgboost-better-than-random-forest-or-gradient-boosting_files/figure-html/unnamed-chunk-4-1.png" style="height: 150px;"  class="thumbnail-image card-img"/></p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+eXtreme Gradient Boosting (XGBoost): Better than random forest or gradient boosting
+</h5>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('TWFjaGluZSUyMExlYXJuaW5n'); return false;">Machine Learning</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>A hands-on R comparison of XGBoost, gradient boosting, random forest, lasso, and best subset regression on a slum-settlement modeling example.</p>
+</div>
+<div class="card-attribution card-text-small justify">
+<div class="listing-author">
+Yang Liu
+</div>
+<div class="listing-date">
+Jul 9, 2018
+</div>
+</div>
+</div>
+</div></a>
+</div>
+<div class="g-col-1" data-index="17" data-categories="" data-listing-date-sort="1530403200000" data-listing-file-modified-sort="1794488165507" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="313">
+<a href="./posts/catalog-of-my-old-blog/index.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top"><img loading='lazy' data-src="posts/catalog-of-my-old-blog/2018-07-20-catalogue-on-my-old-blogger_files/Zipf CDFs.jpeg" style="height: 150px;"  class="thumbnail-image card-img"/></p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Catalog of my old blog
+</h5>
+<div class="listing-categories">
+
+</div>
+<div class="card-text listing-description delink">
+<p>A historical catalog of posts from my earlier Blogger site, with links to older work on statistics, data visualization, R programming, and urban research.</p>
+</div>
+<div class="card-attribution card-text-small justify">
+<div class="listing-author">
+Yang Liu
+</div>
+<div class="listing-date">
+Jul 1, 2018
+</div>
+</div>
+</div>
+</div></a>
+</div>
 </div>
 <div class="listing-no-matching d-none">No matching items</div>
+<nav id="listing-pagination" class="listing-pagination" aria-label="Page Navigation">
+  <ul class="pagination"></ul>
+</nav>
 </div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
